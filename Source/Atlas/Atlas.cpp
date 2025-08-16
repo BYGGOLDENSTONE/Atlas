@@ -2,6 +2,14 @@
 
 #include "Atlas.h"
 #include "Modules/ModuleManager.h"
+#include "Core/AtlasGameplayTags.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Atlas, "Atlas" );
- 
+class FAtlasModule : public FDefaultGameModuleImpl
+{
+    virtual void StartupModule() override
+    {
+        FAtlasGameplayTags::InitializeNativeTags();
+    }
+};
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FAtlasModule, Atlas, "Atlas" );

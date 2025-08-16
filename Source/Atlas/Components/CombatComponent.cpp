@@ -20,6 +20,10 @@ void UCombatComponent::BeginPlay()
     {
         CurrentPoise = CombatRules->CombatRules.MaxPoise;
     }
+    else
+    {
+        CurrentPoise = 100.0f; // Default value if no CombatRules set
+    }
 
     DamageCalculator = NewObject<UDamageCalculator>(this);
 }
@@ -28,7 +32,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (!bPoiseRegenActive && CurrentPoise < CombatRules->CombatRules.MaxPoise)
+    if (CombatRules && !bPoiseRegenActive && CurrentPoise < CombatRules->CombatRules.MaxPoise)
     {
         PoiseRegenDelayTime += DeltaTime;
         if (PoiseRegenDelayTime >= CombatRules->CombatRules.PoiseRegenDelay)
@@ -42,17 +46,27 @@ bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
 {
     if (IsStaggered() || IsAttacking())
     {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot attack: Staggered=%s, Attacking=%s"), 
+            IsStaggered() ? TEXT("true") : TEXT("false"),
+            IsAttacking() ? TEXT("true") : TEXT("false"));
         return false;
     }
 
     UAttackDataAsset** AttackDataPtr = AttackDataMap.Find(AttackTag);
     if (!AttackDataPtr || !(*AttackDataPtr))
     {
+        UE_LOG(LogTemp, Error, TEXT("Attack failed: No AttackData found for tag %s. Make sure AttackDataMap is configured in Blueprint!"), 
+            *AttackTag.ToString());
         return false;
     }
 
     CurrentAttackData = *AttackDataPtr;
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
+
+    UE_LOG(LogTemp, Warning, TEXT("ATTACK STARTED: %s (Damage: %.1f, Knockback: %.1f)"), 
+        *CurrentAttackData->AttackData.AttackName.ToString(),
+        CurrentAttackData->AttackData.BaseDamage,
+        CurrentAttackData->AttackData.Knockback);
 
     if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
     {
@@ -63,6 +77,11 @@ bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
     }
 
     OnAttackStarted.Broadcast(AttackTag, CurrentAttackData);
+    
+    // Auto-end attack after 1 second for testing (will be handled by animation notifies in Phase 2)
+    FTimerHandle TempAttackTimer;
+    GetWorld()->GetTimerManager().SetTimer(TempAttackTimer, this, &UCombatComponent::EndAttack, 1.0f, false);
+    
     return true;
 }
 
@@ -71,17 +90,22 @@ void UCombatComponent::EndAttack()
     RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
     CurrentAttackData = nullptr;
     OnAttackEnded.Broadcast();
+    UE_LOG(LogTemp, Warning, TEXT("Attack Ended"));
 }
 
 bool UCombatComponent::StartBlock()
 {
     if (IsStaggered() || IsAttacking())
     {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot block: Staggered=%s, Attacking=%s"),
+            IsStaggered() ? TEXT("true") : TEXT("false"),
+            IsAttacking() ? TEXT("true") : TEXT("false"));
         return false;
     }
 
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
     OnBlockStarted.Broadcast(true);
+    UE_LOG(LogTemp, Warning, TEXT("BLOCK STARTED - Damage will be reduced by 40%%"));
     return true;
 }
 
@@ -89,22 +113,31 @@ void UCombatComponent::EndBlock()
 {
     RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
     OnBlockEnded.Broadcast();
+    UE_LOG(LogTemp, Warning, TEXT("Block Ended"));
 }
 
 bool UCombatComponent::TryParry()
 {
     if (IsStaggered() || IsAttacking() || IsParrying())
     {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot parry: Staggered=%s, Attacking=%s, Parrying=%s"),
+            IsStaggered() ? TEXT("true") : TEXT("false"),
+            IsAttacking() ? TEXT("true") : TEXT("false"),
+            IsParrying() ? TEXT("true") : TEXT("false"));
         return false;
     }
 
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Parrying")));
     
+    float ParryDuration = CombatRules ? CombatRules->CombatRules.ParryWindowDuration : 0.3f;
+    
+    UE_LOG(LogTemp, Warning, TEXT("PARRY WINDOW OPEN for %.2f seconds! Counter enemy attacks now!"), ParryDuration);
+    
     GetWorld()->GetTimerManager().SetTimer(
         ParryWindowTimerHandle,
         this,
         &UCombatComponent::EndParryWindow,
-        CombatRules->CombatRules.ParryWindowDuration,
+        ParryDuration,
         false
     );
 
@@ -114,6 +147,7 @@ bool UCombatComponent::TryParry()
 void UCombatComponent::EndParryWindow()
 {
     RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Parrying")));
+    UE_LOG(LogTemp, Warning, TEXT("Parry Window Closed"));
 }
 
 void UCombatComponent::ApplyVulnerability(int32 Charges)
@@ -121,11 +155,13 @@ void UCombatComponent::ApplyVulnerability(int32 Charges)
     VulnerabilityCharges = FMath::Max(Charges, 1);
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
     
+    float VulnerabilityDuration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
+    
     GetWorld()->GetTimerManager().SetTimer(
         VulnerabilityTimerHandle,
         this,
         &UCombatComponent::EndVulnerability,
-        CombatRules->CombatRules.VulnerabilityDuration,
+        VulnerabilityDuration,
         false
     );
 
@@ -189,7 +225,7 @@ void UCombatComponent::RecoverFromStagger()
 
 void UCombatComponent::ResetPoise()
 {
-    CurrentPoise = CombatRules->CombatRules.MaxPoise;
+    CurrentPoise = CombatRules ? CombatRules->CombatRules.MaxPoise : 100.0f;
     PoiseRegenDelayTime = 0.0f;
     bPoiseRegenActive = false;
 }
@@ -208,7 +244,7 @@ void UCombatComponent::StartPoiseRegen()
 
 void UCombatComponent::RegenPoise()
 {
-    if (!IsStaggered())
+    if (!IsStaggered() && CombatRules)
     {
         CurrentPoise = FMath::Min(
             CurrentPoise + (CombatRules->CombatRules.PoiseRegenRate * 0.1f),
@@ -236,10 +272,11 @@ void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTa
         return;
     }
 
-    if (TargetCombat->IsParrying() && CombatRules->CanParry(CurrentAttackData->AttackData.AttackTags))
+    if (TargetCombat->IsParrying() && CombatRules && CombatRules->CanParry(CurrentAttackData->AttackData.AttackTags))
     {
         TargetCombat->OnParrySuccess.Broadcast(GetOwner());
-        ApplyVulnerability(CombatRules->CombatRules.DefaultVulnerabilityCharges);
+        int32 DefaultCharges = CombatRules ? CombatRules->CombatRules.DefaultVulnerabilityCharges : 1;
+        ApplyVulnerability(DefaultCharges);
         return;
     }
 

@@ -96,3 +96,46 @@
 - Attack animations need to be hooked up
 - Hitbox detection system not yet implemented
 - Next phase: P2 - Animation Notifies + Hitbox System
+
+## Session: 2025-08-16 - Phase P1 Fixes & Polish
+
+### Changes
+- **Fixed null pointer crashes in CombatComponent**
+  - Added null checks for CombatRules throughout
+  - Added default values when CombatRules not set
+  - Fixed crash on TickComponent and other functions
+  
+- **Implemented native C++ gameplay tags for UE 5.5**
+  - Created FAtlasGameplayTags singleton
+  - Tags now initialize on module startup
+  - More reliable than INI configuration
+  
+- **Enhanced debug logging**
+  - Added detailed logging to all combat functions
+  - Attack logs show damage and knockback values
+  - Block/Parry/Focus all log state changes
+  
+- **Fixed input hold mechanics**
+  - Documented Hold trigger configuration for Input Actions
+  - Block (Space) and Focus (Q) now properly require holding
+  - Added comprehensive input setup guides
+
+### Documentation Added
+- `BLUEPRINT_SETUP_GUIDE.md` - Complete BP configuration guide
+- `GAMEPLAY_TAGS_SETUP.md` - Gameplay tags implementation guide
+- `INPUT_HOLD_FIX.md` - Input hold configuration guide
+
+### Tests Performed
+- All combat inputs tested and working:
+  - LMB: Jab attack (5 damage)
+  - RMB: Parry window (0.3s)
+  - Space (Hold): Block (40% reduction)
+  - Q (Hold): Focus mode
+  - E: Heavy attack (15 damage)
+- No crashes during gameplay
+- Debug output confirms all systems functioning
+
+### Known Issues / Next
+- Attacks don't actually hit yet (no animation notifies)
+- Damage pipeline ready but needs hitbox detection
+- Next phase: P2 - Animation Notifies + Hitbox System
