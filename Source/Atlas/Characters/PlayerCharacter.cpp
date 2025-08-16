@@ -7,6 +7,9 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/LocalPlayer.h"
+#include "../Components/CombatComponent.h"
+#include "../Components/HealthComponent.h"
+#include "GameplayTagContainer.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -74,22 +77,34 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 void APlayerCharacter::AttackLMB()
 {
-	UE_LOG(LogTemp, Log, TEXT("Attack LMB Pressed"));
+	if (CombatComponent)
+	{
+		CombatComponent->StartAttack(FGameplayTag::RequestGameplayTag(FName("Attack.Type.Jab")));
+	}
 }
 
 void APlayerCharacter::ParryRMB()
 {
-	UE_LOG(LogTemp, Log, TEXT("Parry RMB Pressed"));
+	if (CombatComponent)
+	{
+		CombatComponent->TryParry();
+	}
 }
 
 void APlayerCharacter::BlockStart()
 {
-	UE_LOG(LogTemp, Log, TEXT("Block Started"));
+	if (CombatComponent)
+	{
+		CombatComponent->StartBlock();
+	}
 }
 
 void APlayerCharacter::BlockStop()
 {
-	UE_LOG(LogTemp, Log, TEXT("Block Stopped"));
+	if (CombatComponent)
+	{
+		CombatComponent->EndBlock();
+	}
 }
 
 void APlayerCharacter::FocusStart()
@@ -104,5 +119,8 @@ void APlayerCharacter::FocusStop()
 
 void APlayerCharacter::HeavyAttack()
 {
-	UE_LOG(LogTemp, Log, TEXT("Heavy Attack Pressed"));
+	if (CombatComponent)
+	{
+		CombatComponent->StartAttack(FGameplayTag::RequestGameplayTag(FName("Attack.Type.Heavy")));
+	}
 }

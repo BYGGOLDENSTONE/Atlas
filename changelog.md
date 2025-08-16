@@ -38,3 +38,61 @@
 - Character blueprints need to be created from C++ classes
 - Ready for PIE testing after Editor setup
 - Next phase: P1 - Core Gameplay Tags + Data Assets + Damage Pipeline
+
+## Session: 2025-08-16 - Phase P1 - Core Gameplay Tags + Data Assets + Damage Pipeline
+
+### Changes
+- **Gameplay Tags System**
+  - Created GameplayTags.csv with comprehensive combat tags taxonomy
+  - Configured tag categories: Attack.Type, Attack.Property, Combat.State, Damage.Type, Character.Type, Ability, Interactable
+  - Updated DefaultGameplayTags.ini to reference CSV table
+  
+- **Data Asset Architecture**
+  - Created AttackDataAsset class for attack definitions (damage, knockback, stagger, animation)
+  - Created CombatRulesDataAsset class for combat rules (block reduction, parry window, vulnerability)
+  - Implemented tag-based combat rule validation (CanBlock, CanParry)
+  
+- **Combat System Components**
+  - **UCombatComponent**: Full combat state management
+    - Attack execution with Data Asset integration
+    - Block system with damage reduction
+    - Parry system with timing windows
+    - Vulnerability system with charge consumption
+    - Poise/Stagger mechanics with regeneration
+  - **UDamageCalculator**: Centralized damage pipeline
+    - Final damage calculation with multipliers
+    - Block/vulnerability state processing
+    - Knockback and ragdoll application
+    - Damage event broadcasting
+  - **UHealthComponent**: Health and death management
+    - Damage reception with instigator tracking
+    - Death/revival system
+    - Health change event system
+    
+- **Character Integration**
+  - Updated GameCharacterBase with Combat and Health components
+  - Connected PlayerCharacter input actions to combat functions
+  - Wired complete damage pipeline: Combat → Calculator → Health
+
+### Implementation Details
+- **Combat Values**:
+  - Jab: 5 damage, 100 knockback, 20 stagger damage
+  - Heavy: 500 knockback + ragdoll
+  - Block: 40% damage reduction
+  - Vulnerability: 8x damage multiplier, 1s duration
+  - Poise: 100 max, 15/s regen after 1.5s delay
+  - Parry window: 0.3s (configurable)
+  - Focus range: 1000 units
+
+### Tests Required
+- Create attack Data Assets in editor (Jab, Heavy)
+- Create combat rules Data Asset with default values
+- Assign Data Assets to player/enemy Combat Components
+- Test damage pipeline with debug output
+- Verify block/parry/vulnerability mechanics
+
+### Known Issues / Next
+- Data Assets need to be created in Editor
+- Attack animations need to be hooked up
+- Hitbox detection system not yet implemented
+- Next phase: P2 - Animation Notifies + Hitbox System

@@ -72,20 +72,20 @@ Known Issues: None.
 
 ---
 
-## P1. Core Gameplay Tags + Data Assets + Damage Pipeline
+## P1. Core Gameplay Tags + Data Assets + Damage Pipeline ✅ COMPLETED
 
 **Goal:** Data‑driven damage & states without GAS. Central place to compute final damage, tags for rules.
 
 **Deliverables**
 
-* `UCombatComponent`, `UHealthComponent`, `UDamageCalculator` (static funcs).
-* `UAttackDataAsset` (BaseDamage, Tags, Knockback, PlayRateCurve optional).
-* Gameplay Tags taxonomy created.
+* `UCombatComponent`, `UHealthComponent`, `UDamageCalculator` (static funcs). ✅
+* `UAttackDataAsset` (BaseDamage, Tags, Knockback, PlayRateCurve optional). ✅
+* Gameplay Tags taxonomy created. ✅
 
 **DoD**
 
-* Calling `ApplyDamage()` from anywhere routes through `UDamageCalculator` and affects `UHealthComponent`.
-* Tags influence blockability/parryability later.
+* Calling `ApplyDamage()` from anywhere routes through `UDamageCalculator` and affects `UHealthComponent`. ✅
+* Tags influence blockability/parryability later. ✅
 
 **AI Agent – Steps**
 

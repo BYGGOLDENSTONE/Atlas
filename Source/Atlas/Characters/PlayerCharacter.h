@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameCharacterBase.h"
 #include "InputActionValue.h"
+#include "GameplayTagContainer.h"
 #include "PlayerCharacter.generated.h"
 
 class UInputMappingContext;

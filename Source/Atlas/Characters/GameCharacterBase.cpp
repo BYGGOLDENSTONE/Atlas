@@ -3,6 +3,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "../Components/CombatComponent.h"
+#include "../Components/HealthComponent.h"
 
 AGameCharacterBase::AGameCharacterBase()
 {
@@ -31,6 +33,10 @@ AGameCharacterBase::AGameCharacterBase()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 void AGameCharacterBase::BeginPlay()
