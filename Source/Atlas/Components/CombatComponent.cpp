@@ -3,6 +3,7 @@
 #include "../Data/CombatRulesDataAsset.h"
 #include "DamageCalculator.h"
 #include "HealthComponent.h"
+#include "../Characters/GameCharacterBase.h"
 #include "GameFramework/Character.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -289,6 +290,47 @@ void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTa
     );
 
     TargetCombat->TakePoiseDamage(CurrentAttackData->AttackData.StaggerDamage);
+}
+
+void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
+{
+    if (!HitCharacter || !CurrentAttackData || !DamageCalculator)
+    {
+        return;
+    }
+
+    UCombatComponent* TargetCombat = HitCharacter->FindComponentByClass<UCombatComponent>();
+    if (!TargetCombat)
+    {
+        return;
+    }
+
+    bool bCanBeParried = bAttackerParryWindowOpen && CombatRules && CombatRules->CanParry(CurrentAttackData->AttackData.AttackTags);
+    
+    if (TargetCombat->IsParrying() && bCanBeParried)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PARRY SUCCESS! Target parried attack during window"));
+        TargetCombat->OnParrySuccess.Broadcast(GetOwner());
+        int32 DefaultCharges = CombatRules ? CombatRules->CombatRules.DefaultVulnerabilityCharges : 1;
+        ApplyVulnerability(DefaultCharges);
+        return;
+    }
+
+    DamageCalculator->ProcessDamage(
+        GetOwner(),
+        HitCharacter,
+        CurrentAttackData,
+        CombatStateTags,
+        TargetCombat->CombatStateTags
+    );
+
+    TargetCombat->TakePoiseDamage(CurrentAttackData->AttackData.StaggerDamage);
+}
+
+void UCombatComponent::SetAttackerParryWindow(bool bIsOpen)
+{
+    bAttackerParryWindowOpen = bIsOpen;
+    UE_LOG(LogTemp, Warning, TEXT("Attacker Parry Window: %s"), bIsOpen ? TEXT("OPEN") : TEXT("CLOSED"));
 }
 
 bool UCombatComponent::IsAttacking() const

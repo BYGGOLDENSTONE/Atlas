@@ -92,6 +92,11 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void ProcessHit(AActor* HitActor, const FGameplayTag& AttackTag);
 
+    void ProcessHitFromAnimation(class AGameCharacterBase* HitCharacter);
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void SetAttackerParryWindow(bool bIsOpen);
+
     UPROPERTY(BlueprintAssignable, Category = "Combat Events")
     FOnAttackStarted OnAttackStarted;
 
@@ -127,6 +132,7 @@ private:
 
     float PoiseRegenDelayTime = 0.0f;
     bool bPoiseRegenActive = false;
+    bool bAttackerParryWindowOpen = false;
 
     void EndParryWindow();
     void EndVulnerability();

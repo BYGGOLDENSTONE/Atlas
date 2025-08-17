@@ -97,6 +97,76 @@
 - Hitbox detection system not yet implemented
 - Next phase: P2 - Animation Notifies + Hitbox System
 
+## Session: 2025-08-17 - Phase P2 - Animation Notifies + Hitbox System
+
+### Changes
+- **Animation Notify System**
+  - Created UAttackNotify for single-frame attack events
+  - Created UAttackNotifyState for continuous attack windows with hit detection
+  - Created UParryWindowNotifyState for parry timing windows
+  - Notify classes support socket-based hitbox positioning
+  - Debug visualization for hitbox locations during attacks
+  
+- **Hitbox Detection System**
+  - Created UHitboxComponent extending USphereComponent
+  - Per-actor hit tracking to prevent multiple hits from same attack
+  - Configurable hitbox radius and forward offset
+  - Debug drawing support for visualizing active hitboxes
+  - Automatic deactivation timer support
+  
+- **Combat Integration**
+  - Updated UCombatComponent with ProcessHit overload for character hits
+  - Added SetAttackerParryWindow for animation-driven parry timing
+  - Parry window now controlled by animation notifies (attacker-defined)
+  - Hit detection flows through existing damage pipeline
+  - Socket-based positioning for accurate limb-based attacks
+
+### Implementation Details
+- **AttackNotify**: Instant hit detection at animation frame
+- **AttackNotifyState**: Continuous detection with configurable intervals
+- **ParryWindowNotifyState**: Opens/closes parry vulnerability window
+- **HitboxComponent**: Reusable collision component for weapons/limbs
+- Attack flow: Animation → Notify → Hitbox → CombatComponent → DamageCalculator
+- Debug visualization color coding: Red (attack), Orange (continuous), Cyan (parry)
+
+### Files Created
+- Source/Atlas/Animation/AttackNotify.h/cpp
+- Source/Atlas/Animation/AttackNotifyState.h/cpp
+- Source/Atlas/Animation/ParryWindowNotifyState.h/cpp
+- Source/Atlas/Components/HitboxComponent.h/cpp
+
+### Tests Required
+- Add animation notifies to attack montages in Editor
+- Configure socket names for hand/foot positions
+- Test hitbox collision detection with debug drawing
+- Verify parry window timing with animations
+- Test multi-hit prevention per attack
+
+### Build Issues Fixed
+- Fixed InternalConstructor crash by moving component initialization to BeginPlay
+- Changed TSet to TArray with UPROPERTY for proper garbage collection
+- Removed AnimGraphRuntime dependency (not needed for simple notifies)
+- Simplified all constructors to prevent initialization crashes
+
+### Setup Completed
+- ✅ Attack montages created with animation notifies
+- ✅ Socket configuration added (hand_r, hand_l)
+- ✅ Debug visualization working (red/orange/cyan spheres)
+- ✅ Hit detection flowing through damage pipeline
+- ✅ Parry windows properly timed with animations
+
+### Working Features
+- Animation-driven hit detection at correct frames
+- Socket-based hitbox positioning for accurate hits
+- Per-actor hit tracking prevents multiple hits
+- Debug visualization for all combat states
+- Full integration with P1 damage pipeline
+
+### Known Issues / Next
+- Ready for P3 - AI Behavior Trees + Enemy Combat
+- Enemy AI needs combat decision making
+- Interactables system to be implemented later
+
 ## Session: 2025-08-16 - Phase P1 Fixes & Polish
 
 ### Changes
