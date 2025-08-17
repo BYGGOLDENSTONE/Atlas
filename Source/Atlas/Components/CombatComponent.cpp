@@ -372,3 +372,54 @@ bool UCombatComponent::HasCombatStateTag(const FGameplayTag& Tag) const
 {
     return CombatStateTags.HasTag(Tag);
 }
+
+void UCombatComponent::StartBlocking()
+{
+    StartBlock();
+}
+
+void UCombatComponent::StopBlocking()
+{
+    EndBlock();
+}
+
+void UCombatComponent::AttemptParry()
+{
+    TryParry();
+}
+
+void UCombatComponent::DealDamageToTarget(AActor* Target, float Damage, const FGameplayTagContainer& AttackTags)
+{
+    if (!Target || !DamageCalculator)
+    {
+        return;
+    }
+
+    UHealthComponent* TargetHealth = Target->FindComponentByClass<UHealthComponent>();
+    if (TargetHealth)
+    {
+        TargetHealth->TakeDamage(Damage, GetOwner());
+    }
+
+    UCombatComponent* TargetCombat = Target->FindComponentByClass<UCombatComponent>();
+    if (TargetCombat)
+    {
+        if (AttackTags.HasTag(FGameplayTag::RequestGameplayTag("Combat.Status.Stunned")))
+        {
+            TargetCombat->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Staggered"));
+        }
+    }
+}
+
+UAnimMontage* UCombatComponent::GetAttackMontage(const FGameplayTag& AttackTag) const
+{
+    if (AttackDataMap.Contains(AttackTag))
+    {
+        UAttackDataAsset* AttackData = AttackDataMap[AttackTag];
+        if (AttackData)
+        {
+            return AttackData->AttackData.AttackMontage;
+        }
+    }
+    return nullptr;
+}

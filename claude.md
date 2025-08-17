@@ -43,8 +43,18 @@
 - Tag-based combat rules (Blockable, Parryable, etc.)
 - Component-based architecture with interfaces
 
-## Current Phase: P2 - COMPLETED ✓
-Successfully implemented animation-driven combat with hitbox detection and damage delivery.
+## Current Phase: P3 - COMPLETED ✓
+Successfully implemented AI-driven enemy combat with behavior trees, perception, and dynamic combat decision making.
 
-## Next Phase: P3 - AI Behavior Trees + Enemy Combat
-Ready to implement AI-driven enemy behaviors with combat decision making.
+### P3 Features Implemented:
+- **AI Controller**: Perception-based enemy awareness with sight radius
+- **Behavior Tree Tasks**: 
+  - MeleeAttack (Jab/Heavy/Combo sequences)
+  - DefendBlock (Block/Parry/Dodge reactions)
+  - SoulAttack (Unblockable special, 10s cooldown)
+  - CatchSpecial (Anti-kiting dash attack)
+- **Combat Integration**: Uses existing AttackDataAsset system with Attack.Type.Jab/Heavy tags
+- **Dynamic Combat**: AI makes decisions based on distance, pressure, and cooldowns
+
+## Next Phase: P4 - Interactables & Environmental Combat
+Ready to implement Focus Mode and environmental interactions (Vents/Valves).

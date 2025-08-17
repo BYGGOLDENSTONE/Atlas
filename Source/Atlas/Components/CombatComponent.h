@@ -97,6 +97,24 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void SetAttackerParryWindow(bool bIsOpen);
 
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void StartBlocking();
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void StopBlocking();
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void AttemptParry();
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void EndParryWindow();
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void DealDamageToTarget(AActor* Target, float Damage, const FGameplayTagContainer& AttackTags);
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    class UAnimMontage* GetAttackMontage(const FGameplayTag& AttackTag) const;
+
     UPROPERTY(BlueprintAssignable, Category = "Combat Events")
     FOnAttackStarted OnAttackStarted;
 
@@ -134,7 +152,6 @@ private:
     bool bPoiseRegenActive = false;
     bool bAttackerParryWindowOpen = false;
 
-    void EndParryWindow();
     void EndVulnerability();
     void StartPoiseRegen();
     void RegenPoise();
