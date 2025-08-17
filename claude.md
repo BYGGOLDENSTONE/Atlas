@@ -43,18 +43,27 @@
 - Tag-based combat rules (Blockable, Parryable, etc.)
 - Component-based architecture with interfaces
 
-## Current Phase: P3 - COMPLETED ✓
-Successfully implemented AI-driven enemy combat with behavior trees, perception, and dynamic combat decision making.
+## Current Phase: P4 - COMPLETED ✓
+Successfully implemented advanced parry mechanics with vulnerability system, charge-based damage multipliers, and optional i-frames.
 
-### P3 Features Implemented:
-- **AI Controller**: Perception-based enemy awareness with sight radius
-- **Behavior Tree Tasks**: 
-  - MeleeAttack (Jab/Heavy/Combo sequences)
-  - DefendBlock (Block/Parry/Dodge reactions)
-  - SoulAttack (Unblockable special, 10s cooldown)
-  - CatchSpecial (Anti-kiting dash attack)
-- **Combat Integration**: Uses existing AttackDataAsset system with Attack.Type.Jab/Heavy tags
-- **Dynamic Combat**: AI makes decisions based on distance, pressure, and cooldowns
+### P4 Features Implemented:
+- **VulnerabilityComponent**: Manages vulnerability state with charge system
+  - 8x damage multiplier during vulnerability
+  - 1 second default duration
+  - Charge-based consumption (default 1 charge)
+  - Optional i-frames support for invincibility
+- **Enhanced Parry System**:
+  - Frame-perfect counter windows via animation notifies
+  - Successful parry applies vulnerability to attacker
+  - HandleSuccessfulParry() method for clean execution
+  - I-frame grants on successful parry (optional)
+- **ParryFeedbackComponent**: Visual/audio feedback system
+  - VFX for parry success, vulnerability, and i-frames
+  - Camera shake and slow-motion effects
+  - Persistent vulnerability visual indicators
+- **Debug Testing System**: Console commands for testing
+  - TestParryWindow, TestApplyVulnerability, ShowParryInfo
+  - Real-time state inspection and damage simulation
 
-## Next Phase: P4 - Interactables & Environmental Combat
-Ready to implement Focus Mode and environmental interactions (Vents/Valves).
+## Next Phase: P5 - Polish & Balancing
+Ready to refine combat feel, add juice, and balance gameplay systems.

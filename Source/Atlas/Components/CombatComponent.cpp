@@ -3,6 +3,7 @@
 #include "../Data/CombatRulesDataAsset.h"
 #include "DamageCalculator.h"
 #include "HealthComponent.h"
+#include "VulnerabilityComponent.h"
 #include "../Characters/GameCharacterBase.h"
 #include "GameFramework/Character.h"
 #include "Engine/World.h"
@@ -27,6 +28,13 @@ void UCombatComponent::BeginPlay()
     }
 
     DamageCalculator = NewObject<UDamageCalculator>(this);
+    
+    VulnerabilityComponent = GetOwner()->FindComponentByClass<UVulnerabilityComponent>();
+    if (!VulnerabilityComponent)
+    {
+        VulnerabilityComponent = NewObject<UVulnerabilityComponent>(GetOwner(), UVulnerabilityComponent::StaticClass(), TEXT("VulnerabilityComponent"));
+        VulnerabilityComponent->RegisterComponent();
+    }
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -153,30 +161,46 @@ void UCombatComponent::EndParryWindow()
 
 void UCombatComponent::ApplyVulnerability(int32 Charges)
 {
-    VulnerabilityCharges = FMath::Max(Charges, 1);
-    AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
-    
-    float VulnerabilityDuration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
-    
-    GetWorld()->GetTimerManager().SetTimer(
-        VulnerabilityTimerHandle,
-        this,
-        &UCombatComponent::EndVulnerability,
-        VulnerabilityDuration,
-        false
-    );
+    if (VulnerabilityComponent)
+    {
+        float Duration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
+        VulnerabilityComponent->ApplyVulnerability(Charges, Duration);
+        OnVulnerabilityApplied.Broadcast();
+    }
+    else
+    {
+        VulnerabilityCharges = FMath::Max(Charges, 1);
+        AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
+        
+        float VulnerabilityDuration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
+        
+        GetWorld()->GetTimerManager().SetTimer(
+            VulnerabilityTimerHandle,
+            this,
+            &UCombatComponent::EndVulnerability,
+            VulnerabilityDuration,
+            false
+        );
 
-    OnVulnerabilityApplied.Broadcast();
+        OnVulnerabilityApplied.Broadcast();
+    }
 }
 
 void UCombatComponent::ConsumeVulnerabilityCharge()
 {
-    if (VulnerabilityCharges > 0)
+    if (VulnerabilityComponent)
     {
-        VulnerabilityCharges--;
-        if (VulnerabilityCharges <= 0)
+        VulnerabilityComponent->ConsumeCharge();
+    }
+    else
+    {
+        if (VulnerabilityCharges > 0)
         {
-            EndVulnerability();
+            VulnerabilityCharges--;
+            if (VulnerabilityCharges <= 0)
+            {
+                EndVulnerability();
+            }
         }
     }
 }
@@ -275,9 +299,7 @@ void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTa
 
     if (TargetCombat->IsParrying() && CombatRules && CombatRules->CanParry(CurrentAttackData->AttackData.AttackTags))
     {
-        TargetCombat->OnParrySuccess.Broadcast(GetOwner());
-        int32 DefaultCharges = CombatRules ? CombatRules->CombatRules.DefaultVulnerabilityCharges : 1;
-        ApplyVulnerability(DefaultCharges);
+        TargetCombat->HandleSuccessfulParry(GetOwner());
         return;
     }
 
@@ -310,9 +332,7 @@ void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
     if (TargetCombat->IsParrying() && bCanBeParried)
     {
         UE_LOG(LogTemp, Warning, TEXT("PARRY SUCCESS! Target parried attack during window"));
-        TargetCombat->OnParrySuccess.Broadcast(GetOwner());
-        int32 DefaultCharges = CombatRules ? CombatRules->CombatRules.DefaultVulnerabilityCharges : 1;
-        ApplyVulnerability(DefaultCharges);
+        TargetCombat->HandleSuccessfulParry(GetOwner());
         return;
     }
 
@@ -350,7 +370,64 @@ bool UCombatComponent::IsParrying() const
 
 bool UCombatComponent::IsVulnerable() const
 {
+    if (VulnerabilityComponent)
+    {
+        return VulnerabilityComponent->IsVulnerable();
+    }
     return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
+}
+
+bool UCombatComponent::HasIFrames() const
+{
+    if (VulnerabilityComponent)
+    {
+        return VulnerabilityComponent->HasIFrames();
+    }
+    return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.IFrames")));
+}
+
+void UCombatComponent::ApplyVulnerabilityWithIFrames(int32 Charges, bool bGrantIFrames)
+{
+    if (VulnerabilityComponent)
+    {
+        float Duration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
+        VulnerabilityComponent->ApplyVulnerability(Charges, Duration);
+        
+        if (bGrantIFrames && VulnerabilityComponent->bEnableIFrames)
+        {
+            VulnerabilityComponent->StartIFrames();
+        }
+        
+        OnVulnerabilityApplied.Broadcast();
+    }
+    else
+    {
+        ApplyVulnerability(Charges);
+    }
+}
+
+void UCombatComponent::HandleSuccessfulParry(AActor* Attacker)
+{
+    if (!Attacker)
+    {
+        return;
+    }
+    
+    UCombatComponent* AttackerCombat = Attacker->FindComponentByClass<UCombatComponent>();
+    if (AttackerCombat)
+    {
+        int32 DefaultCharges = CombatRules ? CombatRules->CombatRules.DefaultVulnerabilityCharges : 1;
+        bool bGrantIFrames = VulnerabilityComponent ? VulnerabilityComponent->bIFramesOnParrySuccess : false;
+        AttackerCombat->ApplyVulnerabilityWithIFrames(DefaultCharges, bGrantIFrames);
+    }
+    
+    if (VulnerabilityComponent && VulnerabilityComponent->bIFramesOnParrySuccess)
+    {
+        VulnerabilityComponent->StartIFrames();
+    }
+    
+    OnParrySuccess.Broadcast(Attacker);
+    UE_LOG(LogTemp, Warning, TEXT("PARRY SUCCESS! Attacker is now vulnerable!"));
 }
 
 bool UCombatComponent::IsStaggered() const

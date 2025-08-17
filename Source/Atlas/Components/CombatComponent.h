@@ -9,6 +9,7 @@ class UAttackDataAsset;
 class UCombatRulesDataAsset;
 class UDamageCalculator;
 class UHealthComponent;
+class UVulnerabilityComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAttackStarted, const FGameplayTag&, AttackTag, const UAttackDataAsset*, AttackData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnded);
@@ -45,7 +46,7 @@ public:
     float CurrentPoise = 100.0f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Combat State")
-    int32 VulnerabilityCharges = 0;
+    int32 VulnerabilityCharges = 0;  // Deprecated - use VulnerabilityComponent instead
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool StartAttack(const FGameplayTag& AttackTag);
@@ -63,10 +64,13 @@ public:
     bool TryParry();
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
-    void ApplyVulnerability(int32 Charges = 1);
+    void ApplyVulnerability(int32 Charges = 1);  // Deprecated - use VulnerabilityComponent
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
-    void ConsumeVulnerabilityCharge();
+    void ConsumeVulnerabilityCharge();  // Deprecated - use VulnerabilityComponent
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void ApplyVulnerabilityWithIFrames(int32 Charges = 1, bool bGrantIFrames = false);
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void TakePoiseDamage(float Damage);
@@ -85,6 +89,12 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsVulnerable() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    bool HasIFrames() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void HandleSuccessfulParry(AActor* Attacker);
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsStaggered() const;
@@ -143,6 +153,9 @@ private:
     UPROPERTY()
     UDamageCalculator* DamageCalculator;
 
+    UPROPERTY()
+    UVulnerabilityComponent* VulnerabilityComponent;
+
     FTimerHandle VulnerabilityTimerHandle;
     FTimerHandle ParryWindowTimerHandle;
     FTimerHandle PoiseRegenTimerHandle;
@@ -152,7 +165,7 @@ private:
     bool bPoiseRegenActive = false;
     bool bAttackerParryWindowOpen = false;
 
-    void EndVulnerability();
+    void EndVulnerability();  // Deprecated - handled by VulnerabilityComponent
     void StartPoiseRegen();
     void RegenPoise();
     void RecoverFromStagger();

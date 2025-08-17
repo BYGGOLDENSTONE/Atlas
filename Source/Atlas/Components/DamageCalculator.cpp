@@ -2,6 +2,7 @@
 #include "../Data/AttackDataAsset.h"
 #include "../Data/CombatRulesDataAsset.h"
 #include "CombatComponent.h"
+#include "VulnerabilityComponent.h"
 #include "HealthComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -30,13 +31,30 @@ FDamageInfo UDamageCalculator::ProcessDamage(
     DamageInfo.AttackTags = AttackData->AttackData.AttackTags;
 
     UCombatComponent* TargetCombat = Target->FindComponentByClass<UCombatComponent>();
+    UVulnerabilityComponent* TargetVuln = Target->FindComponentByClass<UVulnerabilityComponent>();
+    
+    if (TargetVuln && TargetVuln->HasIFrames())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Attack avoided due to I-Frames!"));
+        DamageInfo.FinalDamage = 0.0f;
+        return DamageInfo;
+    }
+    
     if (TargetCombat && TargetCombat->CombatRules)
     {
         bool bWasBlocked = false;
         bool bWasVulnerable = false;
         
+        float BaseDamageValue = DamageInfo.BaseDamage;
+        
+        if (TargetVuln && TargetVuln->IsVulnerable())
+        {
+            BaseDamageValue *= TargetVuln->GetDamageMultiplier();
+            bWasVulnerable = true;
+        }
+        
         DamageInfo.FinalDamage = CalculateFinalDamage(
-            DamageInfo.BaseDamage,
+            BaseDamageValue,
             TargetCombat->CombatRules,
             AttackerTags,
             DefenderTags,
@@ -47,9 +65,9 @@ FDamageInfo UDamageCalculator::ProcessDamage(
         DamageInfo.bWasBlocked = bWasBlocked;
         DamageInfo.bWasVulnerable = bWasVulnerable;
 
-        if (bWasVulnerable && TargetCombat->IsVulnerable())
+        if (bWasVulnerable && TargetVuln)
         {
-            TargetCombat->ConsumeVulnerabilityCharge();
+            TargetVuln->ConsumeCharge();
         }
     }
     else
@@ -91,11 +109,6 @@ float UDamageCalculator::CalculateFinalDamage(
         FinalDamage *= (1.0f - CombatRules->CombatRules.BlockDamageReduction);
     }
 
-    if (DefenderTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable"))))
-    {
-        bWasVulnerable = true;
-        FinalDamage *= CombatRules->CombatRules.VulnerabilityMultiplier;
-    }
 
     for (const FCombatMultiplier& Multiplier : CombatRules->CombatRules.DamageMultipliers)
     {
