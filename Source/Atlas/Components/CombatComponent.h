@@ -98,6 +98,12 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsStaggered() const;
+    
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    bool IsInCombat() const;
+    
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    float GetTimeSinceLastCombatAction() const;
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void ProcessHit(AActor* HitActor, const FGameplayTag& AttackTag);
@@ -164,6 +170,7 @@ private:
     float PoiseRegenDelayTime = 0.0f;
     bool bPoiseRegenActive = false;
     bool bAttackerParryWindowOpen = false;
+    float LastCombatActionTime = 0.0f;
 
     void EndVulnerability();  // Deprecated - handled by VulnerabilityComponent
     void StartPoiseRegen();

@@ -86,4 +86,7 @@ public:
 
 private:
     void LogDamageInfo(const FDamageInfo& DamageInfo);
+    
+    UPROPERTY()
+    class UWallImpactComponent* WallImpactComponent;
 };

@@ -43,27 +43,78 @@
 - Tag-based combat rules (Blockable, Parryable, etc.)
 - Component-based architecture with interfaces
 
-## Current Phase: P4 - COMPLETED ✓
-Successfully implemented advanced parry mechanics with vulnerability system, charge-based damage multipliers, and optional i-frames.
+## Completed Phases Status
 
-### P4 Features Implemented:
-- **VulnerabilityComponent**: Manages vulnerability state with charge system
-  - 8x damage multiplier during vulnerability
-  - 1 second default duration
-  - Charge-based consumption (default 1 charge)
-  - Optional i-frames support for invincibility
-- **Enhanced Parry System**:
-  - Frame-perfect counter windows via animation notifies
-  - Successful parry applies vulnerability to attacker
-  - HandleSuccessfulParry() method for clean execution
-  - I-frame grants on successful parry (optional)
-- **ParryFeedbackComponent**: Visual/audio feedback system
-  - VFX for parry success, vulnerability, and i-frames
-  - Camera shake and slow-motion effects
-  - Persistent vulnerability visual indicators
-- **Debug Testing System**: Console commands for testing
-  - TestParryWindow, TestApplyVulnerability, ShowParryInfo
-  - Real-time state inspection and damage simulation
+### ✅ P0: Project Setup & Upgrade (UE 5.5) - COMPLETED
+### ✅ P1: Core Gameplay Tags + Data Assets + Damage Pipeline - COMPLETED  
+### ✅ P2: Animation Notifies + Hitbox System - COMPLETED
+### ✅ P3: Block System (40% damage reduction) - COMPLETED
+### ✅ P4: Parry + Vulnerability System - COMPLETED
+### ✅ P5: Heavy Attack (partial) - IN PROGRESS
+- Heavy attack input and basic functionality implemented
+- Ragdoll knockback system working
+- **Missing**: Wall impact detection and bonus damage (moved to P8)
 
-## Next Phase: P5 - Polish & Balancing
-Ready to refine combat feel, add juice, and balance gameplay systems.
+### ✅ P6: Stagger System + Poise - COMPLETED
+- Full poise system (100 max, 20 jab damage, 15/s regen)
+- Stagger on poise break with recovery timer
+- Action lock during stagger state
+
+### ✅ P7: Focus Mode & Interactables - COMPLETED
+- **Focus Mode System**:
+  - Q key hold to activate (1000 unit detection range)
+  - Screen-space targeting prioritizes closest to center
+  - Release Q to interact with focused target
+  - Debug visualization with colored spheres and lines
+  
+- **FocusModeComponent**: Complete targeting system
+  - Scans for interactables and enemies in range
+  - Calculates screen-space priorities
+  - Smart Soft Lock for combat (800 units, auto-engage)
+  - Force-unlock with rapid camera movement (>180°/s)
+  
+- **Interactable System**:
+  - IInteractable interface for all interactable objects
+  - InteractableBase abstract class with cooldown management
+  - Visual feedback for focused/cooldown states
+  
+- **Vent Interactable**: Physics-based projectile
+  - Launches itself when triggered (predetermined direction)
+  - Configurable physics (mass, speed, bounce)
+  - Applies stagger on hit (50 poise damage)
+  - One-time use only
+  
+- **Valve Interactable**: Area effect visualization
+  - 500 unit AoE radius with visual effects
+  - Four types: Fire (red), Electric (cyan), Poison (green), Physical (white)
+  - Optional vulnerability/stagger application
+  - 10-second cooldown
+
+### ✅ P8: Smart Soft Lock + Wall Impact - COMPLETED
+- **Combat State Detection**: IsInCombat() method with 3-second memory
+- **Separated Systems**: Focus Mode (Q key) for interactables, Soft Lock (automatic) for enemies
+- **Soft Lock Camera**: Auto-engages enemies within 1000 units during combat
+  - Smooth camera tracking with dead zones
+  - Player input detection to avoid fighting control
+  - Break-away at 90°, re-engage at 30°
+  - Known Issue: Some asymmetry in left/right rotation response
+- **Wall Impact System**: WallImpactComponent for heavy attacks
+  - Detects walls within 200 units behind target
+  - 1.5x damage multiplier on wall impact
+  - Extended 2-second stagger
+  - Bounce-back physics effect
+
+### 🔄 P9: Basic Enemy AI - PARTIALLY COMPLETED
+- Basic AI controller with perception
+- Simple attack tasks implemented
+- **Missing**: Advanced features (combos, Soul Attack, Catch Special)
+
+## Current Phase: P9 - Advanced AI Features
+Next to implement:
+- AI combo attacks system
+- Soul Attack (unblockable/unparryable, 10s cooldown)
+- Catch Special (anti-kiting gap closer)
+
+## Remaining Phases:
+- **P9**: Complete Advanced AI Features
+- **P10**: Polish & Debug (hit-pause, camera shake, debug HUD)

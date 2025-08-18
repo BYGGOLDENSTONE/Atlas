@@ -2,7 +2,6 @@
 #include "../Interfaces/IInteractable.h"
 #include "../Core/AtlasGameplayTags.h"
 #include "../Characters/GameCharacterBase.h"
-#include "../Characters/EnemyCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -10,7 +9,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "CombatComponent.h"
-#include "HealthComponent.h"
 #include "Engine/OverlapResult.h"
 
 UFocusModeComponent::UFocusModeComponent()
@@ -37,11 +35,6 @@ void UFocusModeComponent::BeginPlay()
     {
         CachedCamera = GetOwner()->FindComponentByClass<UCameraComponent>();
     }
-    
-    if (CachedCamera)
-    {
-        LastCameraRotation = CachedCamera->GetComponentRotation().Vector();
-    }
 }
 
 void UFocusModeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -57,8 +50,6 @@ void UFocusModeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
     
     ScanForTargets();
     UpdateFocusTarget();
-    CheckCameraVelocityForUnlock();
-    UpdateSoftLock();
     
     if (bDebugDrawFocusInfo)
     {
@@ -94,7 +85,6 @@ void UFocusModeComponent::StopFocusMode()
     }
     
     bIsFocusModeActive = false;
-    bIsSoftLocked = false;
     
     ClearFocusedTarget();
     PotentialTargets.Empty();
@@ -156,7 +146,7 @@ void UFocusModeComponent::ScanForTargets()
     {
         if (AActor* Actor = Result.GetActor())
         {
-            if (IsTargetInteractable(Actor) || IsTargetEnemy(Actor))
+            if (IsTargetInteractable(Actor))
             {
                 FFocusTarget Target = EvaluateTarget(Actor);
                 if (Target.Priority > 0.0f)
@@ -280,7 +270,7 @@ FFocusTarget UFocusModeComponent::EvaluateTarget(AActor* Target) const
         Result.bIsInteractable = true;
     }
     
-    Result.bIsEnemy = IsTargetEnemy(Target);
+    Result.bIsEnemy = false; // Focus mode is only for interactables
     
     Result.WorldDistance = FVector::Dist(GetOwner()->GetActorLocation(), TargetLocation);
     
@@ -372,69 +362,9 @@ float UFocusModeComponent::CalculatePriority(const FFocusTarget& Target) const
         Priority *= InteractablePriorityBonus;
     }
     
-    if (bIsSoftLocked && Target.Actor == CurrentFocusedTarget)
-    {
-        Priority *= 1.5f;
-    }
-    
     return Priority;
 }
 
-void UFocusModeComponent::CheckCameraVelocityForUnlock()
-{
-    if (!CachedCamera || !bIsSoftLocked)
-    {
-        return;
-    }
-    
-    FVector CurrentCameraRotation = CachedCamera->GetComponentRotation().Vector();
-    
-    float RotationDelta = FVector::Dist(CurrentCameraRotation, LastCameraRotation);
-    CameraRotationVelocity = RotationDelta / GetWorld()->GetDeltaSeconds();
-    
-    if (CameraRotationVelocity > CameraVelocityUnlockThreshold)
-    {
-        ForceUnlock();
-    }
-    
-    LastCameraRotation = CurrentCameraRotation;
-}
-
-void UFocusModeComponent::UpdateSoftLock()
-{
-    if (!CurrentFocusedTarget || !CurrentTargetInfo.bIsEnemy)
-    {
-        bIsSoftLocked = false;
-        return;
-    }
-    
-    if (CurrentTargetInfo.WorldDistance <= SoftLockEngageDistance && TimeSinceFocusStart > 0.2f)
-    {
-        if (!bIsSoftLocked)
-        {
-            bIsSoftLocked = true;
-            UE_LOG(LogTemp, Log, TEXT("Soft Lock Engaged on: %s"), *CurrentFocusedTarget->GetName());
-        }
-    }
-    else if (CurrentTargetInfo.WorldDistance > SoftLockEngageDistance * 1.2f)
-    {
-        if (bIsSoftLocked)
-        {
-            bIsSoftLocked = false;
-            UE_LOG(LogTemp, Log, TEXT("Soft Lock Disengaged"));
-        }
-    }
-}
-
-void UFocusModeComponent::ForceUnlock()
-{
-    if (bIsSoftLocked)
-    {
-        bIsSoftLocked = false;
-        ClearFocusedTarget();
-        UE_LOG(LogTemp, Log, TEXT("Force Unlocked due to rapid camera movement"));
-    }
-}
 
 bool UFocusModeComponent::TryInteractWithFocusedTarget()
 {
@@ -499,24 +429,6 @@ bool UFocusModeComponent::IsTargetInteractable(AActor* Target) const
     return bImplementsInterface;
 }
 
-bool UFocusModeComponent::IsTargetEnemy(AActor* Target) const
-{
-    if (!Target)
-    {
-        return false;
-    }
-    
-    if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(Target))
-    {
-        if (UHealthComponent* HealthComp = Enemy->GetHealthComponent())
-        {
-            return !HealthComp->IsDead();
-        }
-    }
-    
-    return false;
-}
-
 void UFocusModeComponent::DrawDebugInfo() const
 {
     if (!GetOwner())
@@ -552,3 +464,4 @@ void UFocusModeComponent::DrawDebugInfo() const
         DrawDebugBox(GetWorld(), CurrentFocusedTarget->GetActorLocation(), FVector(50, 50, 50), FColor::Green, false, -1.0f, 0, 5.0f);
     }
 }
+

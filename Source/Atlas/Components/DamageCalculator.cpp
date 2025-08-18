@@ -4,6 +4,7 @@
 #include "CombatComponent.h"
 #include "VulnerabilityComponent.h"
 #include "HealthComponent.h"
+#include "WallImpactComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -151,6 +152,35 @@ void UDamageCalculator::ApplyKnockback(AActor* Target, AActor* Attacker, float K
     FVector KnockbackDirection = (Target->GetActorLocation() - Attacker->GetActorLocation()).GetSafeNormal();
     KnockbackDirection.Z = 0.3f;
     KnockbackDirection.Normalize();
+    
+    // Check for wall impact if this is a heavy knockback
+    if (KnockbackForce >= 300.0f)
+    {
+        // Try to get WallImpactComponent from the attacker
+        if (!WallImpactComponent)
+        {
+            WallImpactComponent = Attacker->FindComponentByClass<UWallImpactComponent>();
+        }
+        
+        // If not on attacker, create one temporarily
+        if (!WallImpactComponent)
+        {
+            WallImpactComponent = NewObject<UWallImpactComponent>(this);
+        }
+        
+        if (WallImpactComponent)
+        {
+            FHitResult WallHit;
+            if (WallImpactComponent->CheckForWallImpact(KnockbackDirection, KnockbackForce, WallHit))
+            {
+                // Wall detected! Apply wall impact effects
+                WallImpactComponent->ApplyWallImpactEffects(Target, WallHit, KnockbackForce);
+                
+                // Reduce knockback since they'll hit the wall
+                KnockbackForce *= 0.5f;
+            }
+        }
+    }
 
     if (bCauseRagdoll)
     {

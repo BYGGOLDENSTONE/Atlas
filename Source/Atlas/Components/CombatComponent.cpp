@@ -71,6 +71,7 @@ bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
 
     CurrentAttackData = *AttackDataPtr;
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
+    LastCombatActionTime = GetWorld()->GetTimeSeconds();
 
     UE_LOG(LogTemp, Warning, TEXT("ATTACK STARTED: %s (Damage: %.1f, Knockback: %.1f)"), 
         *CurrentAttackData->AttackData.AttackName.ToString(),
@@ -113,6 +114,7 @@ bool UCombatComponent::StartBlock()
     }
 
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+    LastCombatActionTime = GetWorld()->GetTimeSeconds();
     OnBlockStarted.Broadcast(true);
     UE_LOG(LogTemp, Warning, TEXT("BLOCK STARTED - Damage will be reduced by 40%%"));
     return true;
@@ -137,6 +139,7 @@ bool UCombatComponent::TryParry()
     }
 
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Parrying")));
+    LastCombatActionTime = GetWorld()->GetTimeSeconds();
     
     float ParryDuration = CombatRules ? CombatRules->CombatRules.ParryWindowDuration : 0.3f;
     
@@ -217,6 +220,7 @@ void UCombatComponent::TakePoiseDamage(float Damage)
     CurrentPoise = FMath::Max(0.0f, CurrentPoise - Damage);
     PoiseRegenDelayTime = 0.0f;
     bPoiseRegenActive = false;
+    LastCombatActionTime = GetWorld()->GetTimeSeconds();
 
     if (CurrentPoise <= 0.0f && !IsStaggered())
     {
@@ -433,6 +437,29 @@ void UCombatComponent::HandleSuccessfulParry(AActor* Attacker)
 bool UCombatComponent::IsStaggered() const
 {
     return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
+}
+
+bool UCombatComponent::IsInCombat() const
+{
+    // Check if we're actively attacking, blocking, parrying, or recently damaged
+    if (IsAttacking() || IsBlocking() || IsParrying() || IsStaggered())
+    {
+        return true;
+    }
+    
+    // Check if we've been in combat within the last 3 seconds
+    float TimeSinceLastAction = GetTimeSinceLastCombatAction();
+    return TimeSinceLastAction < 3.0f;
+}
+
+float UCombatComponent::GetTimeSinceLastCombatAction() const
+{
+    if (LastCombatActionTime <= 0.0f)
+    {
+        return 999.0f; // Never been in combat
+    }
+    
+    return GetWorld() ? GetWorld()->GetTimeSeconds() - LastCombatActionTime : 999.0f;
 }
 
 void UCombatComponent::AddCombatStateTag(const FGameplayTag& Tag)

@@ -374,40 +374,59 @@ Known Issues: None.
 
 ---
 
-## P8. Combat State + Smart Soft Lock Camera
+## P8. Combat State + Smart Soft Lock Camera + Heavy Attack Wall Impact
 
-**Goal:** Auto soft‑lock **when combat starts** (enemy perceives player); **unlock** if player **forces** camera away.
+**Goal:** Auto soft‑lock **when combat starts** (enemy perceives player); **unlock** if player **forces** camera away. Implement wall impact detection for heavy attacks with bonus damage and extended stagger.
 
 **Deliverables**
 
 * `UCombatStateComponent` on both sides: `bInCombat`.
 * Enter combat when enemy detects player (simple distance/LOS or perception).
 * `UCameraLockComponent` (or logic in PlayerCameraManager): when `bInCombat` → nudge camera framing to keep enemy on screen; compute **unlock** if mouse turn speed exceeds threshold for short duration.
+* **Wall Impact System for Heavy Attacks:**
+  * Detect wall collision during ragdoll knockback
+  * Apply bonus damage (5-10) on wall impact
+  * Add extra 0.3s stagger duration when hitting wall
+  * Visual/audio feedback for wall impacts
 
 **DoD**
 
 * Approach enemy → camera softly centers both. Rapidly swing camera away → unlock (free look). Re‑enter proximity → relock.
+* Heavy attack with 500 knockback → enemy ragdolls → if hits wall → bonus damage + extended stagger + VFX/SFX.
 
 **AI Agent – Steps**
 
 1. Add Perception or simple LOS + range check on enemy; on success → broadcast `OnCombatStart(Player, Enemy)`.
 2. Player camera: add spring arm yaw bias towards enemy; clamp max offset; interpolate (no hard snap).
 3. Unlock rule: if input yaw rate > threshold for N frames, disable soft lock until re‑entry.
+4. **Wall Impact Detection:**
+   * Monitor velocity and collision events during ragdoll state
+   * Use capsule trace or overlap events to detect wall proximity
+   * Calculate impact force from velocity magnitude
+   * If impact force > threshold → trigger wall impact effects
+   * Apply bonus damage through DamageCalculator
+   * Extend stagger timer by 0.3s
 
 **In‑Engine Setup**
 
 * Tune arm length, socket offset for over‑shoulder readability.
+* Create wall impact VFX (dust/debris particles).
+* Configure wall collision detection parameters.
 
 **Tests**
 
 * Enter enemy range: lock engages; rotate mouse fast: lock drops; step away & re‑engage.
+* Heavy attack near wall: verify ragdoll → wall hit → bonus damage applied → extended stagger.
+* Heavy attack in open space: verify normal ragdoll without wall bonus.
 
 **Changelog**
 
 ```
-## P8 – Smart Soft Lock
+## P8 – Smart Soft Lock + Wall Impact
 - Combat state driven soft lock-on, with user-forced unlock.
-- Verified engage/disengage behavior.
+- Wall impact detection for heavy attacks with bonus damage.
+- Extended stagger on wall impacts (0.3s extra).
+- Verified engage/disengage behavior and wall impact mechanics.
 ```
 
 ---

@@ -15,11 +15,26 @@
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/0/MY/IWRD06KEPN2HNNL9UM2OV8.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/D/DE/SWSI13675DVYIZ0N4NF7Y3.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_Attack_Heavy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_Attack_Heavy.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/enemy/BY_EnemyCombat.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/enemy/BY_EnemyCombat.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_MeleeAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_MeleeAttack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/changelog.md" beforeDir="false" afterPath="$PROJECT_DIR$/changelog.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/claude.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/roadmap.txt" beforeDir="false" afterPath="$PROJECT_DIR$/roadmap.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,6 +48,8 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="cidr-memory-view://4" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
@@ -186,6 +203,8 @@
       <workItem from="1755440404801" duration="1288000" />
       <workItem from="1755455375088" duration="715000" />
       <workItem from="1755459387549" duration="1119000" />
+      <workItem from="1755505473636" duration="5035000" />
+      <workItem from="1755524526838" duration="3611000" />
     </task>
     <servers />
   </component>

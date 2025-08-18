@@ -10,7 +10,8 @@
       "Bash(mkdir:*)",
       "Bash(dir)",
       "Bash(git rm:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

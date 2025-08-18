@@ -46,8 +46,7 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	
 	if (!IsInAttackRange(AIController, Target))
 	{
-		float Distance = FVector::Dist(Enemy->GetActorLocation(), Target->GetActorLocation());
-		UE_LOG(LogTemp, Warning, TEXT("BTTask_MeleeAttack: Out of range. Distance: %f, Required: %f"), Distance, AttackRange);
+		// Enemy is out of range - this is normal behavior, no need to log
 		return EBTNodeResult::Failed;
 	}
 
@@ -79,7 +78,7 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	FVector DirectionToTarget = (Target->GetActorLocation() - Enemy->GetActorLocation()).GetSafeNormal();
 	Enemy->SetActorRotation(DirectionToTarget.Rotation());
 
-	UE_LOG(LogTemp, Warning, TEXT("BTTask_MeleeAttack: Executing attack type: %d"), (int32)SelectedAttack);
+	// Execute the selected attack type
 
 	if (SelectedAttack == EAttackType::Combo)
 	{
@@ -131,11 +130,11 @@ void UBTTask_MeleeAttack::PerformAttack(AEnemyCharacter* Enemy, EAttackType Type
 	{
 	case EAttackType::Jab:
 		AttackTag = FGameplayTag::RequestGameplayTag(FName("Attack.Type.Jab"), false);
-		UE_LOG(LogTemp, Warning, TEXT("PerformAttack: Attempting Jab attack"));
+		// Jab attack
 		break;
 	case EAttackType::Heavy:
 		AttackTag = FGameplayTag::RequestGameplayTag(FName("Attack.Type.Heavy"), false);
-		UE_LOG(LogTemp, Warning, TEXT("PerformAttack: Attempting Heavy attack"));
+		// Heavy attack
 		break;
 	default:
 		AttackTag = FGameplayTag::RequestGameplayTag(FName("Attack.Type.Jab"), false);
@@ -151,11 +150,8 @@ void UBTTask_MeleeAttack::PerformAttack(AEnemyCharacter* Enemy, EAttackType Type
 
 	// Start the attack through CombatComponent which will handle the montage from AttackDataAsset
 	bool bSuccess = CombatComp->StartAttack(AttackTag);
-	if (bSuccess)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PerformAttack: Successfully started attack with tag: %s"), *AttackTag.ToString());
-	}
-	else
+	// Attack started through CombatComponent
+	if (!bSuccess)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PerformAttack: Failed to start attack. Check if AttackDataAsset is configured for tag: %s"), *AttackTag.ToString());
 	}

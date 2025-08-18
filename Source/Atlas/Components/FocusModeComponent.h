@@ -56,12 +56,6 @@ public:
     float ScreenCenterTolerance = 100.0f;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus Mode")
-    float SoftLockEngageDistance = 800.0f;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus Mode")
-    float CameraVelocityUnlockThreshold = 180.0f;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus Mode")
     float InteractablePriorityBonus = 2.0f;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus Mode")
@@ -69,9 +63,6 @@ public:
     
     UPROPERTY(BlueprintReadOnly, Category = "Focus Mode State")
     bool bIsFocusModeActive = false;
-    
-    UPROPERTY(BlueprintReadOnly, Category = "Focus Mode State")
-    bool bIsSoftLocked = false;
     
     UPROPERTY(BlueprintReadOnly, Category = "Focus Mode State")
     AActor* CurrentFocusedTarget = nullptr;
@@ -95,22 +86,13 @@ public:
     bool TryInteractWithFocusedTarget();
     
     UFUNCTION(BlueprintCallable, Category = "Focus Mode")
-    void ForceUnlock();
-    
-    UFUNCTION(BlueprintCallable, Category = "Focus Mode")
     AActor* GetFocusedTarget() const { return CurrentFocusedTarget; }
     
     UFUNCTION(BlueprintCallable, Category = "Focus Mode")
     bool IsFocusModeActive() const { return bIsFocusModeActive; }
     
     UFUNCTION(BlueprintCallable, Category = "Focus Mode")
-    bool IsSoftLocked() const { return bIsSoftLocked; }
-    
-    UFUNCTION(BlueprintCallable, Category = "Focus Mode")
     bool IsTargetInteractable(AActor* Target) const;
-    
-    UFUNCTION(BlueprintCallable, Category = "Focus Mode")
-    bool IsTargetEnemy(AActor* Target) const;
     
     UPROPERTY(BlueprintAssignable, Category = "Focus Mode Events")
     FOnTargetFocused OnTargetFocused;
@@ -130,8 +112,6 @@ private:
     FVector2D GetScreenPosition(const FVector& WorldPosition) const;
     float CalculateScreenDistance(const FVector2D& ScreenPos) const;
     float CalculatePriority(const FFocusTarget& Target) const;
-    void CheckCameraVelocityForUnlock();
-    void UpdateSoftLock();
     void DrawDebugInfo() const;
     
     UPROPERTY()
@@ -140,8 +120,6 @@ private:
     UPROPERTY()
     APlayerController* CachedPlayerController = nullptr;
     
-    FVector LastCameraRotation;
-    float CameraRotationVelocity = 0.0f;
     float TimeSinceFocusStart = 0.0f;
     bool bWasInteracting = false;
 };
