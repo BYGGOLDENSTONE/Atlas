@@ -5,7 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Components/FocusModeComponent.h"
-#include "../Components/SoftLockComponent.h"
+// #include "../Components/SoftLockComponent.h" // Removed - soft lock system deleted
 #include "../Actors/VentInteractable.h"
 #include "../Actors/ValveInteractable.h"
 #include "../Core/AtlasGameplayTags.h"
@@ -228,13 +228,7 @@ void FFocusModeDebugCommands::ForceUnlockFocus(const TArray<FString>& Args)
     APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
     if (!PlayerChar) return;
     
-    // Force unlock soft lock system
-    USoftLockComponent* SoftLockComp = PlayerChar->FindComponentByClass<USoftLockComponent>();
-    if (SoftLockComp)
-    {
-        SoftLockComp->ForceBreakLock();
-        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Soft lock force unlocked"));
-    }
+    // Soft lock system has been removed
     
     // Stop focus mode if active
     UFocusModeComponent* FocusComp = PlayerChar->FindComponentByClass<UFocusModeComponent>();
@@ -256,8 +250,6 @@ void FFocusModeDebugCommands::ShowFocusInfo(const TArray<FString>& Args)
     UFocusModeComponent* FocusComp = PlayerChar->FindComponentByClass<UFocusModeComponent>();
     if (!FocusComp) return;
     
-    // Get SoftLockComponent too
-    USoftLockComponent* SoftLockComp = PlayerChar->FindComponentByClass<USoftLockComponent>();
     
     FString InfoText = FString::Printf(TEXT("=== Focus Mode Info (Interactables) ===\n"));
     InfoText += FString::Printf(TEXT("Active: %s\n"), FocusComp->IsFocusModeActive() ? TEXT("YES") : TEXT("NO"));
@@ -278,60 +270,15 @@ void FFocusModeDebugCommands::ShowFocusInfo(const TArray<FString>& Args)
         InfoText += TEXT("Current Target: NONE\n");
     }
     
-    // Add Soft Lock info
-    if (SoftLockComp)
-    {
-        InfoText += FString::Printf(TEXT("\n=== Soft Lock Info (Enemies) ===\n"));
-        InfoText += FString::Printf(TEXT("Enabled: %s\n"), SoftLockComp->bEnabled ? TEXT("YES") : TEXT("NO"));
-        InfoText += FString::Printf(TEXT("Locked: %s\n"), SoftLockComp->IsLocked() ? TEXT("YES") : TEXT("NO"));
-        
-        if (SoftLockComp->GetLockedTarget())
-        {
-            InfoText += FString::Printf(TEXT("Locked Target: %s\n"), *SoftLockComp->GetLockedTarget()->GetName());
-            InfoText += FString::Printf(TEXT("Distance: %.0f\n"), SoftLockComp->CurrentTargetDistance);
-        }
-        else
-        {
-            InfoText += TEXT("Locked Target: NONE\n");
-        }
-    }
+    // Soft lock system has been removed
     
     GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, InfoText);
 }
 
 void FFocusModeDebugCommands::TestSoftLock(const TArray<FString>& Args)
 {
-    UWorld* World = GEngine->GetWorldFromContextObject(GEngine, EGetWorldErrorMode::LogAndReturnNull);
-    if (!World) return;
-    
-    APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
-    if (!PlayerChar) return;
-    
-    // Use the SoftLockComponent now, not FocusModeComponent
-    USoftLockComponent* SoftLockComp = PlayerChar->FindComponentByClass<USoftLockComponent>();
-    if (!SoftLockComp)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("SoftLockComponent not found!"));
-        return;
-    }
-    
-    // If no args or arg is 1, enable soft lock
-    bool bEnable = true;
-    if (Args.Num() > 0)
-    {
-        bEnable = FCString::Atoi(*Args[0]) != 0;
-    }
-    
-    if (bEnable)
-    {
-        SoftLockComp->EnableSoftLock();
-        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("Soft Lock System ENABLED"));
-    }
-    else
-    {
-        SoftLockComp->DisableSoftLock();
-        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Soft Lock System DISABLED"));
-    }
+    // Soft lock system has been removed
+    GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Soft/Hard Lock system has been removed from the project"));
 }
 
 void FFocusModeDebugCommands::SimulateVentInteraction(const TArray<FString>& Args)

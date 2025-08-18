@@ -12,7 +12,7 @@
 #include "HAL/PlatformTime.h"
 
 // Buffer size for receiving data
-const int32 BufferSize = 8192;
+constexpr int32 MCPBufferSize = 8192;
 
 FMCPServerRunnable::FMCPServerRunnable(UEpicUnrealMCPBridge* InBridge, TSharedPtr<FSocket> InListenerSocket)
     : Bridge(InBridge)
@@ -56,7 +56,7 @@ uint32 FMCPServerRunnable::Run()
                 ClientSocket->SetSendBufferSize(SocketBufferSize, SocketBufferSize);
                 ClientSocket->SetReceiveBufferSize(SocketBufferSize, SocketBufferSize);
                 
-                uint8 Buffer[8192];
+                uint8 Buffer[MCPBufferSize];
                 while (bRunning)
                 {
                     int32 BytesRead = 0;

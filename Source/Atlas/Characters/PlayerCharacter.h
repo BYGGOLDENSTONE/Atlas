@@ -45,9 +45,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	UFocusModeComponent* FocusModeComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
-	class USoftLockComponent* SoftLockComponent;
 
 protected:
 	virtual void BeginPlay() override;

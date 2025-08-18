@@ -10,7 +10,6 @@
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/FocusModeComponent.h"
-#include "../Components/SoftLockComponent.h"
 #include "GameplayTagContainer.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -18,7 +17,6 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	FocusModeComponent = CreateDefaultSubobject<UFocusModeComponent>(TEXT("FocusModeComponent"));
-	SoftLockComponent = CreateDefaultSubobject<USoftLockComponent>(TEXT("SoftLockComponent"));
 }
 
 void APlayerCharacter::BeginPlay()

@@ -18,7 +18,6 @@
 
 ### Key Mechanics
 - **Focus Mode (Q)**: Screen-space targeting for interactables (1000 unit range)
-- **Smart Soft Lock**: Auto-engages in combat, force-unlock with rapid camera movement
 - **Interactables**: Vent (projectile stagger), Valve (AoE with archetype-specific effects)
 
 ### AI System
@@ -68,10 +67,8 @@
   - Debug visualization with colored spheres and lines
   
 - **FocusModeComponent**: Complete targeting system
-  - Scans for interactables and enemies in range
-  - Calculates screen-space priorities
-  - Smart Soft Lock for combat (800 units, auto-engage)
-  - Force-unlock with rapid camera movement (>180°/s)
+  - Scans for interactables in range
+  - Calculates screen-space priorities for targeting
   
 - **Interactable System**:
   - IInteractable interface for all interactable objects
@@ -90,19 +87,17 @@
   - Optional vulnerability/stagger application
   - 10-second cooldown
 
-### ✅ P8: Smart Soft Lock + Wall Impact - COMPLETED
-- **Combat State Detection**: IsInCombat() method with 3-second memory
-- **Separated Systems**: Focus Mode (Q key) for interactables, Soft Lock (automatic) for enemies
-- **Soft Lock Camera**: Auto-engages enemies within 1000 units during combat
-  - Smooth camera tracking with dead zones
-  - Player input detection to avoid fighting control
-  - Break-away at 90°, re-engage at 30°
-  - Known Issue: Some asymmetry in left/right rotation response
+### ✅ P8: Wall Impact - COMPLETED
 - **Wall Impact System**: WallImpactComponent for heavy attacks
   - Detects walls within 200 units behind target
   - 1.5x damage multiplier on wall impact
   - Extended 2-second stagger
   - Bounce-back physics effect
+
+### ❌ REMOVED: Camera Lock System
+- Soft/Hard lock system completely removed from project
+- Player has full manual camera control
+- No automatic enemy tracking
 
 ### 🔄 P9: Basic Enemy AI - PARTIALLY COMPLETED
 - Basic AI controller with perception

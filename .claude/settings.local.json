@@ -11,7 +11,8 @@
       "Bash(dir)",
       "Bash(git rm:*)",
       "Bash(rm:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(del SoftLockComponent.h SoftLockComponent.cpp)"
     ],
     "deny": [],
     "ask": []

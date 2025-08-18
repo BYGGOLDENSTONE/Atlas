@@ -1,5 +1,34 @@
 # Atlas Development Changelog
 
+## Session: 2025-08-18 - Camera Lock System Removal & Code Cleanup
+
+### Changes
+- **Removed Camera Lock System**
+  - Deleted SoftLockComponent.h and SoftLockComponent.cpp files
+  - Removed SoftLockComponent from PlayerCharacter
+  - Cleaned up all references in debug commands
+  - Player now has full manual camera control
+  
+- **Code Cleanup**
+  - Fixed ANY_PACKAGE deprecation warnings in EpicUnrealMCPBlueprintCommands.cpp
+  - Fixed BufferSize naming conflict in MCPServerRunnable.cpp
+  - Updated FocusModeDebugCommands to remove soft lock references
+  
+- **Documentation Updates**
+  - Updated CLAUDE.md to reflect removal of camera lock system
+  - Removed references to Smart Soft Lock from key mechanics
+  - Added note about camera lock removal in P8 section
+
+### Rationale
+- Camera lock system was causing unwanted rotation behavior
+- Hard lock implementation was too restrictive for gameplay
+- Player feedback indicated preference for full manual control
+
+### Known Issues
+- None related to camera system
+
+---
+
 ## Session: 2025-08-16 - Phase P0 - Project Setup & Upgrade (UE 5.5)
 
 ### Changes
