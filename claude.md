@@ -12,7 +12,6 @@
 - **Attack System**: Animation-driven hitboxes with Data Assets
 - **Defense Mechanics**: 
   - Block: 40% damage reduction (Space hold)
-  - Parry: Frame-perfect counter with vulnerability charges
   - Vulnerability: 8x damage multiplier with charge system
 - **Stagger/Poise**: Prevents infinite trading, action lock on poise break
 
@@ -22,14 +21,13 @@
 
 ### AI System
 - Behavior Tree/Blackboard driven
-- Combat behaviors: Basic attacks, combos, parry/block reactions
-- Special attacks: Soul Attack (unblockable/unparryable, 10s CD), Catch Special (anti-kiting)
+- Combat behaviors: Basic attacks, combos, block reactions
+- Special attacks: Soul Attack (unblockable, 10s CD), Catch Special (anti-kiting)
 - Environmental awareness for interactable usage
 
 ## Important Values
 - Jab: 5 damage, 100 knockback
 - Heavy: 500 knockback + ragdoll
-- Parry Window: Attacker's notify-driven
 - Vulnerability: 1s duration, 1 charge default, 8x multiplier
 - Block: 60% damage taken (40% reduction)
 - Poise: 100 max, 20 jab damage, 15/s regen after 1.5s
@@ -39,7 +37,7 @@
 - NO Gameplay Ability System (GAS)
 - Data-driven via Data Assets and Gameplay Tags
 - All damage flows through centralized pipeline
-- Tag-based combat rules (Blockable, Parryable, etc.)
+- Tag-based combat rules (Blockable, etc.)
 - Component-based architecture with interfaces
 
 ## Completed Phases Status
@@ -48,7 +46,7 @@
 ### ✅ P1: Core Gameplay Tags + Data Assets + Damage Pipeline - COMPLETED  
 ### ✅ P2: Animation Notifies + Hitbox System - COMPLETED
 ### ✅ P3: Block System (40% damage reduction) - COMPLETED
-### ✅ P4: Parry + Vulnerability System - COMPLETED
+### ✅ P4: Vulnerability System - COMPLETED
 ### ✅ P5: Heavy Attack (partial) - IN PROGRESS
 - Heavy attack input and basic functionality implemented
 - Ragdoll knockback system working
@@ -107,7 +105,7 @@
 ## Current Phase: P9 - Advanced AI Features
 Next to implement:
 - AI combo attacks system
-- Soul Attack (unblockable/unparryable, 10s cooldown)
+- Soul Attack (unblockable, 10s cooldown)
 - Catch Special (anti-kiting gap closer)
 
 ## Remaining Phases:

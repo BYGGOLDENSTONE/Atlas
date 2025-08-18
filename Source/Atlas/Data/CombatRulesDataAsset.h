@@ -27,8 +27,6 @@ struct FCombatRules
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Defense")
     float BlockDamageReduction = 0.4f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Defense")
-    float ParryWindowDuration = 0.3f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Vulnerability")
     float VulnerabilityMultiplier = 8.0f;
@@ -68,5 +66,4 @@ public:
 
     float CalculateFinalDamage(float BaseDamage, const FGameplayTagContainer& AttackerTags, const FGameplayTagContainer& DefenderTags) const;
     bool CanBlock(const FGameplayTagContainer& AttackTags) const;
-    bool CanParry(const FGameplayTagContainer& AttackTags) const;
 };

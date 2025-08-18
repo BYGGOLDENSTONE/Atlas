@@ -21,14 +21,11 @@ public:
 
     // Attack Property Tags
     FGameplayTag Attack_Property_Blockable;
-    FGameplayTag Attack_Property_Parryable;
     FGameplayTag Attack_Property_Unblockable;
-    FGameplayTag Attack_Property_Unparryable;
 
     // Combat State Tags
     FGameplayTag Combat_State_Attacking;
     FGameplayTag Combat_State_Blocking;
-    FGameplayTag Combat_State_Parrying;
     FGameplayTag Combat_State_Vulnerable;
     FGameplayTag Combat_State_Staggered;
     FGameplayTag Combat_State_Invincible;

@@ -15,7 +15,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAttackStarted, const FGameplayTa
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnded);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBlockStarted, bool, bSuccess);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlockEnded);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnParrySuccess, AActor*, Attacker);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVulnerabilityApplied);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaggered);
 
@@ -60,8 +59,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void EndBlock();
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    bool TryParry();
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void ApplyVulnerability(int32 Charges = 1);  // Deprecated - use VulnerabilityComponent
@@ -84,8 +81,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsBlocking() const;
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    bool IsParrying() const;
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsVulnerable() const;
@@ -93,8 +88,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool HasIFrames() const;
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void HandleSuccessfulParry(AActor* Attacker);
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsStaggered() const;
@@ -110,8 +103,6 @@ public:
 
     void ProcessHitFromAnimation(class AGameCharacterBase* HitCharacter);
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void SetAttackerParryWindow(bool bIsOpen);
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void StartBlocking();
@@ -119,11 +110,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void StopBlocking();
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void AttemptParry();
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void EndParryWindow();
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void DealDamageToTarget(AActor* Target, float Damage, const FGameplayTagContainer& AttackTags);
@@ -143,8 +130,6 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Combat Events")
     FOnBlockEnded OnBlockEnded;
 
-    UPROPERTY(BlueprintAssignable, Category = "Combat Events")
-    FOnParrySuccess OnParrySuccess;
 
     UPROPERTY(BlueprintAssignable, Category = "Combat Events")
     FOnVulnerabilityApplied OnVulnerabilityApplied;
@@ -163,13 +148,11 @@ private:
     UVulnerabilityComponent* VulnerabilityComponent;
 
     FTimerHandle VulnerabilityTimerHandle;
-    FTimerHandle ParryWindowTimerHandle;
     FTimerHandle PoiseRegenTimerHandle;
     FTimerHandle StaggerRecoveryTimerHandle;
 
     float PoiseRegenDelayTime = 0.0f;
     bool bPoiseRegenActive = false;
-    bool bAttackerParryWindowOpen = false;
     float LastCombatActionTime = 0.0f;
 
     void EndVulnerability();  // Deprecated - handled by VulnerabilityComponent

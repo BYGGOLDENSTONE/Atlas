@@ -1,5 +1,35 @@
 # Atlas Development Changelog
 
+## Session: 2025-08-18 - Parry System Complete Removal
+
+### Changes
+- **Removed Parry System Entirely**
+  - Deleted all parry-related files (ParryWindowNotifyState, ParryTestCommands, ParryFeedbackComponent)
+  - Removed parry methods from CombatComponent (TryParry, HandleSuccessfulParry, SetAttackerParryWindow, etc.)
+  - Removed parry gameplay tags from AtlasGameplayTags
+  - Removed parry from CombatRulesDataAsset
+  - Removed parry input from PlayerCharacter (ParryRMB)
+  - Removed parry option from AI defense behavior
+  - Updated all documentation to reflect parry removal
+
+- **Simplified Combat System**
+  - Block system remains intact (40% damage reduction)
+  - Vulnerability system continues to work (8x damage multiplier)
+  - Soul Attack now only unblockable (not unparryable)
+  - Cleaner, more focused combat mechanics
+
+### Rationale
+- Parry system added unnecessary complexity
+- Focus on core mechanics: attack, block, vulnerability, and stagger
+- Simplifies player learning curve and AI behavior
+
+### Files Deleted
+- Source/Atlas/Animation/ParryWindowNotifyState.h/cpp
+- Source/Atlas/Debug/ParryTestCommands.h/cpp
+- Source/Atlas/Components/ParryFeedbackComponent.h/cpp
+
+---
+
 ## Session: 2025-08-18 - Camera Lock System Removal & Code Cleanup
 
 ### Changes

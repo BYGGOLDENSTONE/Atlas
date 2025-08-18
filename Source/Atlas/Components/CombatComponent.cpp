@@ -127,40 +127,7 @@ void UCombatComponent::EndBlock()
     UE_LOG(LogTemp, Warning, TEXT("Block Ended"));
 }
 
-bool UCombatComponent::TryParry()
-{
-    if (IsStaggered() || IsAttacking() || IsParrying())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot parry: Staggered=%s, Attacking=%s, Parrying=%s"),
-            IsStaggered() ? TEXT("true") : TEXT("false"),
-            IsAttacking() ? TEXT("true") : TEXT("false"),
-            IsParrying() ? TEXT("true") : TEXT("false"));
-        return false;
-    }
 
-    AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Parrying")));
-    LastCombatActionTime = GetWorld()->GetTimeSeconds();
-    
-    float ParryDuration = CombatRules ? CombatRules->CombatRules.ParryWindowDuration : 0.3f;
-    
-    UE_LOG(LogTemp, Warning, TEXT("PARRY WINDOW OPEN for %.2f seconds! Counter enemy attacks now!"), ParryDuration);
-    
-    GetWorld()->GetTimerManager().SetTimer(
-        ParryWindowTimerHandle,
-        this,
-        &UCombatComponent::EndParryWindow,
-        ParryDuration,
-        false
-    );
-
-    return true;
-}
-
-void UCombatComponent::EndParryWindow()
-{
-    RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Parrying")));
-    UE_LOG(LogTemp, Warning, TEXT("Parry Window Closed"));
-}
 
 void UCombatComponent::ApplyVulnerability(int32 Charges)
 {
@@ -301,11 +268,6 @@ void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTa
         return;
     }
 
-    if (TargetCombat->IsParrying() && CombatRules && CombatRules->CanParry(CurrentAttackData->AttackData.AttackTags))
-    {
-        TargetCombat->HandleSuccessfulParry(GetOwner());
-        return;
-    }
 
     DamageCalculator->ProcessDamage(
         GetOwner(),
@@ -331,14 +293,6 @@ void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
         return;
     }
 
-    bool bCanBeParried = bAttackerParryWindowOpen && CombatRules && CombatRules->CanParry(CurrentAttackData->AttackData.AttackTags);
-    
-    if (TargetCombat->IsParrying() && bCanBeParried)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("PARRY SUCCESS! Target parried attack during window"));
-        TargetCombat->HandleSuccessfulParry(GetOwner());
-        return;
-    }
 
     DamageCalculator->ProcessDamage(
         GetOwner(),
@@ -351,11 +305,6 @@ void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
     TargetCombat->TakePoiseDamage(CurrentAttackData->AttackData.StaggerDamage);
 }
 
-void UCombatComponent::SetAttackerParryWindow(bool bIsOpen)
-{
-    bAttackerParryWindowOpen = bIsOpen;
-    UE_LOG(LogTemp, Warning, TEXT("Attacker Parry Window: %s"), bIsOpen ? TEXT("OPEN") : TEXT("CLOSED"));
-}
 
 bool UCombatComponent::IsAttacking() const
 {
@@ -367,10 +316,6 @@ bool UCombatComponent::IsBlocking() const
     return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
 }
 
-bool UCombatComponent::IsParrying() const
-{
-    return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Parrying")));
-}
 
 bool UCombatComponent::IsVulnerable() const
 {
@@ -410,29 +355,6 @@ void UCombatComponent::ApplyVulnerabilityWithIFrames(int32 Charges, bool bGrantI
     }
 }
 
-void UCombatComponent::HandleSuccessfulParry(AActor* Attacker)
-{
-    if (!Attacker)
-    {
-        return;
-    }
-    
-    UCombatComponent* AttackerCombat = Attacker->FindComponentByClass<UCombatComponent>();
-    if (AttackerCombat)
-    {
-        int32 DefaultCharges = CombatRules ? CombatRules->CombatRules.DefaultVulnerabilityCharges : 1;
-        bool bGrantIFrames = VulnerabilityComponent ? VulnerabilityComponent->bIFramesOnParrySuccess : false;
-        AttackerCombat->ApplyVulnerabilityWithIFrames(DefaultCharges, bGrantIFrames);
-    }
-    
-    if (VulnerabilityComponent && VulnerabilityComponent->bIFramesOnParrySuccess)
-    {
-        VulnerabilityComponent->StartIFrames();
-    }
-    
-    OnParrySuccess.Broadcast(Attacker);
-    UE_LOG(LogTemp, Warning, TEXT("PARRY SUCCESS! Attacker is now vulnerable!"));
-}
 
 bool UCombatComponent::IsStaggered() const
 {
@@ -441,8 +363,8 @@ bool UCombatComponent::IsStaggered() const
 
 bool UCombatComponent::IsInCombat() const
 {
-    // Check if we're actively attacking, blocking, parrying, or recently damaged
-    if (IsAttacking() || IsBlocking() || IsParrying() || IsStaggered())
+    // Check if we're actively attacking, blocking, or recently damaged
+    if (IsAttacking() || IsBlocking() || IsStaggered())
     {
         return true;
     }
@@ -487,10 +409,6 @@ void UCombatComponent::StopBlocking()
     EndBlock();
 }
 
-void UCombatComponent::AttemptParry()
-{
-    TryParry();
-}
 
 void UCombatComponent::DealDamageToTarget(AActor* Target, float Damage, const FGameplayTagContainer& AttackTags)
 {

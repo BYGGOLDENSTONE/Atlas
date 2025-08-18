@@ -15,14 +15,26 @@
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/UnrealMCP/Source/UnrealMCP/Private/Commands/EpicUnrealMCPBlueprintCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/UnrealMCP/Source/UnrealMCP/Private/Commands/EpicUnrealMCPBlueprintCommands.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/UnrealMCP/Source/UnrealMCP/Private/MCPServerRunnable.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/UnrealMCP/Source/UnrealMCP/Private/MCPServerRunnable.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/GameplayTags.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Config/GameplayTags.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/ParryWindowNotifyState.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/ParryWindowNotifyState.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/SoftLockComponent.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/SoftLockComponent.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ParryFeedbackComponent.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ParryFeedbackComponent.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/ParryTestCommands.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/ParryTestCommands.h" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +48,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://9" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://1" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -193,6 +205,7 @@
       <workItem from="1755459387549" duration="1119000" />
       <workItem from="1755505473636" duration="5035000" />
       <workItem from="1755524526838" duration="8710000" />
+      <workItem from="1755537820019" duration="1149000" />
     </task>
     <servers />
   </component>

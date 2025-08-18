@@ -30,7 +30,3 @@ bool UCombatRulesDataAsset::CanBlock(const FGameplayTagContainer& AttackTags) co
     return !AttackTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Attack.Property.Unblockable")));
 }
 
-bool UCombatRulesDataAsset::CanParry(const FGameplayTagContainer& AttackTags) const
-{
-    return !AttackTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Attack.Property.Unparryable")));
-}

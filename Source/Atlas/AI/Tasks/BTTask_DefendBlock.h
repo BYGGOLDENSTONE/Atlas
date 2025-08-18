@@ -8,7 +8,6 @@ UENUM(BlueprintType)
 enum class EDefenseType : uint8
 {
 	Block UMETA(DisplayName = "Block"),
-	Parry UMETA(DisplayName = "Parry"),
 	Dodge UMETA(DisplayName = "Dodge"),
 	Auto UMETA(DisplayName = "Auto-Decide")
 };
@@ -32,11 +31,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Defense")
 	float BlockDuration = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Defense")
-	float ParryWindow = 0.2f;
-
-	UPROPERTY(EditAnywhere, Category = "Defense")
-	float ParrySuccessChance = 0.6f;
 
 	UPROPERTY(EditAnywhere, Category = "Defense")
 	float DodgeDistance = 300.0f;
@@ -44,11 +38,9 @@ protected:
 private:
 	float TimeElapsed;
 	bool bIsBlocking;
-	bool bParryAttempted;
 
 	void StartBlock(class AEnemyCharacter* Enemy);
 	void StopBlock(class AEnemyCharacter* Enemy);
-	bool AttemptParry(class AEnemyCharacter* Enemy);
 	void PerformDodge(class AEnemyCharacter* Enemy, class AActor* Threat);
 	EDefenseType DecideDefenseType(class UBlackboardComponent* BlackboardComp);
 };

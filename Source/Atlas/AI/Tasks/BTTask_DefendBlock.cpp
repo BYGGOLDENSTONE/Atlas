@@ -13,7 +13,6 @@ UBTTask_DefendBlock::UBTTask_DefendBlock()
 	bNotifyTick = true;
 	TimeElapsed = 0.0f;
 	bIsBlocking = false;
-	bParryAttempted = false;
 }
 
 EBTNodeResult::Type UBTTask_DefendBlock::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -43,7 +42,6 @@ EBTNodeResult::Type UBTTask_DefendBlock::ExecuteTask(UBehaviorTreeComponent& Own
 	}
 
 	TimeElapsed = 0.0f;
-	bParryAttempted = false;
 
 	EDefenseType SelectedDefense = DefenseType;
 	if (DefenseType == EDefenseType::Auto)
@@ -54,14 +52,6 @@ EBTNodeResult::Type UBTTask_DefendBlock::ExecuteTask(UBehaviorTreeComponent& Own
 	switch (SelectedDefense)
 	{
 	case EDefenseType::Block:
-		StartBlock(Enemy);
-		return EBTNodeResult::InProgress;
-		
-	case EDefenseType::Parry:
-		if (AttemptParry(Enemy))
-		{
-			return EBTNodeResult::Succeeded;
-		}
 		StartBlock(Enemy);
 		return EBTNodeResult::InProgress;
 		
@@ -137,39 +127,6 @@ void UBTTask_DefendBlock::StopBlock(AEnemyCharacter* Enemy)
 	}
 }
 
-bool UBTTask_DefendBlock::AttemptParry(AEnemyCharacter* Enemy)
-{
-	if (!Enemy || bParryAttempted)
-	{
-		return false;
-	}
-
-	bParryAttempted = true;
-	
-	float RandomValue = FMath::FRand();
-	if (RandomValue <= ParrySuccessChance)
-	{
-		UCombatComponent* CombatComp = Enemy->GetCombatComponent();
-		if (CombatComp)
-		{
-			CombatComp->AttemptParry();
-			
-			FTimerHandle ParryTimer;
-			Enemy->GetWorld()->GetTimerManager().SetTimer(
-				ParryTimer,
-				[CombatComp]()
-				{
-					CombatComp->EndParryWindow();
-				},
-				ParryWindow,
-				false
-			);
-			return true;
-		}
-	}
-	
-	return false;
-}
 
 void UBTTask_DefendBlock::PerformDodge(AEnemyCharacter* Enemy, AActor* Threat)
 {
@@ -210,11 +167,6 @@ EDefenseType UBTTask_DefendBlock::DecideDefenseType(UBlackboardComponent* Blackb
 	if (bIsUnderPressure && DistanceToTarget < 150.0f)
 	{
 		return EDefenseType::Dodge;
-	}
-	
-	if (DistanceToTarget < 250.0f && FMath::FRand() > 0.5f)
-	{
-		return EDefenseType::Parry;
 	}
 	
 	return EDefenseType::Block;

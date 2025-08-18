@@ -11,19 +11,16 @@ void FAtlasGameplayTags::InitializeNativeTags()
     GameplayTags.Attack_Type_Jab = Manager.AddNativeGameplayTag(FName("Attack.Type.Jab"), FString("Basic jab attack"));
     GameplayTags.Attack_Type_Heavy = Manager.AddNativeGameplayTag(FName("Attack.Type.Heavy"), FString("Heavy attack with knockback"));
     GameplayTags.Attack_Type_Special = Manager.AddNativeGameplayTag(FName("Attack.Type.Special"), FString("Special attack"));
-    GameplayTags.Attack_Type_Soul = Manager.AddNativeGameplayTag(FName("Attack.Type.Soul"), FString("Soul attack - unblockable and unparryable"));
+    GameplayTags.Attack_Type_Soul = Manager.AddNativeGameplayTag(FName("Attack.Type.Soul"), FString("Soul attack - unblockable"));
     GameplayTags.Attack_Type_Catch = Manager.AddNativeGameplayTag(FName("Attack.Type.Catch"), FString("Catch special - anti-kiting attack"));
 
     // Attack Property Tags
     GameplayTags.Attack_Property_Blockable = Manager.AddNativeGameplayTag(FName("Attack.Property.Blockable"), FString("Attack can be blocked"));
-    GameplayTags.Attack_Property_Parryable = Manager.AddNativeGameplayTag(FName("Attack.Property.Parryable"), FString("Attack can be parried"));
     GameplayTags.Attack_Property_Unblockable = Manager.AddNativeGameplayTag(FName("Attack.Property.Unblockable"), FString("Attack cannot be blocked"));
-    GameplayTags.Attack_Property_Unparryable = Manager.AddNativeGameplayTag(FName("Attack.Property.Unparryable"), FString("Attack cannot be parried"));
 
     // Combat State Tags
     GameplayTags.Combat_State_Attacking = Manager.AddNativeGameplayTag(FName("Combat.State.Attacking"), FString("Character is currently attacking"));
     GameplayTags.Combat_State_Blocking = Manager.AddNativeGameplayTag(FName("Combat.State.Blocking"), FString("Character is blocking"));
-    GameplayTags.Combat_State_Parrying = Manager.AddNativeGameplayTag(FName("Combat.State.Parrying"), FString("Character is parrying"));
     GameplayTags.Combat_State_Vulnerable = Manager.AddNativeGameplayTag(FName("Combat.State.Vulnerable"), FString("Character is vulnerable 8x damage"));
     GameplayTags.Combat_State_Staggered = Manager.AddNativeGameplayTag(FName("Combat.State.Staggered"), FString("Character is staggered/poise broken"));
     GameplayTags.Combat_State_Invincible = Manager.AddNativeGameplayTag(FName("Combat.State.Invincible"), FString("Character has invincibility frames"));

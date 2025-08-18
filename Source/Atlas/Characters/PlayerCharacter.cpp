@@ -41,7 +41,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		EnhancedInputComponent->BindAction(AttackLMBAction, ETriggerEvent::Triggered, this, &APlayerCharacter::AttackLMB);
-		EnhancedInputComponent->BindAction(ParryRMBAction, ETriggerEvent::Triggered, this, &APlayerCharacter::ParryRMB);
 		EnhancedInputComponent->BindAction(BlockSpaceHoldAction, ETriggerEvent::Started, this, &APlayerCharacter::BlockStart);
 		EnhancedInputComponent->BindAction(BlockSpaceHoldAction, ETriggerEvent::Completed, this, &APlayerCharacter::BlockStop);
 		EnhancedInputComponent->BindAction(FocusQHoldAction, ETriggerEvent::Started, this, &APlayerCharacter::FocusStart);
@@ -86,13 +85,6 @@ void APlayerCharacter::AttackLMB()
 	}
 }
 
-void APlayerCharacter::ParryRMB()
-{
-	if (CombatComponent)
-	{
-		CombatComponent->TryParry();
-	}
-}
 
 void APlayerCharacter::BlockStart()
 {
