@@ -9,11 +9,14 @@
 #include "Engine/LocalPlayer.h"
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
+#include "../Components/FocusModeComponent.h"
 #include "GameplayTagContainer.h"
 
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	FocusModeComponent = CreateDefaultSubobject<UFocusModeComponent>(TEXT("FocusModeComponent"));
 }
 
 void APlayerCharacter::BeginPlay()
@@ -109,12 +112,23 @@ void APlayerCharacter::BlockStop()
 
 void APlayerCharacter::FocusStart()
 {
-	UE_LOG(LogTemp, Log, TEXT("Focus Mode Started"));
+	if (FocusModeComponent)
+	{
+		FocusModeComponent->StartFocusMode();
+	}
 }
 
 void APlayerCharacter::FocusStop()
 {
-	UE_LOG(LogTemp, Log, TEXT("Focus Mode Stopped"));
+	if (FocusModeComponent)
+	{
+		// Try to interact with focused target before stopping focus mode
+		if (FocusModeComponent->IsFocusModeActive())
+		{
+			FocusModeComponent->TryInteractWithFocusedTarget();
+		}
+		FocusModeComponent->StopFocusMode();
+	}
 }
 
 void APlayerCharacter::HeavyAttack()

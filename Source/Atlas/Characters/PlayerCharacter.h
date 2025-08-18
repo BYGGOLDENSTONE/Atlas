@@ -8,6 +8,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UFocusModeComponent;
 
 UCLASS()
 class ATLAS_API APlayerCharacter : public AGameCharacterBase
@@ -41,6 +42,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* HeavyEAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
+	UFocusModeComponent* FocusModeComponent;
 
 protected:
 	virtual void BeginPlay() override;

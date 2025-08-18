@@ -15,19 +15,11 @@
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEditor.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEditor.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/Input/Actions/IA_Q.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/Input/Actions/IA_Q.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/Input/Actions/IA_space.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/Input/Actions/IA_space.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/Input/IMC_Default.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/Input/IMC_Default.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Heavy_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Heavy_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/EnemyCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/EnemyCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/EnemyCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/EnemyCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/0/MY/IWRD06KEPN2HNNL9UM2OV8.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,15 +33,6 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
@@ -199,6 +182,10 @@
       <workItem from="1755414313958" duration="1734000" />
       <workItem from="1755424890626" duration="1538000" />
       <workItem from="1755430069659" duration="3125000" />
+      <workItem from="1755434106354" duration="137000" />
+      <workItem from="1755440404801" duration="1288000" />
+      <workItem from="1755455375088" duration="715000" />
+      <workItem from="1755459387549" duration="1119000" />
     </task>
     <servers />
   </component>
