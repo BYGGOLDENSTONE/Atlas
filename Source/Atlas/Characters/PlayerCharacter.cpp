@@ -25,16 +25,12 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("=== PlayerCharacter BeginPlay ==="));
-	UE_LOG(LogTemp, Warning, TEXT("DashComponent: %s"), DashComponent ? TEXT("EXISTS") : TEXT("NULL"));
-	UE_LOG(LogTemp, Warning, TEXT("CombatComponent: %s"), CombatComponent ? TEXT("EXISTS") : TEXT("NULL"));
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(CombatMappingContext, 0);
-			UE_LOG(LogTemp, Warning, TEXT("Input Mapping Context added successfully"));
 		}
 		else
 		{
@@ -51,21 +47,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	UE_LOG(LogTemp, Warning, TEXT("=== SetupPlayerInputComponent Called ==="));
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Enhanced Input Component found, binding actions..."));
-		
-		// Log which actions are null
-		UE_LOG(LogTemp, Warning, TEXT("Input Actions Status:"));
-		UE_LOG(LogTemp, Warning, TEXT("  MoveAction: %s"), MoveAction ? TEXT("Valid") : TEXT("NULL"));
-		UE_LOG(LogTemp, Warning, TEXT("  LookAction: %s"), LookAction ? TEXT("Valid") : TEXT("NULL"));
-		UE_LOG(LogTemp, Warning, TEXT("  AttackLMBAction: %s"), AttackLMBAction ? TEXT("Valid") : TEXT("NULL"));
-		UE_LOG(LogTemp, Warning, TEXT("  BlockRMBHoldAction: %s"), BlockRMBHoldAction ? TEXT("Valid") : TEXT("NULL"));
-		UE_LOG(LogTemp, Warning, TEXT("  DashSpaceAction: %s"), DashSpaceAction ? TEXT("Valid") : TEXT("NULL"));
-		UE_LOG(LogTemp, Warning, TEXT("  FocusQHoldAction: %s"), FocusQHoldAction ? TEXT("Valid") : TEXT("NULL"));
-		UE_LOG(LogTemp, Warning, TEXT("  HeavyEAction: %s"), HeavyEAction ? TEXT("Valid") : TEXT("NULL"));
 		
 		if (MoveAction)
 			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
@@ -78,13 +62,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		{
 			EnhancedInputComponent->BindAction(BlockRMBHoldAction, ETriggerEvent::Started, this, &APlayerCharacter::BlockStart);
 			EnhancedInputComponent->BindAction(BlockRMBHoldAction, ETriggerEvent::Completed, this, &APlayerCharacter::BlockStop);
-			UE_LOG(LogTemp, Warning, TEXT("Block (RMB) action bound"));
 		}
 		
 		if (DashSpaceAction)
 		{
 			EnhancedInputComponent->BindAction(DashSpaceAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Dash);
-			UE_LOG(LogTemp, Warning, TEXT("Dash (Space) action bound successfully!"));
 		}
 		else
 		{
@@ -99,8 +81,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		
 		if (HeavyEAction)
 			EnhancedInputComponent->BindAction(HeavyEAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HeavyAttack);
-			
-		UE_LOG(LogTemp, Warning, TEXT("Input binding setup complete"));
 	}
 	else
 	{
@@ -193,8 +173,6 @@ void APlayerCharacter::HeavyAttack()
 
 void APlayerCharacter::Dash()
 {
-	UE_LOG(LogTemp, Warning, TEXT("=== PlayerCharacter::Dash() called ==="));
-	UE_LOG(LogTemp, Warning, TEXT("LastMovementInput: X=%.2f, Y=%.2f"), LastMovementInput.X, LastMovementInput.Y);
 	
 	if (DashComponent)
 	{

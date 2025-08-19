@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
+#include "DrawDebugHelpers.h"
 
 FDamageInfo UDamageCalculator::ProcessDamage(
     AActor* Attacker,
@@ -150,37 +151,27 @@ void UDamageCalculator::ApplyKnockback(AActor* Target, AActor* Attacker, float K
     }
 
     FVector KnockbackDirection = (Target->GetActorLocation() - Attacker->GetActorLocation()).GetSafeNormal();
-    KnockbackDirection.Z = 0.3f;
+    KnockbackDirection.Z = KnockbackUpwardForce;  // Configurable upward force
     KnockbackDirection.Normalize();
     
-    // Check for wall impact if this is a heavy knockback
-    if (KnockbackForce >= 300.0f)
+    // Debug visualization of knockback direction
+    #if WITH_EDITOR
+    if (UWorld* World = Target->GetWorld())
     {
-        // Try to get WallImpactComponent from the attacker
-        if (!WallImpactComponent)
-        {
-            WallImpactComponent = Attacker->FindComponentByClass<UWallImpactComponent>();
-        }
-        
-        // If not on attacker, create one temporarily
-        if (!WallImpactComponent)
-        {
-            WallImpactComponent = NewObject<UWallImpactComponent>(this);
-        }
-        
-        if (WallImpactComponent)
-        {
-            FHitResult WallHit;
-            if (WallImpactComponent->CheckForWallImpact(KnockbackDirection, KnockbackForce, WallHit))
-            {
-                // Wall detected! Apply wall impact effects
-                WallImpactComponent->ApplyWallImpactEffects(Target, WallHit, KnockbackForce);
-                
-                // Reduce knockback since they'll hit the wall
-                KnockbackForce *= 0.5f;
-            }
-        }
+        FVector StartPos = Target->GetActorLocation();
+        FVector EndPos = StartPos + (KnockbackDirection * 300.0f);
+        DrawDebugDirectionalArrow(World, StartPos, EndPos, 
+            50.0f, FColor::Magenta, false, 3.0f, 0, 5.0f);
+        DrawDebugString(World, StartPos + FVector(0, 0, 200), 
+            FString::Printf(TEXT("KNOCKBACK\nForce: %.0f\nDirection: %.2f, %.2f, %.2f"), 
+                KnockbackForce, KnockbackDirection.X, KnockbackDirection.Y, KnockbackDirection.Z),
+            nullptr, FColor::Magenta, 3.0f, true, 1.5f);
     }
+    #endif
+    
+    UE_LOG(LogTemp, Warning, TEXT("Knockback Applied: Force=%.1f, Direction=(%.2f, %.2f, %.2f), Ragdoll=%s"),
+        KnockbackForce, KnockbackDirection.X, KnockbackDirection.Y, KnockbackDirection.Z, 
+        bCauseRagdoll ? TEXT("Yes") : TEXT("No"));
 
     if (bCauseRagdoll)
     {
@@ -195,11 +186,55 @@ void UDamageCalculator::ApplyKnockback(AActor* Target, AActor* Attacker, float K
             CapsuleComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
         }
 
-        TargetCharacter->LaunchCharacter(KnockbackDirection * KnockbackForce * 2.0f, true, true);
+        TargetCharacter->LaunchCharacter(KnockbackDirection * KnockbackForce * RagdollKnockbackMultiplier, true, true);
+        
+        // Start collision tracking for wall/floor impact detection
+        if (KnockbackForce > 150.0f)
+        {
+            // Try to get WallImpactComponent from the attacker
+            if (!WallImpactComponent)
+            {
+                WallImpactComponent = Attacker->FindComponentByClass<UWallImpactComponent>();
+            }
+            
+            // If not on attacker, create one temporarily
+            if (!WallImpactComponent)
+            {
+                WallImpactComponent = NewObject<UWallImpactComponent>(this);
+                WallImpactComponent->RegisterComponent();
+            }
+            
+            if (WallImpactComponent)
+            {
+                WallImpactComponent->StartKnockbackTracking(Target, KnockbackForce);
+            }
+        }
     }
     else
     {
-        TargetCharacter->LaunchCharacter(KnockbackDirection * KnockbackForce, true, false);
+        TargetCharacter->LaunchCharacter(KnockbackDirection * KnockbackForce * StandardKnockbackMultiplier, true, false);
+        
+        // Start collision tracking for wall/floor impact detection (non-ragdoll)
+        if (KnockbackForce > 150.0f)
+        {
+            // Try to get WallImpactComponent from the attacker
+            if (!WallImpactComponent)
+            {
+                WallImpactComponent = Attacker->FindComponentByClass<UWallImpactComponent>();
+            }
+            
+            // If not on attacker, create one temporarily
+            if (!WallImpactComponent)
+            {
+                WallImpactComponent = NewObject<UWallImpactComponent>(this);
+                WallImpactComponent->RegisterComponent();
+            }
+            
+            if (WallImpactComponent)
+            {
+                WallImpactComponent->StartKnockbackTracking(Target, KnockbackForce);
+            }
+        }
     }
 }
 

@@ -55,9 +55,6 @@ bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
 {
     if (IsStaggered() || IsAttacking())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot attack: Staggered=%s, Attacking=%s"), 
-            IsStaggered() ? TEXT("true") : TEXT("false"),
-            IsAttacking() ? TEXT("true") : TEXT("false"));
         return false;
     }
 
@@ -73,10 +70,6 @@ bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
     LastCombatActionTime = GetWorld()->GetTimeSeconds();
 
-    UE_LOG(LogTemp, Warning, TEXT("ATTACK STARTED: %s (Damage: %.1f, Knockback: %.1f)"), 
-        *CurrentAttackData->AttackData.AttackName.ToString(),
-        CurrentAttackData->AttackData.BaseDamage,
-        CurrentAttackData->AttackData.Knockback);
 
     if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
     {
@@ -100,23 +93,18 @@ void UCombatComponent::EndAttack()
     RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
     CurrentAttackData = nullptr;
     OnAttackEnded.Broadcast();
-    UE_LOG(LogTemp, Warning, TEXT("Attack Ended"));
 }
 
 bool UCombatComponent::StartBlock()
 {
     if (IsStaggered() || IsAttacking())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot block: Staggered=%s, Attacking=%s"),
-            IsStaggered() ? TEXT("true") : TEXT("false"),
-            IsAttacking() ? TEXT("true") : TEXT("false"));
         return false;
     }
 
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
     LastCombatActionTime = GetWorld()->GetTimeSeconds();
     OnBlockStarted.Broadcast(true);
-    UE_LOG(LogTemp, Warning, TEXT("BLOCK STARTED - Damage will be reduced by 40%%"));
     return true;
 }
 
@@ -124,7 +112,6 @@ void UCombatComponent::EndBlock()
 {
     RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
     OnBlockEnded.Broadcast();
-    UE_LOG(LogTemp, Warning, TEXT("Block Ended"));
 }
 
 

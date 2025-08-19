@@ -1,90 +1,101 @@
-Game Concept:
-High-Concept Logline
-A 1v1, close-combat roguelite set on a decaying, ring-shaped space station. Players must strategically manage both their own health and the station's structural integrity, using the environment itself as a weapon to make powerful enemies vulnerable before landing the critical blow.
+Heavy Attack Wall Impact System - Technical Documentation
+=========================================================
 
-Core Design Pillars
-The Vulnerability System: Combat is not about chipping away at health bars. It is a strategic puzzle focused on a single goal: make the enemy Vulnerable. Only then can significant damage be dealt.
+SYSTEM OVERVIEW:
+----------------
+The heavy attack wall impact system has been refactored from a predictive pre-check 
+approach to a reactive collision-based detection system that tracks the enemy during 
+knockback and responds to actual impacts.
 
-The Integrity Dilemma: A dual-fail state system. Players must protect their own life, but also the life of the station. The most powerful abilities risk the entire run by damaging the station, creating a constant, high-stakes risk/reward choice.
+CORE MECHANICS:
+---------------
 
-Strategic 1v1 Combat: With no complex parry system, combat is a fluid dance of positioning, environmental awareness, and blocking. The focus is on outsmarting a single, unique opponent in each level rather than reacting to tightly timed attack windows.
+1. Heavy Attack Properties:
+   - Damage: Base attack damage (configurable in AttackDataAsset)
+   - Knockback: 500 units
+   - Ragdoll: Enabled (bCausesRagdoll = true)
+   - Input: E key (PlayerCharacter)
 
-Procedural Roguelite Structure: Every run is unique. The randomized order of themed levels forces players to adapt their strategy and build on the fly, learning which paths offer the rewards they need most.
+2. Collision Detection:
+   - Threshold: >150 knockback force (lowered from 300)
+   - Detection Sphere: 100 unit radius
+   - Tracking Duration: 2 seconds max
+   - Collision Channels: WorldStatic, WorldDynamic
 
-Core Gameplay Loop
-Enter the Level: The player enters a small, curved section of the ring-station, facing a single, unique enemy.
+3. Surface Classification:
+   - Wall: Surface normal Z < 0.3 (mostly vertical)
+   - Floor: Surface normal Z > 0.7 (mostly horizontal)  
+   - Slope: Between 0.3-0.7 (currently treated as neither)
 
-Analyze and Strategize: The player assesses the enemy's capabilities and the interactive environmental objects available.
+4. Impact Outcomes:
 
-Create an Opening: Using a combination of abilities and environmental tools, the player attempts to make the enemy Vulnerable. This is the primary objective.
+   WALL IMPACT:
+   - Stagger Duration: 2 seconds
+   - Poise Damage: 100 (full break)
+   - Bounce Effect: 20% of impact force
+   - Animation: Wall hit response (TODO)
+   - VFX: Wall break effect at impact (TODO)
+   - Damage: NONE (removed - stagger only)
 
-Deal Critical Damage: While the enemy is Vulnerable, the player lands basic attacks which now deal massive critical damage.
+   FLOOR IMPACT:
+   - Ragdoll Duration: 1 second
+   - Poise Damage: 50 (moderate)
+   - Recovery: Get-up animation after 1 second (TODO)
+   - Animation: Floor fall response (TODO)
+   - VFX: Dust/impact at floor hit (TODO)
 
-Survive: The player must simultaneously avoid the enemy's attempts to make them Vulnerable, using movement and a standard block.
+IMPLEMENTATION DETAILS:
+-----------------------
 
-Claim the Reward: Upon defeating the enemy, the player chooses one reward from a selection, tailored to the level's theme. They must leave the others behind for that run.
+WallImpactComponent:
+- StartKnockbackTracking(): Initiates collision monitoring
+- OnTargetHit(): Processes collision events
+- IsWallHit()/IsFloorHit(): Classifies surface type
+- ApplyWallImpactEffects(): Handles wall-specific outcomes
+- ApplyFloorImpactEffects(): Handles floor-specific outcomes
 
-Choose Your Path: The player proceeds to the next level, continuing deeper into the station.
+DamageCalculator:
+- ApplyKnockback(): Launches character with full force
+- Creates/finds WallImpactComponent
+- Starts tracking after launch (not before)
 
-Repeat: The player repeats the loop until their HP reaches zero or the Station Integrity collapses. On failure, they return to the start, more powerful for the next attempt.
+GAMEPLAY BEHAVIOR:
+------------------
+- Works at ANY height (ground, airborne, falling)
+- No cooldown between impacts (intentional)
+- Always triggers if wall exists within detection
+- Consistent and predictable for combo potential
+- No immunity period after impact
 
-Key Mechanics Explained
-The Vulnerability System:
+DEBUG FEATURES:
+---------------
+- Yellow sphere: Shows collision detection radius
+- Red sphere: Wall impact location
+- Green sphere: Floor impact location
+- Cyan arrow: Surface normal direction
+- Text overlay: Impact type (WALL/FLOOR)
+- Console logs: Force values and impact details
 
-This is the core of combat. Neither the player nor the enemy takes significant damage from basic attacks unless they are in a "Vulnerable" state.
+CONFIGURATION:
+--------------
+Editable in WallImpactComponent defaults:
+- CollisionSphereRadius: 100.0f
+- MinImpactForce: 150.0f
+- WallImpactStaggerDuration: 2.0f
+- FloorRagdollDuration: 1.0f
+- WallSurfaceAngleThreshold: 0.3f
+- FloorSurfaceAngleThreshold: 0.7f
 
-Vulnerability is triggered by abilities or environmental interactions. These tools do not cause damage themselves; they are purely setup tools.
+EVENTS:
+-------
+- OnWallImpact: Broadcasts (Target, HitResult, Force)
+- OnFloorImpact: Broadcasts (Target, HitResult)
 
-The number of critical hits a character can take while Vulnerable varies. For example, a normal enemy might take one critical hit before recovering, while a boss might withstand five.
-
-Success is not guaranteed. A launched object might miss, requiring the player to reposition and try again. More powerful abilities have a higher certainty of applying Vulnerability but come at a greater cost to the station's integrity.
-
-Example: A late-game ability, Wall Smash, might catch an enemy's foot and launch them into a nearby wall, making them Vulnerable for the next 3 hits. This gives the player a window to rush in and deal damage, a strategy enhanced by rewards like a movement speed buff.
-
-Station Integrity & Instability:
-
-The station has its own health bar. This bar decreases when powerful, environment-altering abilities are used (e.g., smashing floors, tearing open walls).
-
-This creates a critical choice: use a safe, less reliable method to apply Vulnerability, or use a powerful, guaranteed ability that pushes the entire run closer to failure?
-
-As integrity drops, the station becomes Unstable. This can have direct gameplay consequences, such as gravity shifts that alter movement and the trajectory of thrown objects, creating new hazards and strategic possibilities in combat.
-
-Example: A Ground Smash ability might be guaranteed to make an enemy Vulnerable, but it will cause a massive loss of Station Integrity, risking an immediate end to the run for a guaranteed victory in the current fight.
-
-Level Structure and Procedural Generation:
-
-The game consists of 10+ levels, each a 1v1 combat encounter.
-
-There are 10 unique level themes (e.g., Laboratory, Hydroponics, Control Room, Supply Bay). Each theme has a distinct visual design (e.g., foggy, filled with supplies) and is associated with a specific reward type.
-
-On each run, the order of these levels is randomized. A player will quickly learn that "Laboratory levels give Stat Buffs" and "Supply Bay levels give new Abilities," allowing them to strategically plan their route.
-
-Reward Types: There are 4-5 distinct reward types. A level's theme determines the type of reward offered. For example:
-
-Lab Level: Offers "Stat Buff" rewards (e.g., increase player HP, increase Station Integrity, increase attack damage).
-
-Supply Level: Offers "Ability" rewards (e.g., gain the Wall Smash ability).
-
-Control Room: Offers "Environmental Access" rewards (e.g., the ability to interact with steam vents).
-
-Each reward type has at least 3 different options, though some rewards (like a movement speed buff) may appear in multiple reward pools.
-
-Narrative & Thematic Abilities
-The Story: The protagonist, a humanoid cyborg, carries the cybernetic left arm of his deceased wife. His goal is to reach the station's core to upload her consciousness from the arm's data banks, effectively reviving her. This arm is a symbol of his determination and the central point of the narrative.
-
-The Wife's Arm: This arm provides powerful, passive abilities that are AI-controlled and not triggered by the player. This makes them feel like a separate entity helping the protagonist under certain conditions.
-
-Examples: A "Firewall" that automatically blocks one incoming digital or environmental attack per level, or a "Backup System" that grants the player one extra life per run. These abilities add narrative depth and a unique layer to progression.
-
-Enemy Design: The Guardian
-Design Philosophy: The primary antagonist is not a mindless drone but an intelligent duelist. Combat begins the moment the player enters a level.
-
-Intelligent & Reactive AI: The Guardian's AI is designed to feel adaptive and strategic. It will analyze player behavior and punish predictability. Crucially, it uses the environment just as the player does.
-
-The AI will actively try to lure the player towards environmental hazards.
-
-It will constantly check its surroundings for opportunities, for example, only attempting a Wall Smash attack if the player is positioned near a wall.
-
-Its movement will be unpredictable, designed to create openings for its own environmental attacks.
-
-Technical Foundation: The AI will be built using a Behavior Tree (BT) with a Blackboard to store key variables about the state of combat, allowing for complex and reactive decision-making.
+FUTURE ENHANCEMENTS:
+--------------------
+- Animation integration for both impact types
+- Particle effects at impact points
+- Sound effects differentiation
+- Possible slope handling
+- Wall destructibility system
+- Environmental damage zones

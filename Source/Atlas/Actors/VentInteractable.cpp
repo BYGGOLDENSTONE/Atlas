@@ -82,8 +82,8 @@ void AVentInteractable::ExecuteInteraction(AActor* Interactor)
     
     Super::ExecuteInteraction(Interactor);
     
-    UE_LOG(LogTemp, Warning, TEXT("=== VENT LAUNCHING ITSELF ==="));
-    UE_LOG(LogTemp, Warning, TEXT("Interactor: %s"), Interactor ? *Interactor->GetName() : TEXT("None"));
+    UE_LOG(LogTemp, Warning, TEXT("VENT: Launching projectile (Interactor: %s)"), 
+        Interactor ? *Interactor->GetName() : TEXT("None"));
     
     bHasBeenTriggered = true;
     LaunchSelf(Interactor);

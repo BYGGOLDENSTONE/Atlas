@@ -19,7 +19,6 @@ void UAttackNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequ
     AlreadyHitActors.Reset();
     TimeSinceLastCheck = 0.0f;
 
-    UE_LOG(LogTemp, Warning, TEXT("Attack Window Begin: %s (Duration: %.2f)"), *AttackName.ToString(), TotalDuration);
 
     PerformHitDetection(MeshComp);
 }
@@ -44,7 +43,6 @@ void UAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequen
 {
     Super::NotifyEnd(MeshComp, Animation, EventReference);
 
-    UE_LOG(LogTemp, Warning, TEXT("Attack Window End: %s"), *AttackName.ToString());
     AlreadyHitActors.Reset();
 }
 
@@ -102,7 +100,6 @@ void UAttackNotifyState::PerformHitDetection(USkeletalMeshComponent* MeshComp)
                     {
                         if (HitCharacter != Character)
                         {
-                            UE_LOG(LogTemp, Warning, TEXT("New hit detected on: %s"), *HitCharacter->GetName());
                             AlreadyHitActors.AddUnique(HitActor);
                             CombatComp->ProcessHitFromAnimation(HitCharacter);
                         }

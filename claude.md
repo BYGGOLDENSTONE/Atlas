@@ -111,14 +111,17 @@
   * Optional vulnerability/stagger application
   * 10-second cooldown
 
-### ✅ P8: Wall Impact - COMPLETED
+### ✅ P8: Wall Impact - COMPLETED (Refactored 2025-08-19)
 
-* **Wall Impact System**: WallImpactComponent for heavy attacks
+* **Wall Impact System**: Collision-based detection during knockback
 
-  * Detects walls within 200 units behind target
-  * 1.5x damage multiplier on wall impact
-  * Extended 2-second stagger
-  * Bounce-back physics effect
+  * Reactive collision detection (not predictive)
+  * Tracks enemy during flight with attached collision sphere
+  * Distinguishes wall impacts (2s stagger) vs floor impacts (1s ragdoll)
+  * Works from ANY direction (sideways, diagonal, forward, backward)
+  * No damage on wall impact (stagger-only effect)
+  * Configurable knockback forces (upward, multipliers)
+  * Enhanced debug visualization (following spheres, directional arrows)
 
 ### ✅ P9: Dash System - COMPLETED
 

@@ -37,8 +37,7 @@ void AValveInteractable::TriggerAoEEffect(AActor* Interactor)
     // Get all actors in radius for visual effect
     TArray<AActor*> AffectedActors = GetActorsInRadius();
     
-    UE_LOG(LogTemp, Warning, TEXT("=== VALVE AOE TRIGGERED ==="));
-    UE_LOG(LogTemp, Warning, TEXT("Valve %s triggered with radius %.0f, found %d actors"), 
+    UE_LOG(LogTemp, Warning, TEXT("VALVE: %s AoE triggered (Radius: %.0f, Actors: %d)"), 
         *GetName(), AoERadius, AffectedActors.Num());
     
     // Visual effects based on type

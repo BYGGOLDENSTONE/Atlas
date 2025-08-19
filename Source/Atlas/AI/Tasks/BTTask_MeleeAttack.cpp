@@ -153,7 +153,6 @@ void UBTTask_MeleeAttack::PerformAttack(AEnemyCharacter* Enemy, EAttackType Type
 	// Attack started through CombatComponent
 	if (!bSuccess)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PerformAttack: Failed to start attack. Check if AttackDataAsset is configured for tag: %s"), *AttackTag.ToString());
 	}
 }
 

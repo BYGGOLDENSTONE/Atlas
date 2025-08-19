@@ -1,633 +1,72 @@
-================================================================================
-                    ATLAS GAME ANALYSIS & RECOMMENDATIONS REPORT
-================================================================================
+Wall Impact System Refactor - Implementation Report
+===================================================
 
-DATE: 2025-08-18
-PROJECT: Atlas - 1v1 Roguelite Combat Game
-ENGINE: Unreal Engine 5.5
-ANALYSIS TYPE: Comprehensive Game Design & Technical Review
+CHANGES MADE:
+-------------
 
-================================================================================
-SECTION 1: CURRENT IMPLEMENTATION STATUS
-================================================================================
+1. WallImpactComponent.h Changes:
+   - Removed pre-check wall detection approach
+   - Added collision sphere tracking system (100 unit radius)
+   - Lowered MinImpactForce from 300 to 150
+   - Removed WallImpactDamageMultiplier (no damage on wall impact)
+   - Added FloorRagdollDuration (1 second)
+   - Added surface angle thresholds (0.3 for walls, 0.7 for floors)
+   - Added separate delegates for wall and floor impacts
+   - Added new tracking methods and collision handling
 
-1.1 SUCCESSFULLY IMPLEMENTED FEATURES
---------------------------------------
-✅ Vulnerability System
-   - 8x damage multiplier when vulnerable
-   - Charge-based system with configurable duration
-   - Clean component architecture
+2. WallImpactComponent.cpp Complete Rewrite:
+   - Implemented StartKnockbackTracking(): Creates collision sphere attached to target
+   - Added OnTargetHit(): Detects collisions during knockback flight
+   - Surface detection using normals:
+     * Wall: Normal.Z < 0.3 (vertical surfaces)
+     * Floor: Normal.Z > 0.7 (horizontal surfaces)
+   - Wall Impact Effects:
+     * 2-second extended stagger
+     * 20% bounce back from wall
+     * Debug visualization for wall break location
+   - Floor Impact Effects:
+     * 1-second ragdoll recovery
+     * 50 poise damage (vs 100 for walls)
+     * Different debug visualization
+   - Added 2-second timeout for tracking safety
 
-✅ Environmental Interaction System
-   - Focus Mode (Q key, 1000 unit range)
-   - Screen-space targeting system
-   - Vent interactables (physics projectiles)
-   - Valve interactables (AoE effects with types)
+3. DamageCalculator.cpp Changes:
+   - Removed pre-emptive wall checking
+   - Apply full knockback force immediately
+   - Start collision tracking AFTER launching character
+   - Tracking starts when knockback > 150 (lowered from 300)
+   - No knockback reduction for predicted wall hits
 
-✅ Core Combat Pipeline
-   - UCombatComponent → UDamageCalculator → UHealthComponent
-   - Animation-driven hitbox system
-   - Data Asset configuration
-   - Gameplay Tag integration
-
-✅ Defensive Mechanics
-   - Block system (40% damage reduction)
-   - Stagger/Poise system (100 max, regeneration)
-   - Wall impact detection (1.5x damage on wall hit)
-
-✅ Basic AI Framework
-   - Behavior Tree/Blackboard implementation
-   - Perception system with sight
-   - Simple attack tasks
-   - Movement and targeting
-
-1.2 CRITICAL MISSING FEATURES
-------------------------------
-❌ Station Integrity System (CORE MECHANIC - 50% of gameplay loop)
-❌ Roguelite Structure (No procedural generation)
-❌ Level/Room System (No themed encounters)
-❌ Reward System (No progression choices)
-❌ Meta-progression (No run-to-run improvements)
-❌ Wife's Arm Abilities (Key narrative/gameplay feature)
-
-1.3 TECHNICAL ISSUES REQUIRING IMMEDIATE FIXES
------------------------------------------------
-⚠️ ISSUE #1: Parry System Remnants
-   Location: EnemyAIController.h:51, BTTask_SoulAttack.h:34
-   Problem: ParryReactionTime and UnparryableTag still exist
-   Impact: Code inconsistency with design vision
-   Fix: Remove all parry-related code
-
-⚠️ ISSUE #2: Incomplete AI Implementation
-   - Soul Attack lacks proper cooldown management
-   - Catch Special not integrated into behavior tree
-   - No environmental awareness for interactables
-   - Missing combo attack sequences
-
-⚠️ ISSUE #3: No Game State Management
-   - No run management system
-   - No level progression tracking
-   - No reward selection interface
-   - No death/restart flow
-
-================================================================================
-SECTION 2: GAME CONCEPT ANALYSIS
-================================================================================
-
-2.1 CORE DESIGN STRENGTHS
--------------------------
-1. Dual-Stakes System (Health + Station Integrity)
-   - Creates unique risk/reward dynamics
-   - Every action has strategic weight
-   - Natural difficulty scaling through degradation
-
-2. Vulnerability-Focused Combat
-   - Clear, understandable objective
-   - Reduces reliance on frame-perfect timing
-   - Enables strategic variety
-
-3. Environmental Combat Integration
-   - Leverages space station setting perfectly
-   - Multiple solution paths per encounter
-   - Emergent gameplay possibilities
-
-4. Narrative-Gameplay Integration
-   - Wife's arm as companion mechanic
-   - Emotional stakes reinforce gameplay stakes
-   - Unique hook for marketing
-
-2.2 POTENTIAL DESIGN CONCERNS
------------------------------
-1. Repetition Risk
-   - 1v1 only format may feel monotonous
-   - Need variety in enemy behaviors
-   - Environmental variety crucial
-
-2. Skill Expression Limitations
-   - No combo system might limit depth
-   - Binary vulnerable state too simple?
-   - Need mastery curve for retention
-
-3. Pacing Challenges
-   - 10 consecutive 1v1 fights might exhaust players
-   - Need breather moments or variety
-   - Balance between challenge and frustration
-
-================================================================================
-SECTION 3: GAMEPLAY RECOMMENDATIONS
-================================================================================
-
-3.1 STATION INTEGRITY SYSTEM (PRIORITY 1)
------------------------------------------
-CONCEPT: The station's health becomes a strategic resource
-
-IMPLEMENTATION:
-- Global Integrity Bar: 100 points (shared across entire run)
-- Ability Costs:
-  * Light environmental attacks: 5 integrity
-  * Heavy ground smashes: 15 integrity  
-  * Ultimate abilities: 25 integrity
-  * Passive drain in later levels: 1 per 30 seconds
-
-INSTABILITY STAGES:
-- 100-75: Stable (Normal gameplay)
-- 75-50: Minor Instability
-  * Flickering lights affect visibility
-  * Occasional micro-gravity moments
-  * Sparking panels (visual only)
-  
-- 50-25: Major Instability  
-  * Gravity wells appear randomly
-  * Oxygen leaks create damage zones
-  * Environmental hazards activate
-  * Enemy AI becomes more aggressive
-  
-- 25-0: Critical Instability
-  * Constant environmental threats
-  * Equipment malfunctions (abilities may fail)
-  * Screen distortion effects
-  * Time pressure increases
-
-RECOVERY MECHANISMS:
-- Repair Kits: Rare rewards (+20 integrity)
-- Perfect Victory: No damage taken (+5 integrity)
-- Environmental Kills: Using environment efficiently (+2 integrity)
-- Wife's Emergency Protocol: Once per run full repair
-
-3.2 ENHANCED VULNERABILITY SYSTEM
----------------------------------
-CONCEPT: Layer vulnerability for tactical depth
-
-VULNERABILITY STACKS (1-3):
-- Level 1: 3x damage (1 hit capacity)
-- Level 2: 6x damage (2 hit capacity)  
-- Level 3: 9x damage (3 hit capacity)
-
-APPLICATION METHODS:
-- Environmental Hit: +1 stack
-- Heavy Ability: +2 stacks
-- Perfect Timing: +3 stacks
-- Combo Application: Stack preservation between methods
-
-STACK BEHAVIOR:
-- Individual decay timers per stack
-- Can build stacks while vulnerable
-- Different enemies have stack resistance
-- Some abilities pierce resistance
-
-3.3 WIFE'S ARM COMPANION SYSTEM
--------------------------------
-CONCEPT: AI-controlled abilities that feel like a partner
-
-BASE ABILITIES (Passive, Context-Triggered):
-
-1. "Last Stand Protocol"
-   - Triggers: Fatal blow incoming
-   - Effect: Auto-blocks once per level
-   - Upgrade: Increases trigger chance (10% → 25% → 50%)
-
-2. "Data Analysis"
-   - Triggers: Enemy enters attack pattern
-   - Effect: Highlights vulnerability windows
-   - Upgrade: Predicts enemy moves 0.5s → 1s → 1.5s ahead
-
-3. "Emergency Override"
-   - Triggers: Station integrity < 25
-   - Effect: Repairs 10 integrity
-   - Upgrade: Also provides temporary shield
-
-4. "Memory Echo"
-   - Triggers: Player takes major damage
-   - Effect: Rewind last 2 seconds (once per level)
-   - Upgrade: Extends rewind to 3s → 4s → 5s
-
-5. "Synchronization Surge"
-   - Triggers: Player lands 3 hits rapidly
-   - Effect: Next ability costs 0 integrity
-   - Upgrade: Reduces cooldown between triggers
-
-PROGRESSION:
-- Memory Fragments: Currency for upgrades
-- Collected from special enemy defeats
-- Persistent between runs
-- Unlocks new abilities and upgrades
-
-================================================================================
-SECTION 4: CONTENT RECOMMENDATIONS
-================================================================================
-
-4.1 ENEMY ARCHETYPES (5 Core Types for MVP)
--------------------------------------------
-1. ENFORCER (Tutorial Enemy)
-   - Basic melee attacks
-   - Predictable patterns
-   - 1 vulnerability stack max
-   - Teaching tool for mechanics
-
-2. TECHNICIAN (Environmental Specialist)
-   - Deploys turrets/traps
-   - Uses interactables against player
-   - Requires environmental solutions
-   - 2 vulnerability stacks max
-
-3. BERSERKER (Aggressive Rusher)
-   - Immune to first vulnerability application
-   - Rage mode at 50% health
-   - Forces defensive play
-   - 1 vulnerability stack but needs 5 hits
-
-4. GHOST (Evasion Specialist)
-   - Phase shift ability (1s invulnerability)
-   - Requires specific interactables to hit
-   - Tests timing and positioning
-   - 3 vulnerability stacks possible
-
-5. CORRUPTED (Adaptive Mirror)
-   - Copies player's last used ability
-   - Learns from player patterns
-   - Ultimate test of versatility
-   - Variable vulnerability based on player actions
-
-4.2 ROOM THEMES & REWARDS (10 Types)
-------------------------------------
-1. MAINTENANCE BAY
-   - Visual: Industrial, tools everywhere
-   - Hazards: Crushers, conveyor belts
-   - Rewards: New active abilities
-   - Special: Throwable tool weapons
-
-2. HYDROPONICS
-   - Visual: Overgrown, misty
-   - Hazards: Poison gas vents
-   - Rewards: Status effect abilities
-   - Special: Healing plants (risk/reward)
-
-3. REACTOR CORE
-   - Visual: Glowing, high-tech
-   - Hazards: Radiation pulses
-   - Rewards: Stat buffs (damage, speed)
-   - Special: Overcharge zones (temporary power)
-
-4. CARGO HOLD
-   - Visual: Stacked crates, cramped
-   - Hazards: Falling cargo
-   - Rewards: Defensive abilities
-   - Special: Destructible cover system
-
-5. MED BAY
-   - Visual: Clean, clinical
-   - Hazards: Malfunctioning equipment
-   - Rewards: Health/Integrity repairs
-   - Special: Healing stations (both can use)
-
-6. COMMAND BRIDGE
-   - Visual: Screens, control panels
-   - Hazards: Gravity manipulation
-   - Rewards: Movement abilities
-   - Special: Environmental control access
-
-7. ARMORY
-   - Visual: Weapons, ammunition
-   - Hazards: Explosive barrels
-   - Rewards: Damage multipliers
-   - Special: Weapon racks as projectiles
-
-8. CRYO CHAMBER
-   - Visual: Frozen, ice effects
-   - Hazards: Freeze traps, slippery floor
-   - Rewards: Slow/Stun abilities
-   - Special: Frozen enemies (shatter mechanic)
-
-9. ENGINEERING
-   - Visual: Pipes, machinery
-   - Hazards: Steam jets, moving platforms
-   - Rewards: Environmental mastery
-   - Special: Repair stations for integrity
-
-10. OBSERVATORY
-    - Visual: Stars, low lighting
-    - Hazards: Low gravity sections
-    - Rewards: Ranged options
-    - Special: Windows can be broken (instant death)
-
-4.3 REWARD CATEGORIES
---------------------
-STAT BUFFS (15 variants):
-- Health +20/40/60
-- Movement Speed +10/20/30%
-- Attack Damage +15/30/45%
-- Integrity Efficiency -20/40/60% cost
-- Vulnerability Duration +0.5/1/1.5s
-
-ACTIVE ABILITIES (15 variants):
-- Ground Pound (AoE vulnerability)
-- Dash Strike (gap closer)
-- Gravity Well (pull enemies)
-- Emergency Shield (block all for 2s)
-- Overcharge (next attack = 3 stacks)
-
-ENVIRONMENTAL MASTERY (10 variants):
-- Unlock Vent control
-- Unlock Valve types
-- Double environmental damage
-- Environmental kill = integrity restore
-- Chain environmental effects
-
-WIFE'S ARM UPGRADES (10 variants):
-- Increase trigger chances
-- Add secondary effects
-- Reduce cooldowns
-- Unlock new abilities
-- Passive stat bonuses
-
-STATION MODS (10 variants):
-- Integrity shields (absorb first 10 damage)
-- Auto-repair (1 per minute)
-- Stability anchors (reduce instability effects)
-- Emergency protocols (prevent critical state once)
-- Efficiency systems (reduce all costs by 25%)
-
-================================================================================
-SECTION 5: PROGRESSION SYSTEMS
-================================================================================
-
-5.1 RUN STRUCTURE
+NEW SYSTEM FLOW:
 ----------------
-LEVELS 1-3: TUTORIAL ZONE
-- 1 enemy type (Enforcer)
-- Basic rooms only
-- Full integrity
-- Teaching mechanics
+1. Heavy attack triggers with 500 knockback force
+2. Full knockback applied to enemy (ragdoll + launch)
+3. Collision sphere spawns on enemy (100 unit radius)
+4. During flight, sphere detects first collision
+5. System checks surface normal:
+   - WALL HIT: 2-second stagger + bounce + wall break VFX
+   - FLOOR HIT: 1-second ragdoll + get-up animation
+6. Tracking stops after impact or 2-second timeout
 
-LEVELS 4-6: ESCALATION ZONE
-- 2 enemy types (+ Technician)
-- Hazards activate
-- Integrity management begins
-- Reward choices matter
+KEY IMPROVEMENTS:
+-----------------
+- Dynamic collision detection vs pre-calculation
+- Accurate impact point for VFX spawning
+- Different outcomes for wall vs floor
+- More realistic physics (full knockback applied)
+- Better visual debugging with sphere visualization
+- Removed unnecessary damage from wall impacts
 
-LEVELS 7-9: CHAOS ZONE
-- 3 enemy types (+ choice)
-- Full instability possible
-- Resource management critical
-- Build must be cohesive
+TODO (Animation/VFX):
+--------------------
+- Wall impact animation implementation
+- Floor recovery/get-up animation
+- Wall break particle effect at impact point
+- Different sounds for wall vs floor impacts
 
-LEVEL 10: BOSS ENCOUNTER
-- "The Station Core Guardian"
-- Uses all mechanics
-- Multi-phase fight
-- Narrative climax
-
-5.2 META-PROGRESSION
--------------------
-CURRENCY: Data Fragments
-- Earned from defeats
-- Bonus for perfect victories
-- Special challenges give more
-- Persistent between runs
-
-PERMANENT UPGRADES:
-1. Starting Resources
-   - Base health: 100 → 150
-   - Base integrity: 100 → 150
-   - Starting ability slot
-
-2. Unlock Systems
-   - New room types
-   - New enemy variants
-   - New reward pools
-   - New wife abilities
-
-3. Quality of Life
-   - Restart from level 4
-   - Practice mode
-   - Seed selection
-   - Statistics tracking
-
-================================================================================
-SECTION 6: UNIQUE SELLING POINTS
-================================================================================
-
-6.1 CORE DIFFERENTIATORS
-------------------------
-1. "Your Greatest Weapon is Your Greatest Weakness"
-   - Using powerful abilities damages your win condition
-   - Creates constant meaningful choices
-   - Natural difficulty balancing
-
-2. "Every Fight is a Puzzle, Not a Reflex Test"
-   - No frame-perfect requirements
-   - Multiple solution paths
-   - Strategy over reaction time
-
-3. "Your Dead Wife is Your Co-op Partner"
-   - Unique AI companion system
-   - Emotional narrative hook
-   - Progression tied to story
-
-4. "The Station is Dying With You"
-   - Dynamic difficulty through degradation
-   - Environmental storytelling
-   - Procedural decay system
-
-6.2 MARKET POSITIONING
-----------------------
-SIMILAR TO:
-- Hades (roguelite progression)
-- Sifu (strategic combat)
-- Dead Space (station atmosphere)
-- FTL (resource management)
-
-DIFFERENT BECAUSE:
-- Dual resource management (health + integrity)
-- Environmental focus over combos
-- AI companion with narrative weight
-- Degradation as difficulty system
-
-================================================================================
-SECTION 7: MINIMUM VIABLE PRODUCT (MVP)
-================================================================================
-
-7.1 PHASE 1: CORE LOOP (2-3 months)
------------------------------------
-MUST HAVE:
-□ Station Integrity system
-□ 3 enemy types (Enforcer, Technician, Berserker)
-□ 5 room types with 2 variations each
-□ Basic roguelite structure (10 levels)
-□ 15 rewards across 3 categories
-□ Run management system
-□ Death/restart flow
-
-DELIVERABLES:
-- Playable 30-minute runs
-- Core mechanics proven
-- Basic progression loop
-- Performance baseline
-
-7.2 PHASE 2: POLISH & DEPTH (1-2 months)
-----------------------------------------
-MUST HAVE:
-□ Wife's arm abilities (3 passives)
-□ Instability visual/gameplay effects
-□ Meta-progression (5 permanent upgrades)
-□ Boss fight implementation
-□ Sound design pass
-□ Juice and game feel
-□ Basic UI/UX
-
-DELIVERABLES:
-- 1-hour runs with variety
-- Emotional hooks established
-- Replayability proven
-- Stream-ready build
-
-7.3 PHASE 3: CONTENT & LAUNCH (1 month)
----------------------------------------
-MUST HAVE:
-□ Additional 2 enemy types
-□ Additional 5 room types
-□ 20+ new rewards
-□ Achievements system
-□ Demo for Steam Next Fest
-□ Trailer and marketing materials
-□ Streamer mode features
-
-DELIVERABLES:
-- 2-3 hours of content
-- Marketing campaign ready
-- Community features
-- Launch-ready product
-
-================================================================================
-SECTION 8: IMMEDIATE ACTION ITEMS
-================================================================================
-
-8.1 WEEK 1: CRITICAL FIXES
---------------------------
-1. Remove all parry system code
-2. Fix AI cooldown management
-3. Create StationIntegrityComponent
-4. Design reward data structure
-5. Plan level management system
-
-8.2 WEEK 2: CORE SYSTEMS
-------------------------
-1. Implement Station Integrity
-2. Add vulnerability stacking
-3. Create room theme system
-4. Build reward selection UI
-5. Add run management
-
-8.3 WEEK 3: CONTENT FOUNDATION
-------------------------------
-1. Implement 3 enemy types
-2. Create 5 room variants
-3. Add 15 basic rewards
-4. Test core loop
-5. Balance initial values
-
-8.4 WEEK 4: POLISH & ITERATION
-------------------------------
-1. Add instability effects
-2. Implement wife's arm (1 ability)
-3. Create death/restart flow
-4. Add basic progression
-5. Playtest and iterate
-
-================================================================================
-SECTION 9: RISK ASSESSMENT
-================================================================================
-
-9.1 HIGH RISK AREAS
-------------------
-1. Integrity System Balance
-   - Too punishing = frustration
-   - Too forgiving = no tension
-   - Needs extensive playtesting
-
-2. Enemy Variety
-   - 5 types might not be enough
-   - AI needs to feel different
-   - Behavior trees complexity
-
-3. Replayability
-   - Procedural generation quality
-   - Reward variety and balance
-   - Meta-progression pacing
-
-9.2 MITIGATION STRATEGIES
-------------------------
-1. Rapid Prototyping
-   - Test integrity system early
-   - Get feedback quickly
-   - Iterate based on data
-
-2. Modular Development
-   - Build systems to be expandable
-   - Easy to add content post-launch
-   - DLC/update potential
-
-3. Community Involvement
-   - Early access consideration
-   - Beta testing program
-   - Discord community building
-
-================================================================================
-SECTION 10: SUCCESS METRICS
-================================================================================
-
-10.1 DEVELOPMENT MILESTONES
----------------------------
-□ Prototype: Core loop playable (Month 1)
-□ Alpha: All systems integrated (Month 2)
-□ Beta: Content complete (Month 3)
-□ Gold: Polish complete (Month 4)
-□ Launch: Marketing ready (Month 5)
-
-10.2 LAUNCH TARGETS
-------------------
-- Steam Wishlists: 10,000 pre-launch
-- Week 1 Sales: 1,000 copies
-- Month 1 Sales: 5,000 copies
-- User Reviews: 85% positive
-- Streamer Coverage: 10+ channels
-
-10.3 POST-LAUNCH GOALS
----------------------
-- Monthly content updates
-- Community challenges
-- Speedrun support
-- Console ports consideration
-- Sequel/DLC planning
-
-================================================================================
-CONCLUSION
-================================================================================
-
-Atlas has strong potential as a unique roguelite that differentiates itself 
-through its dual-resource management system and emotional narrative hook. The 
-station integrity mechanic is genuinely innovative and creates meaningful 
-strategic decisions absent from competitors.
-
-KEY SUCCESS FACTORS:
-1. Focus on the integrity system as core differentiator
-2. Ensure enemy variety feels meaningful
-3. Polish the "game feel" extensively
-4. Market the unique aspects clearly
-5. Build community early and actively
-
-RECOMMENDED DEVELOPMENT PRIORITY:
-1. Fix technical issues (Week 1)
-2. Implement station integrity (Week 2)
-3. Create basic content (Week 3-4)
-4. Playtest extensively (Week 5+)
-5. Iterate based on feedback
-
-The game has clear potential for financial success if executed well. The unique 
-mechanics, emotional hook, and strategic depth can help it stand out in the 
-crowded roguelite market. Focus on making the core loop incredibly satisfying 
-before expanding content.
-
-================================================================================
-END OF REPORT
-================================================================================
+TESTING NOTES:
+--------------
+- Threshold lowered to 150 for easier testing
+- Debug spheres show collision detection radius
+- Debug text shows impact type (WALL/FLOOR/SLOPE)
+- Surface normal values logged for verification

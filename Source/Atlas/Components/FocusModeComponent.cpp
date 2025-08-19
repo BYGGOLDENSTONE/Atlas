@@ -368,7 +368,6 @@ float UFocusModeComponent::CalculatePriority(const FFocusTarget& Target) const
 
 bool UFocusModeComponent::TryInteractWithFocusedTarget()
 {
-    UE_LOG(LogTemp, Warning, TEXT("=== TryInteractWithFocusedTarget Called ==="));
     
     if (!CurrentFocusedTarget)
     {
@@ -403,11 +402,8 @@ bool UFocusModeComponent::TryInteractWithFocusedTarget()
         return false;
     }
     
-    UE_LOG(LogTemp, Warning, TEXT("=== CALLING INTERACT ON %s ==="), *CurrentFocusedTarget->GetName());
     IInteractable::Execute_Interact(CurrentFocusedTarget, GetOwner());
     bWasInteracting = true;
-    
-    UE_LOG(LogTemp, Warning, TEXT("=== INTERACTION SUCCESSFUL with: %s ==="), *CurrentFocusedTarget->GetName());
     
     return true;
 }

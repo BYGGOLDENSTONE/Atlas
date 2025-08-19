@@ -86,7 +86,6 @@ void AInteractableBase::OnUnfocused_Implementation(AActor* FocusingActor)
 
 void AInteractableBase::Interact_Implementation(AActor* Interactor)
 {
-    UE_LOG(LogTemp, Warning, TEXT("=== InteractableBase::Interact_Implementation Called ==="));
     UE_LOG(LogTemp, Warning, TEXT("Interactable: %s, Interactor: %s"), *GetName(), Interactor ? *Interactor->GetName() : TEXT("None"));
     
     if (!CanInteract_Implementation(Interactor))
@@ -101,8 +100,6 @@ void AInteractableBase::Interact_Implementation(AActor* Interactor)
     OnInteracted.Broadcast(Interactor);
     
     StartCooldown();
-    
-    UE_LOG(LogTemp, Warning, TEXT("=== %s INTERACTION COMPLETE ==="), *GetName());
 }
 
 float AInteractableBase::GetInteractionDistance_Implementation() const

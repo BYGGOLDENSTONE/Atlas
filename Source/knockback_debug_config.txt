@@ -1,0 +1,97 @@
+KNOCKBACK & IMPACT DEBUG SYSTEM
+================================
+
+CONFIGURABLE KNOCKBACK FORCES (DamageCalculator)
+-------------------------------------------------
+You can now edit these in the DamageCalculator component in Blueprint:
+
+1. KnockbackUpwardForce (default: 0.3)
+   - Range: 0.0 to 1.0
+   - Controls how much upward lift enemies get when knocked back
+   - 0.0 = purely horizontal knockback
+   - 0.3 = slight upward arc (default)
+   - 1.0 = strong upward launch
+
+2. RagdollKnockbackMultiplier (default: 2.0)
+   - Range: 1.0 to 5.0
+   - Multiplier for heavy attacks that cause ragdoll
+   - 2.0 = double force for ragdoll knockbacks
+
+3. StandardKnockbackMultiplier (default: 1.0)
+   - Multiplier for regular (non-ragdoll) knockbacks
+   - Can be adjusted for overall knockback strength
+
+DEBUG LOGS
+----------
+When enemy is knocked back with force > 150, you'll see:
+
+1. INITIAL KNOCKBACK LOG:
+   "Knockback Applied: Force=500.0, Upward=0.30, Ragdoll=Yes"
+
+2. TRACKING START:
+   "[KNOCKBACK TRACKING] Started for BP_Enemy | Force: 500.0 | Threshold: 150.0"
+
+3. IMPACT DETECTION:
+   ========================================
+   KNOCKBACK IMPACT DETECTED!
+     Type: WALL or FLOOR or SLOPE
+     Surface Normal Z: 0.00 (wall) or 1.00 (floor)
+     Impact Location: X=100 Y=200 Z=50
+     Impact Actor: Wall_Blueprint
+     Debug Color: RED (wall) / GREEN (floor) / YELLOW (slope)
+   ========================================
+
+4. IMPACT EFFECTS:
+   For WALL:
+   >>> WALL IMPACT EFFECTS APPLIED <<<
+     - Stagger Duration: 2.0 seconds
+     - Bounce Force Applied
+     - Wall Break VFX at: X=100 Y=200 Z=50
+
+   For FLOOR:
+   >>> FLOOR IMPACT EFFECTS APPLIED <<<
+     - Ragdoll Duration: 1.0 seconds
+     - Recovery Timer Started
+     - Floor Impact at: X=100 Y=200 Z=0
+
+DEBUG VISUALIZATION
+-------------------
+Visual debug elements (in editor with debug enabled):
+
+1. TRACKING PHASE:
+   - Yellow sphere (100 unit radius) around enemy during knockback
+   - "TRACKING KNOCKBACK" text above enemy
+
+2. WALL IMPACT:
+   - Large RED sphere (75 units) at impact point
+   - Orange arrow showing wall normal direction
+   - Text showing "WALL IMPACT!\n2 sec stagger\nForce: 500"
+   - Persists for 5 seconds
+
+3. FLOOR IMPACT:
+   - GREEN circle on ground (60 unit radius)
+   - Medium GREEN sphere (40 units) at impact point
+   - Text showing "FLOOR IMPACT!\n1 sec ragdoll\nForce: 500"
+   - Persists for 3 seconds
+
+SURFACE DETECTION
+-----------------
+- WALL: Surface normal Z < 0.3 (mostly vertical)
+- FLOOR: Surface normal Z > 0.7 (mostly horizontal)
+- SLOPE: Between 0.3-0.7 (currently just logged, no special handling)
+
+HOW TO TEST
+-----------
+1. Open DamageCalculator in Blueprint editor
+2. Adjust KnockbackUpwardForce (try 0.1 for low arc, 0.5 for high arc)
+3. Adjust RagdollKnockbackMultiplier (try 3.0 for stronger heavy attacks)
+4. Use heavy attack (E key) near walls or open areas
+5. Watch console logs for impact detection
+6. Observe visual debug spheres and text in editor
+
+TUNING TIPS
+-----------
+- Lower KnockbackUpwardForce (0.1-0.2) for more horizontal, wall-seeking knockback
+- Higher KnockbackUpwardForce (0.4-0.6) for more aerial juggle potential
+- Increase RagdollKnockbackMultiplier for more dramatic heavy attacks
+- Current threshold of 150 knockback force triggers tracking (heavy attacks are 500+)

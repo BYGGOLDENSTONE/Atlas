@@ -27,15 +27,6 @@ void UDashComponent::BeginPlay()
 	{
 		CombatComponent = OwnerCharacter->FindComponentByClass<UCombatComponent>();
 		HealthComponent = OwnerCharacter->FindComponentByClass<UHealthComponent>();
-		
-		UE_LOG(LogTemp, Warning, TEXT("=== DashComponent Initialized ==="));
-		UE_LOG(LogTemp, Warning, TEXT("Owner: %s"), *OwnerCharacter->GetName());
-		UE_LOG(LogTemp, Warning, TEXT("CombatComponent: %s"), CombatComponent ? TEXT("Found") : TEXT("Not Found"));
-		UE_LOG(LogTemp, Warning, TEXT("HealthComponent: %s"), HealthComponent ? TEXT("Found") : TEXT("Not Found"));
-		
-		FDashSettings Settings = GetDashSettings();
-		UE_LOG(LogTemp, Warning, TEXT("Dash Settings - Distance: %.1f, Duration: %.2f, Cooldown: %.2f"),
-			Settings.DashDistance, Settings.DashDuration, Settings.DashCooldown);
 	}
 	else
 	{
@@ -67,7 +58,6 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		
 		if (CooldownTimer <= 0.0f)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("=== DASH COOLDOWN COMPLETE - Ready to dash again ==="));
 			CurrentDashState = EDashState::Ready;
 			CooldownTimer = 0.0f;
 		}
@@ -85,20 +75,13 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 void UDashComponent::TryDash(const FVector2D& InputDirection)
 {
-	UE_LOG(LogTemp, Warning, TEXT("=== DASH ATTEMPT ==="));
-	UE_LOG(LogTemp, Warning, TEXT("Input Direction: X=%.2f, Y=%.2f"), InputDirection.X, InputDirection.Y);
-	UE_LOG(LogTemp, Warning, TEXT("Current Dash State: %s"), 
-		CurrentDashState == EDashState::Ready ? TEXT("Ready") : 
-		CurrentDashState == EDashState::Dashing ? TEXT("Dashing") : TEXT("Cooldown"));
 	
 	if (!CanDash())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DASH FAILED: CanDash() returned false"));
 		return;
 	}
 
 	FVector DashDir = CalculateDashDirection(InputDirection);
-	UE_LOG(LogTemp, Warning, TEXT("Calculated Dash Direction: %s"), *DashDir.ToString());
 	StartDash(DashDir);
 }
 
@@ -106,19 +89,13 @@ bool UDashComponent::CanDash() const
 {
 	if (CurrentDashState != EDashState::Ready)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CanDash: FALSE - Not in Ready state (Current: %s, Cooldown: %.2f)"), 
-			CurrentDashState == EDashState::Dashing ? TEXT("Dashing") : TEXT("Cooldown"),
-			CooldownTimer);
 		return false;
 	}
 
 	if (!CheckStateRestrictions())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CanDash: FALSE - State restrictions failed"));
 		return false;
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("CanDash: TRUE - Ready to dash"));
 	return true;
 }
 
@@ -130,7 +107,6 @@ void UDashComponent::StartDash(const FVector& Direction)
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("=== STARTING DASH ==="));
 	
 	CurrentDashState = EDashState::Dashing;
 	DashDirection = Direction;
@@ -140,16 +116,11 @@ void UDashComponent::StartDash(const FVector& Direction)
 	DashTargetLocation = DashStartLocation + (DashDirection * Settings.DashDistance);
 	DashTimer = 0.0f;
 	
-	UE_LOG(LogTemp, Warning, TEXT("Dash Settings: Distance=%.1f, Duration=%.2f, Cooldown=%.2f"), 
-		Settings.DashDistance, Settings.DashDuration, Settings.DashCooldown);
-	UE_LOG(LogTemp, Warning, TEXT("Start Location: %s"), *DashStartLocation.ToString());
-	UE_LOG(LogTemp, Warning, TEXT("Target Location: %s"), *DashTargetLocation.ToString());
 
 	if (UCharacterMovementComponent* MovementComp = OwnerCharacter->GetCharacterMovement())
 	{
 		MovementComp->SetMovementMode(MOVE_Flying);
 		MovementComp->StopMovementImmediately();
-		UE_LOG(LogTemp, Warning, TEXT("Movement mode set to Flying"));
 	}
 	else
 	{
@@ -201,7 +172,6 @@ void UDashComponent::UpdateDash(float DeltaTime)
 	
 	if (DashProgress >= 1.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Dash completed (Progress: %.2f)"), DashProgress);
 		EndDash();
 	}
 }
@@ -214,7 +184,6 @@ void UDashComponent::EndDash()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("=== ENDING DASH ==="));
 	
 	CurrentDashState = EDashState::Cooldown;
 	FDashSettings Settings = GetDashSettings();
@@ -235,7 +204,6 @@ bool UDashComponent::CheckStateRestrictions() const
 {
 	if (!OwnerCharacter)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CheckStateRestrictions: No OwnerCharacter"));
 		return false;
 	}
 
@@ -243,19 +211,16 @@ bool UDashComponent::CheckStateRestrictions() const
 	{
 		if (CombatComponent->IsAttacking())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CheckStateRestrictions: Currently attacking"));
 			return false;
 		}
 		
 		if (CombatComponent->IsBlocking())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CheckStateRestrictions: Currently blocking"));
 			return false;
 		}
 		
 		if (CombatComponent->IsStaggered())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CheckStateRestrictions: Currently staggered"));
 			return false;
 		}
 	}
@@ -264,12 +229,10 @@ bool UDashComponent::CheckStateRestrictions() const
 	{
 		if (MovementComp->IsFalling())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CheckStateRestrictions: Currently falling/airborne"));
 			return false;
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("CheckStateRestrictions: All checks passed"));
 	return true;
 }
 
@@ -277,17 +240,14 @@ FVector UDashComponent::CalculateDashDirection(const FVector2D& InputDirection) 
 {
 	if (!OwnerCharacter)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CalculateDashDirection: No OwnerCharacter, returning forward"));
 		return FVector::ForwardVector;
 	}
 
 	FVector2D DashInput = InputDirection;
-	UE_LOG(LogTemp, Warning, TEXT("CalculateDashDirection Input: X=%.2f, Y=%.2f"), DashInput.X, DashInput.Y);
 	
 	if (DashInput.IsNearlyZero())
 	{
 		FVector ForwardDir = OwnerCharacter->GetActorForwardVector();
-		UE_LOG(LogTemp, Warning, TEXT("No input detected, dashing forward: %s"), *ForwardDir.ToString());
 		return ForwardDir;
 	}
 	
@@ -296,13 +256,11 @@ FVector UDashComponent::CalculateDashDirection(const FVector2D& InputDirection) 
 	{
 		DashInput.Y = 0.0f;
 		DashInput.X = FMath::Sign(DashInput.X);
-		UE_LOG(LogTemp, Warning, TEXT("Horizontal dash selected: X=%.0f"), DashInput.X);
 	}
 	else
 	{
 		DashInput.X = 0.0f;
 		DashInput.Y = FMath::Sign(DashInput.Y);
-		UE_LOG(LogTemp, Warning, TEXT("Vertical dash selected: Y=%.0f"), DashInput.Y);
 	}
 
 	if (AController* Controller = OwnerCharacter->GetController())
@@ -314,12 +272,7 @@ FVector UDashComponent::CalculateDashDirection(const FVector2D& InputDirection) 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		
 		FVector ResultDirection = (ForwardDirection * DashInput.Y) + (RightDirection * DashInput.X);
-		FVector NormalizedResult = ResultDirection.GetSafeNormal();
-		
-		UE_LOG(LogTemp, Warning, TEXT("Camera Yaw: %.1f, Final Direction: %s"), 
-			Rotation.Yaw, *NormalizedResult.ToString());
-		
-		return NormalizedResult;
+		return ResultDirection.GetSafeNormal();
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("No controller found, using actor forward"));

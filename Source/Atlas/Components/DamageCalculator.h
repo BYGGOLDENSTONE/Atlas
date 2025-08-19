@@ -58,6 +58,16 @@ class ATLAS_API UDamageCalculator : public UObject
 public:
     UPROPERTY(BlueprintAssignable, Category = "Damage")
     FOnDamageCalculated OnDamageCalculated;
+    
+    // Knockback Configuration
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Knockback", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+    float KnockbackUpwardForce = 0.3f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Knockback", meta = (ClampMin = "1.0", ClampMax = "5.0"))
+    float RagdollKnockbackMultiplier = 2.0f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Knockback")
+    float StandardKnockbackMultiplier = 1.0f;
 
     UFUNCTION(BlueprintCallable, Category = "Damage")
     FDamageInfo ProcessDamage(

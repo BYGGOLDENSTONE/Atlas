@@ -1,5 +1,56 @@
 # Atlas Development Changelog
 
+## Session: 2025-08-19 - Wall Impact System Refactor & Debug Improvements
+
+### Major Changes
+- **Wall Impact System Complete Refactor**
+  - Changed from predictive pre-checking to reactive collision-based detection
+  - Now tracks enemy during knockback flight with collision sphere
+  - Uses character's capsule component for more reliable collision detection
+  - Distinguishes between wall impacts (vertical) and floor impacts (horizontal)
+  
+- **Configurable Knockback System**
+  - Added KnockbackUpwardForce (0.0-1.0) for vertical lift control
+  - Added RagdollKnockbackMultiplier (1.0-5.0) for heavy attack scaling
+  - Added StandardKnockbackMultiplier for regular knockback tuning
+  - Knockback works from ANY direction (sideways, diagonal, forward, backward)
+  
+- **Impact Detection Improvements**
+  - Wall Impact: 2-second stagger, bounce effect, wall break VFX placeholder
+  - Floor Impact: 1-second ragdoll, recovery animation placeholder
+  - Surface detection: Wall (Normal.Z < 0.3), Floor (Normal.Z > 0.7)
+  - Lowered detection threshold from 300 to 150 knockback force
+  
+- **Debug Visualization Enhancements**
+  - Yellow sphere follows enemy during knockback (properly attached)
+  - Magenta arrow shows knockback direction and force
+  - Red sphere/effects for wall impacts
+  - Green circle/sphere for floor impacts
+  - Real-time position and direction text overlays
+  
+- **Code Cleanup**
+  - Removed verbose initialization logs (input setup, dash init, etc.)
+  - Removed attack window begin/end logs
+  - Removed combat state change logs
+  - Kept only essential error logging
+  - Cleaner console output focused on gameplay events
+
+### Technical Details
+- WallImpactComponent now uses TickComponent for tracking visualization
+- Collision detection uses QueryAndPhysics mode with proper hit events
+- Removed damage from wall impacts (stagger-only effect)
+- Added proper attachment rules for collision components
+
+### Files Modified
+- WallImpactComponent.h/cpp - Complete refactor for collision-based detection
+- DamageCalculator.h/cpp - Added configurable knockback parameters
+- PlayerCharacter.cpp - Removed verbose logging
+- DashComponent.cpp - Removed debug spam
+- CombatComponent.cpp - Cleaned up combat logs
+- AttackNotifyState.cpp - Removed attack window logs
+
+---
+
 ## Session: 2025-08-18 - Parry System Complete Removal
 
 ### Changes
