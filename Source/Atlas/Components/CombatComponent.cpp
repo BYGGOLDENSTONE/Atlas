@@ -100,58 +100,6 @@ void UCombatComponent::EndBlock()
 
 
 
-void UCombatComponent::ApplyVulnerability(int32 Charges)
-{
-    if (VulnerabilityComponent)
-    {
-        float Duration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
-        VulnerabilityComponent->ApplyVulnerability(Charges, Duration);
-        OnVulnerabilityApplied.Broadcast();
-    }
-    else
-    {
-        VulnerabilityCharges = FMath::Max(Charges, 1);
-        AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
-        
-        float VulnerabilityDuration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
-        
-        GetWorld()->GetTimerManager().SetTimer(
-            VulnerabilityTimerHandle,
-            this,
-            &UCombatComponent::EndVulnerability,
-            VulnerabilityDuration,
-            false
-        );
-
-        OnVulnerabilityApplied.Broadcast();
-    }
-}
-
-void UCombatComponent::ConsumeVulnerabilityCharge()
-{
-    if (VulnerabilityComponent)
-    {
-        VulnerabilityComponent->ConsumeCharge();
-    }
-    else
-    {
-        if (VulnerabilityCharges > 0)
-        {
-            VulnerabilityCharges--;
-            if (VulnerabilityCharges <= 0)
-            {
-                EndVulnerability();
-            }
-        }
-    }
-}
-
-void UCombatComponent::EndVulnerability()
-{
-    VulnerabilityCharges = 0;
-    RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
-    GetWorld()->GetTimerManager().ClearTimer(VulnerabilityTimerHandle);
-}
 
 
 void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTag)
@@ -254,10 +202,6 @@ void UCombatComponent::ApplyVulnerabilityWithIFrames(int32 Charges, bool bGrantI
         
         OnVulnerabilityApplied.Broadcast();
     }
-    else
-    {
-        ApplyVulnerability(Charges);
-    }
 }
 
 
@@ -300,15 +244,6 @@ bool UCombatComponent::HasCombatStateTag(const FGameplayTag& Tag) const
     return CombatStateTags.HasTag(Tag);
 }
 
-void UCombatComponent::StartBlocking()
-{
-    StartBlock();
-}
-
-void UCombatComponent::StopBlocking()
-{
-    EndBlock();
-}
 
 
 void UCombatComponent::DealDamageToTarget(AActor* Target, float Damage, const FGameplayTagContainer& AttackTags)

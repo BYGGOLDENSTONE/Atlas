@@ -107,7 +107,7 @@ void UBTTask_DefendBlock::StartBlock(AEnemyCharacter* Enemy)
 	UCombatComponent* CombatComp = Enemy->GetCombatComponent();
 	if (CombatComp)
 	{
-		CombatComp->StartBlocking();
+		CombatComp->StartBlock();
 		bIsBlocking = true;
 	}
 }
@@ -122,7 +122,7 @@ void UBTTask_DefendBlock::StopBlock(AEnemyCharacter* Enemy)
 	UCombatComponent* CombatComp = Enemy->GetCombatComponent();
 	if (CombatComp)
 	{
-		CombatComp->StopBlocking();
+		CombatComp->EndBlock();
 		bIsBlocking = false;
 	}
 }

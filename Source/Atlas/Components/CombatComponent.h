@@ -41,8 +41,6 @@ public:
     FGameplayTagContainer CombatStateTags;
 
 
-    UPROPERTY(BlueprintReadOnly, Category = "Combat State")
-    int32 VulnerabilityCharges = 0;  // Deprecated - use VulnerabilityComponent instead
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool StartAttack(const FGameplayTag& AttackTag);
@@ -57,11 +55,6 @@ public:
     void EndBlock();
 
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void ApplyVulnerability(int32 Charges = 1);  // Deprecated - use VulnerabilityComponent
-
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void ConsumeVulnerabilityCharge();  // Deprecated - use VulnerabilityComponent
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void ApplyVulnerabilityWithIFrames(int32 Charges = 1, bool bGrantIFrames = false);
@@ -94,11 +87,6 @@ public:
     void ProcessHitFromAnimation(class AGameCharacterBase* HitCharacter);
 
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void StartBlocking();
-
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void StopBlocking();
 
 
 
@@ -134,10 +122,7 @@ private:
     UPROPERTY()
     UVulnerabilityComponent* VulnerabilityComponent;
 
-    FTimerHandle VulnerabilityTimerHandle;
     float LastCombatActionTime = 0.0f;
-
-    void EndVulnerability();  // Deprecated - handled by VulnerabilityComponent
 
     void AddCombatStateTag(const FGameplayTag& Tag);
     void RemoveCombatStateTag(const FGameplayTag& Tag);

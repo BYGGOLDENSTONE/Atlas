@@ -43,16 +43,31 @@
 **Todo**: AI combos, Soul Attack (unblockable), Catch Special (gap closer), enemy dash
 
 ## Key Components
+### Core Combat
 - `HealthComponent`: Health + poise management, damage/stagger events
-- `CombatComponent`: Attack/block states, damage calculation
+- `CombatComponent`: Attack/block states, damage calculation (deprecated code removed)
 - `DashComponent`: Movement ability with i-frames
 - `FocusModeComponent`: Target detection and interaction
 - `WallImpactComponent`: Knockback collision detection
 - `VulnerabilityComponent`: Damage multiplier state
 
+### New Systems (2025-01-19)
+- `DebugRenderComponent`: Centralized debug visualization with categories
+- `AnimationManagerComponent`: Unified animation control with priority system
+- `IStaggerable` & `IBlockable`: Component interfaces for cleaner AI
+- `CombatRulesDataAsset`: All combat values centralized (no magic numbers)
+- `DebugCommandsDataAsset`: Data-driven debug commands
+
 ## Important Notes
 - Poise system moved from Combat to Health component (2025-01-19)
+- Code quality improvements completed (2025-01-19)
+- All magic numbers moved to CombatRulesDataAsset
 - Interactables are neutral - affect all characters
 - Focus range increased to 2000 units
 - No camera lock system (removed)
 - No parry system (removed)
+
+## Setup Required
+See `ENGINE_SETUP_GUIDE.md` for detailed configuration steps
+See `COMPONENT_ARCHITECTURE.md` for system dependencies
+See `nextroadmap.md` for development phases

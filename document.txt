@@ -1,0 +1,150 @@
+This document outlines the core concept, mechanics, and structure for the project, merging the original vision with expanded gameplay recommendations. It is intended as a blueprint for the grayboxing phase of development.
+
+---
+
+### Game Design Document: [Project Title Here]
+
+#### 1. High Concept
+
+**High-Concept Logline**
+A 1v1, close-combat roguelite set on a decaying, ring-shaped space station. Players must strategically manage both their own health and the station's structural integrity, using the environment itself as a weapon to expose powerful enemies before landing the critical blow.
+
+---
+
+#### 2. Core Design Pillars
+
+1.  **The Vulnerability System (Combat as Puzzle):** Combat is not about attrition. It is a strategic puzzle focused on creating openings. Significant damage can only be dealt when an opponent is "Vulnerable." The environment is the primary weapon.
+2.  **The Integrity Dilemma (The Doomsday Clock):** A dual-fail state system. Players must protect their own life and the station's integrity. The most powerful abilities risk the entire run by damaging the station, creating constant, high-stakes risk/reward choices.
+3.  **Strategic 1v1 Combat:** Focused, intense duels against a single, intelligent opponent. Combat is a fluid dance of positioning, environmental awareness, blocking, and dodging, rather than complex parry timing. The enemy AI utilizes the environment just as the player does.
+4.  **Thematic Cohesion and Narrative Drive:** The decaying station setting justifies the mechanics. The protagonist's goal—to revive his deceased wife via her cybernetic arm—provides emotional weight and a unique vector for passive abilities.
+
+---
+
+#### 3. Core Gameplay Loop
+
+1.  **Enter the Level:** The player enters a curved section of the ring-station, facing a single enemy.
+2.  **Analyze and Strategize:** The player assesses the enemy's archetype and the interactive environmental hazards available.
+3.  **The Integrity Choice:** The player must decide whether to use low-risk, less reliable methods or high-risk, powerful abilities that damage the station's integrity.
+4.  **Create an Opening:** Using abilities and environmental tools, the player attempts to make the enemy Vulnerable (Stunned, Crippled, or Exposed).
+5.  **Deal Critical Damage:** While Vulnerable, the player lands basic attacks which deal massive critical damage.
+6.  **Survive and Adapt:** The player avoids the enemy's attempts to make *them* Vulnerable. As Integrity drops, players must also adapt to increasing Station Instability.
+7.  **Claim the Reward:** Upon victory, the player chooses one reward tailored to the level's theme.
+8.  **Choose Your Path:** The player proceeds deeper into the station.
+9.  **Repeat:** The loop continues until the player's HP reaches zero or the Station Integrity collapses.
+
+---
+
+#### 4. Key Mechanics Explained
+
+##### 4.1. The Vulnerability System
+
+Neither the player nor the enemy takes significant damage unless "Vulnerable." Vulnerability is triggered by abilities or environmental interactions, which serve as setup tools rather than damage dealers.
+
+Vulnerability is tiered based on the severity of the triggering event:
+
+*   **Stunned (Brief - Yellow Indicator):**
+    *   *Cause:* Low-risk actions (e.g., throwing a small object, a quick push resulting in a standard wall collision).
+    *   *Effect:* Allows for **1 critical hit** before recovery.
+*   **Crippled (Positional - Orange Indicator):**
+    *   *Cause:* Moderate environmental interactions (e.g., electrocuted by a panel, caught in closing blast doors, slipping on slick surfaces).
+    *   *Effect:* Lasts longer. Allows for **2-3 critical hits**.
+*   **Exposed (Severe - Red Indicator):**
+    *   *Cause:* High-risk, integrity-damaging abilities (e.g., launched through a structural wall, hit by heavy machinery, decompression).
+    *   *Effect:* The enemy is completely helpless. Allows for **3-5 critical hits**.
+
+##### 4.2. The Integrity Dilemma
+
+The station has its own health bar, separate from the player's. This bar decreases when powerful, environment-altering abilities are used by either the player or the enemy. This forces the central conflict: secure the current fight using powerful abilities, or preserve the station for the long run?
+
+##### 4.3. Station Instability
+
+As Integrity drops, the station becomes Unstable, dynamically altering the gameplay environment in all future levels of the run. These effects stack.
+
+*   **80% Integrity (Minor Instability):** Lights flicker, minor steam leaks. (Atmospheric).
+*   **60% Integrity (Moderate Instability):** Localized Gravity Fluctuations. Movement becomes "floaty" in zones. Thrown objects travel in unexpected arcs.
+*   **40% Integrity (Severe Instability):** Structural Failures. Parts of the floor or ceiling randomly collapse. System Malfunctions: Environmental interactions might randomly fail or activate with a delay.
+*   **20% Integrity (Critical):** Hull Breaches appear (suction hazards near walls). Station defense systems (turrets/drones) may activate and target both parties indiscriminately. Blast doors may randomly seal, reshaping the arena mid-fight.
+
+---
+
+#### 5. Abilities and Narrative
+
+##### 5.1. Player Active Abilities
+
+Abilities are categorized based on their impact on Station Integrity.
+
+**Low Risk (Minimal/No Integrity Cost)**
+
+*   **Kinetic Pulse:** A short-range, wide-arc force push for repositioning the enemy.
+*   **Debris Pull:** A magnetic pull on a small, loose object (crate, tool chest). Use as a projectile or temporary cover.
+*   **Coolant Spray:** Creates a frictionless surface on the floor. Enemies moving quickly over it may slip (Crippled).
+*   **System Hack (Basic):** Interact with simple environmental objects (doors, lights, small consoles) from a distance.
+
+**Medium Risk (Minor Integrity Cost)**
+
+*   **Floor Destabilizer:** Causes a section of floor grating to buckle. If the enemy steps on it, they stumble (Crippled).
+*   **Impact Gauntlet:** A charged melee punch that launches the enemy significantly further than the Kinetic Pulse. Minor integrity loss due to force reverberation.
+*   **Localized EMP:** Disables high-tech environmental elements in a radius, potentially disabling enemy shields or hazards.
+
+**High Risk (Major Integrity Cost)**
+
+*   **Seismic Stamp:** A charged ground smash that cracks the floor plating. Guarantees Crippled or Exposed state in an AoE. Heavy Integrity damage.
+*   **Gravity Anchor:** Rips a heavy component (e.g., a generator) from the wall/ceiling and launches it. Guarantees Exposed if it hits. Massive Integrity damage.
+*   **Airlock Breach:** Tears a small hole in the outer hull. Massive decompression pulls everything towards the breach. Extreme Integrity loss.
+
+##### 5.2. Narrative & The Wife's Arm (Passive)
+
+**The Story:** The protagonist, a humanoid cyborg, carries the cybernetic left arm of his deceased wife. His goal is to reach the station's core to upload her consciousness from the arm's data banks, reviving her.
+
+**The Arm's Function:** This arm provides powerful, passive abilities that are AI-controlled (not triggered by the player), making them feel like a separate entity assisting the protagonist under specific conditions.
+
+*   **Firewall:** Automatically blocks the first attack that would make the player Vulnerable in a level.
+*   **Predictive Algorithm:** When the enemy is about to launch an environmental attack, the arm highlights the trajectory or the targeted object/area in the player's UI.
+*   **Emergency Sealant:** (Once per run) If an ability usage would cause the station to collapse (Integrity reaches 0), the arm prevents the failure and restores 10% Integrity.
+*   **Overclock:** When the player successfully lands a Critical Hit, the arm boosts the player's movement speed for 3 seconds, allowing for follow-up or escape.
+
+---
+
+#### 6. Enemy Design (The Guardians)
+
+**Design Philosophy:** The antagonists are intelligent duelists, not drones. The AI (built using a Behavior Tree) is designed to be adaptive, punish predictability, and utilize the environment strategically (e.g., luring the player towards hazards, checking positioning before attempting a Wall Smash).
+
+**AI Archetypes:** To manage scope, enemies are built upon core archetypes. Variety is achieved by procedurally assigning abilities and environmental preferences.
+
+*   **The Duelist (Standard):** Balanced AI. Uses the environment moderately. Focuses on positioning and punishing predictable player movement.
+*   **The Brute (Heavy):** Slow, deliberate movement. Prefers high-risk attacks and will readily sacrifice station integrity. Resistant; may require stronger impacts (Tier 2+) to become Vulnerable.
+*   **The Controller (Trapper):** Maintains distance. Focuses on remotely activating environmental hazards and luring the player into kill zones. Minimal direct combat ability.
+
+---
+
+#### 7. Level Structure, Rooms, and Rewards
+
+The game consists of 10+ levels (1v1 encounters) per run. The order of room themes is randomized each run. A level's theme dictates the hazards present and the type of reward offered.
+
+*   **Laboratory (Rewards: Stat Buffs)**
+    *   *Hazards:* Chemical spills (DoT), breakable specimen tanks, overchargeable centrifuges.
+    *   *Rewards:* HP Increase, Critical Damage Multiplier, Integrity Repair Kit, Impact Dampeners (Reduce Integrity damage taken from abilities).
+*   **Supply Bay (Rewards: New Abilities)**
+    *   *Hazards:* Unsecured crates (dynamic cover/projectiles), loading drones, magnetic cranes.
+    *   *Rewards:* Gain new Active Abilities (e.g., Seismic Stamp, Impact Gauntlet, Coolant Spray).
+*   **Control Room (Rewards: Environmental Access/Utility)**
+    *   *Hazards:* Explosive consoles, retractable blast shields, defense turrets.
+    *   *Rewards:* Security Override (activate turrets in future levels), Blast Door Codes, Map reveal (see the next 3 levels).
+*   **Hydroponics Bay (Rewards: Sustain/Defense)**
+    *   *Hazards:* Dense foliage (obscures vision), irrigation systems (slippery floors), heavy hanging pods.
+    *   *Rewards:* Passive healing buff, Block efficiency increase, Debuff resistance.
+*   **Data Archives (Rewards: Wife's Arm Upgrades)**
+    *   *Hazards:* Security fields, localized EMP fields, narrow server racks.
+    *   *Rewards:* Unlock a new passive ability for the Arm, or upgrade an existing one (e.g., Firewall blocks 2 hits).
+
+---
+
+#### 8. Grayboxing Focus
+
+The immediate development priority is to prototype the core mechanics using basic shapes and logic to ensure the gameplay feel is satisfying.
+
+1.  **Movement and Blocking:** Ensure controls are highly responsive for dodging and blocking, as these are the primary defenses.
+2.  **Interaction Clarity:** Prototype the feedback mechanisms for environmental interaction (highlighting objects, predicting trajectories).
+3.  **The Vulnerability Tiers:** Implement the Stunned, Crippled, and Exposed states and test the feel of transitioning from setup to payoff.
+4.  **The Integrity System:** Implement the dual health bars and the basic functionality of High-Risk abilities damaging the station.
+5.  **Basic AI (Duelist):** Develop the foundational Behavior Tree for an enemy that can navigate the space, identify environmental hazards, and attempt to use them against the player.

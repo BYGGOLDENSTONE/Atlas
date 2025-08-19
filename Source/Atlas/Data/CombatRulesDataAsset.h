@@ -46,8 +46,53 @@ struct FCombatRules
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Poise")
     float PoiseRegenDelay = 1.5f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stagger")
+    float StaggerDuration = 2.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stagger")
+    float WallImpactStaggerDuration = 2.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stagger")
+    float FloorImpactRagdollDuration = 1.0f;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus")
-    float FocusRange = 1000.0f;
+    float FocusRange = 2000.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus")
+    float FocusTargetPriorityWeight = 0.3f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashDistance = 400.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashCooldown = 2.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashSpeed = 2000.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dash")
+    float DashIFrameDuration = 0.3f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+    float CombatTimeoutDuration = 3.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Knockback")
+    float MinKnockbackForWallImpact = 300.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Knockback")
+    float WallImpactCheckRadius = 50.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactables")
+    float InteractableCooldown = 10.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactables")
+    float VentProjectileSpeed = 2000.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactables")
+    float VentPoiseDamage = 50.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactables")
+    float ValveAoERadius = 500.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Multipliers")
     TArray<FCombatMultiplier> DamageMultipliers;
