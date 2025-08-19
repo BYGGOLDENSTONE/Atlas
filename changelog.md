@@ -524,16 +524,7 @@
 ### Files Created
 - Source/Atlas/Components/WallImpactComponent.h/cpp
 
-### Tests Required
-- Verify combat auto-engage triggers correctly
-- Test soft lock camera tracking smoothness
-- Confirm force-unlock sensitivity
-- Test wall impact detection accuracy
-- Verify bonus damage and extended stagger
 
-### Known Issues
-- Soft lock camera has some asymmetry in rotation handling (functional but needs polish)
-- AI "out of range" warning removed but AI attack timing needs tuning
 
 ### Next Steps
 - P9 - Complete Advanced AI Features (combos, Soul Attack, Catch Special)
