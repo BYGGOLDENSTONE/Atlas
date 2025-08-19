@@ -12,13 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.h" afterDir="false" />
-    </list>
+    <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,7 +25,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://1" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -190,7 +184,7 @@
       <workItem from="1755524526838" duration="8710000" />
       <workItem from="1755537820019" duration="1744000" />
       <workItem from="1755591692479" duration="10192000" />
-      <workItem from="1755640608914" duration="323000" />
+      <workItem from="1755640608914" duration="927000" />
     </task>
     <servers />
   </component>
