@@ -1,7 +1,7 @@
 #include "ValveInteractable.h"
 #include "../Core/AtlasGameplayTags.h"
 #include "../Characters/GameCharacterBase.h"
-#include "../Characters/EnemyCharacter.h"
+#include "../Characters/PlayerCharacter.h"
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/VulnerabilityComponent.h"
@@ -34,36 +34,19 @@ void AValveInteractable::ExecuteInteraction(AActor* Interactor)
 
 void AValveInteractable::TriggerAoEEffect(AActor* Interactor)
 {
-    // Get all actors in radius for visual effect
+    // Get all actors in radius
     TArray<AActor*> AffectedActors = GetActorsInRadius();
     
-    UE_LOG(LogTemp, Warning, TEXT("VALVE: %s AoE triggered (Radius: %.0f, Actors: %d)"), 
-        *GetName(), AoERadius, AffectedActors.Num());
+    UE_LOG(LogTemp, Warning, TEXT("VALVE: %s AoE triggered (Type: %s, Radius: %.0f, Actors: %d)"), 
+        *GetName(), 
+        ValveType == EValveType::Vulnerability ? TEXT("Vulnerability") : TEXT("Stagger"),
+        AoERadius, AffectedActors.Num());
     
     // Visual effects based on type
-    FColor EffectColor = FColor::Red;
-    FString EffectName = TEXT("Fire");
-    
-    switch (EffectType)
-    {
-        case EValveEffectType::Electric:
-            EffectColor = FColor::Cyan;
-            EffectName = TEXT("Electric");
-            break;
-        case EValveEffectType::Poison:
-            EffectColor = FColor::Green;
-            EffectName = TEXT("Poison");
-            break;
-        case EValveEffectType::Physical:
-            EffectColor = FColor::White;
-            EffectName = TEXT("Physical");
-            break;
-        default:
-            break;
-    }
+    FColor EffectColor = ValveType == EValveType::Vulnerability ? FColor::Purple : FColor::Yellow;
     
     // Draw area effect visualization
-    DrawDebugSphere(GetWorld(), GetActorLocation(), AoERadius, 32, EffectColor, false, EffectDuration, 0, 3.0f);
+    DrawDebugSphere(GetWorld(), GetActorLocation(), AoERadius, 32, EffectColor, false, 3.0f, 0, 3.0f);
     
     // Draw radial lines for effect
     FVector Center = GetActorLocation();
@@ -75,7 +58,7 @@ void AValveInteractable::TriggerAoEEffect(AActor* Interactor)
             FMath::Sin(FMath::DegreesToRadians(Angle)) * AoERadius,
             0
         );
-        DrawDebugLine(GetWorld(), Center, EndPoint, EffectColor, false, EffectDuration, 0, 2.0f);
+        DrawDebugLine(GetWorld(), Center, EndPoint, EffectColor, false, 3.0f, 0, 2.0f);
     }
     
     // Draw circles at different heights for volume effect
@@ -83,16 +66,16 @@ void AValveInteractable::TriggerAoEEffect(AActor* Interactor)
     {
         FVector HeightOffset = FVector(0, 0, Height);
         DrawDebugCircle(GetWorld(), Center + HeightOffset, AoERadius * (1.0f - FMath::Abs(Height) / 200.0f), 
-            24, EffectColor, false, EffectDuration, 0, 2.0f, 
+            24, EffectColor, false, 3.0f, 0, 2.0f, 
             FVector(0, 1, 0), FVector(1, 0, 0), false);
     }
     
-    // Apply visual effects to actors in range
+    // Apply effect to all actors in range (neutral behavior)
     for (AActor* Target : AffectedActors)
     {
         if (Target && IsValid(Target))
         {
-            ApplyVisualEffectToActor(Target, Interactor);
+            ApplyEffectToActor(Target);
             
             // Draw line from valve to affected actor
             DrawDebugLine(GetWorld(), GetActorLocation(), Target->GetActorLocation(), 
@@ -101,95 +84,64 @@ void AValveInteractable::TriggerAoEEffect(AActor* Interactor)
     }
     
     // Trigger Blueprint events
-    SpawnVisualEffect(EffectType, AoERadius);
+    SpawnVisualEffect(ValveType, AoERadius);
     OnAoETriggered(AffectedActors);
     
     UE_LOG(LogTemp, Warning, TEXT("Valve %s triggered %s AoE effect (Radius: %.0f)"), 
-        *GetName(), *EffectName, AoERadius);
-    
-    // Start effect over time if enabled
-    if (bDamageOverTime && EffectDuration > 0)
-    {
-        ActiveTargets.Empty();
-        for (AActor* Target : AffectedActors)
-        {
-            ActiveTargets.Add(Target);
-        }
-        StartEffectOverTime();
-    }
+        *GetName(), 
+        ValveType == EValveType::Vulnerability ? TEXT("Vulnerability") : TEXT("Stagger"),
+        AoERadius);
 }
 
-void AValveInteractable::ApplyVisualEffectToActor(AActor* Target, AActor* Interactor)
+void AValveInteractable::ApplyEffectToActor(AActor* Target)
 {
     if (!Target || !IsValid(Target))
     {
         return;
     }
     
-    // Only apply visual effects, no damage
+    // Apply to any character (neutral behavior)
     AGameCharacterBase* Character = Cast<AGameCharacterBase>(Target);
+    if (!Character)
+    {
+        Character = Cast<APlayerCharacter>(Target);
+    }
+    
     if (!Character)
     {
         return;
     }
     
-    bool bIsEnemy = Target->IsA(AEnemyCharacter::StaticClass());
-    
-    if ((bIsEnemy && !bAffectsEnemies) || (!bIsEnemy && !bAffectsAllies))
+    if (ValveType == EValveType::Vulnerability)
     {
-        return;
-    }
-    
-    // Get archetype effect for special behaviors
-    FValveArchetypeEffect ArchetypeEffect = GetArchetypeEffect(Target);
-    
-    // Apply vulnerability if specified (non-damaging status effect)
-    if (ArchetypeEffect.bAppliesVulnerability)
-    {
+        // Apply vulnerability
         if (UVulnerabilityComponent* VulnComp = Target->FindComponentByClass<UVulnerabilityComponent>())
         {
-            VulnComp->ApplyVulnerability(1, false);
-            UE_LOG(LogTemp, Warning, TEXT("Valve applied vulnerability to %s"), *Target->GetName());
+            VulnComp->ApplyVulnerability(VulnerabilityCharges, false);
+            UE_LOG(LogTemp, Warning, TEXT("Valve applied %d vulnerability charges to %s"), 
+                VulnerabilityCharges, *Target->GetName());
         }
     }
-    
-    // Apply stagger if specified (non-damaging crowd control)
-    if (ArchetypeEffect.bAppliesStagger)
+    else if (ValveType == EValveType::Stagger)
     {
-        if (UCombatComponent* CombatComp = Character->GetCombatComponent())
+        // Apply stagger
+        if (UHealthComponent* HealthComp = Target->FindComponentByClass<UHealthComponent>())
         {
-            CombatComp->TakePoiseDamage(30.0f);
-            UE_LOG(LogTemp, Warning, TEXT("Valve applied stagger effect to %s"), *Target->GetName());
+            HealthComp->TakePoiseDamage(StaggerPoiseDamage);
+            HealthComp->PlayHitReaction();
+            UE_LOG(LogTemp, Warning, TEXT("Valve applied %.0f poise damage to %s"), 
+                StaggerPoiseDamage, *Target->GetName());
         }
     }
     
     // Visual feedback on the target
-    FColor EffectColor = FColor::Red;
-    switch (EffectType)
-    {
-        case EValveEffectType::Electric:
-            EffectColor = FColor::Cyan;
-            break;
-        case EValveEffectType::Poison:
-            EffectColor = FColor::Green;
-            break;
-        case EValveEffectType::Physical:
-            EffectColor = FColor::White;
-            break;
-    }
+    FColor EffectColor = ValveType == EValveType::Vulnerability ? FColor::Purple : FColor::Yellow;
     
     // Draw effect indicator above target
     DrawDebugSphere(GetWorld(), Target->GetActorLocation() + FVector(0, 0, 100), 
-        30, 12, EffectColor, false, EffectDuration, 0, 2.0f);
+        30, 12, EffectColor, false, 3.0f, 0, 2.0f);
     
-    UE_LOG(LogTemp, Log, TEXT("Valve visual effect applied to %s"), *Target->GetName());
-}
-
-// Renamed from ApplyEffectToActor to avoid confusion
-void AValveInteractable::ApplyEffectToActor(AActor* Target, AActor* Interactor)
-{
-    // Redirect to visual-only effect
-    ApplyVisualEffectToActor(Target, Interactor);
+    UE_LOG(LogTemp, Log, TEXT("Valve effect applied to %s"), *Target->GetName());
 }
 
 TArray<AActor*> AValveInteractable::GetActorsInRadius() const
@@ -217,7 +169,9 @@ TArray<AActor*> AValveInteractable::GetActorsInRadius() const
         {
             if (AActor* Actor = Result.GetActor())
             {
-                if (Actor->IsA(AGameCharacterBase::StaticClass()))
+                // Check for any character type (neutral behavior)
+                if (Actor->IsA(AGameCharacterBase::StaticClass()) || 
+                    Actor->IsA(APlayerCharacter::StaticClass()))
                 {
                     ActorsInRadius.Add(Actor);
                 }
@@ -228,130 +182,3 @@ TArray<AActor*> AValveInteractable::GetActorsInRadius() const
     return ActorsInRadius;
 }
 
-FGameplayTag AValveInteractable::GetDamageTypeTag() const
-{
-    const FAtlasGameplayTags& GameplayTags = FAtlasGameplayTags::Get();
-    
-    switch (EffectType)
-    {
-        case EValveEffectType::Fire:
-            return GameplayTags.Damage_Type_Fire;
-        case EValveEffectType::Electric:
-            return GameplayTags.Damage_Type_Electric;
-        case EValveEffectType::Poison:
-            return GameplayTags.Damage_Type_Poison;
-        case EValveEffectType::Physical:
-        default:
-            return GameplayTags.Damage_Type_Physical;
-    }
-}
-
-FValveArchetypeEffect AValveInteractable::GetArchetypeEffect(AActor* Target) const
-{
-    FValveArchetypeEffect DefaultEffect;
-    DefaultEffect.DamageMultiplier = 1.0f;
-    DefaultEffect.RadiusMultiplier = 1.0f;
-    
-    if (!Target)
-    {
-        return DefaultEffect;
-    }
-    
-    for (const FValveArchetypeEffect& Effect : ArchetypeEffects)
-    {
-        if (AGameCharacterBase* Character = Cast<AGameCharacterBase>(Target))
-        {
-            if (UCombatComponent* CombatComp = Character->GetCombatComponent())
-            {
-                if (CombatComp->CombatStateTags.HasTag(Effect.ArchetypeTag))
-                {
-                    return Effect;
-                }
-            }
-        }
-    }
-    
-    return DefaultEffect;
-}
-
-void AValveInteractable::StartEffectOverTime()
-{
-    // Renamed from StartDamageOverTime
-    if (DamageOverTimeHandle.IsValid())
-    {
-        GetWorld()->GetTimerManager().ClearTimer(DamageOverTimeHandle);
-    }
-    
-    GetWorld()->GetTimerManager().SetTimer(
-        DamageOverTimeHandle,
-        this,
-        &AValveInteractable::ApplyTickEffect,
-        TickDamageInterval,
-        true,
-        0.0f
-    );
-    
-    FTimerHandle StopTimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(
-        StopTimerHandle,
-        this,
-        &AValveInteractable::StopEffectOverTime,
-        EffectDuration,
-        false
-    );
-}
-
-void AValveInteractable::StopEffectOverTime()
-{
-    // Renamed from StopDamageOverTime
-    GetWorld()->GetTimerManager().ClearTimer(DamageOverTimeHandle);
-    ActiveTargets.Empty();
-    
-    UE_LOG(LogTemp, Log, TEXT("Valve %s stopped effect over time"), *GetName());
-}
-
-void AValveInteractable::ApplyTickEffect()
-{
-    // Renamed from ApplyTickDamage
-    TArray<TWeakObjectPtr<AActor>> ValidTargets;
-    
-    for (const TWeakObjectPtr<AActor>& WeakTarget : ActiveTargets)
-    {
-        if (AActor* Target = WeakTarget.Get())
-        {
-            if (IsValid(Target))
-            {
-                float Distance = FVector::Dist(GetActorLocation(), Target->GetActorLocation());
-                if (Distance <= AoERadius * 1.2f)
-                {
-                    // Apply visual effect only, no damage
-                    ApplyVisualEffectToActor(Target, LastInteractor.Get());
-                    ValidTargets.Add(WeakTarget);
-                }
-            }
-        }
-    }
-    
-    ActiveTargets = ValidTargets;
-    
-    if (ActiveTargets.Num() == 0)
-    {
-        StopEffectOverTime();
-    }
-}
-
-// Keep these for backward compatibility but they don't deal damage anymore
-void AValveInteractable::StartDamageOverTime()
-{
-    StartEffectOverTime();
-}
-
-void AValveInteractable::StopDamageOverTime()
-{
-    StopEffectOverTime();
-}
-
-void AValveInteractable::ApplyTickDamage()
-{
-    ApplyTickEffect();
-}

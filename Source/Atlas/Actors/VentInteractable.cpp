@@ -2,6 +2,7 @@
 #include "../Core/AtlasGameplayTags.h"
 #include "../Characters/EnemyCharacter.h"
 #include "../Characters/GameCharacterBase.h"
+#include "../Characters/PlayerCharacter.h"
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "Engine/World.h"
@@ -175,8 +176,14 @@ void AVentInteractable::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
         return;
     }
     
-    // Check if we hit an enemy
-    if (Cast<AEnemyCharacter>(OtherActor) || Cast<AGameCharacterBase>(OtherActor))
+    // Check if we hit any character (neutral behavior)
+    AGameCharacterBase* HitCharacter = Cast<AGameCharacterBase>(OtherActor);
+    if (!HitCharacter)
+    {
+        HitCharacter = Cast<APlayerCharacter>(OtherActor);
+    }
+    
+    if (HitCharacter)
     {
         UE_LOG(LogTemp, Warning, TEXT("Vent %s hit %s!"), *GetName(), *OtherActor->GetName());
         
@@ -185,15 +192,18 @@ void AVentInteractable::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
         // Visual feedback
         DrawDebugSphere(GetWorld(), Hit.Location, 75, 12, FColor::Yellow, false, 2.0f);
         
-        // Reduce velocity after hit but keep flying
-        if (MeshComponent)
+        // Despawn after hitting a character
+        FTimerHandle DespawnTimer;
+        GetWorld()->GetTimerManager().SetTimer(DespawnTimer, [this]()
         {
-            FVector CurrentVelocity = MeshComponent->GetPhysicsLinearVelocity();
-            MeshComponent->SetPhysicsLinearVelocity(CurrentVelocity * 0.5f);
-        }
+            Destroy();
+        }, 0.5f, false);
+        
+        bIsFlying = false;
+        return;
     }
     
-    // Handle bouncing
+    // Handle bouncing off walls/floors
     if (bShouldBounce && MeshComponent)
     {
         // Physics engine handles bouncing automatically with restitution
@@ -208,11 +218,14 @@ void AVentInteractable::ApplyStaggerToTarget(AActor* HitActor)
         return;
     }
     
-    if (UCombatComponent* CombatComp = HitActor->FindComponentByClass<UCombatComponent>())
+    if (UHealthComponent* HealthComp = HitActor->FindComponentByClass<UHealthComponent>())
     {
-        CombatComp->TakePoiseDamage(StaggerPoiseDamage);
+        HealthComp->TakePoiseDamage(StaggerPoiseDamage);
         
-        if (CombatComp->IsStaggered())
+        // Play hit reaction animation
+        HealthComp->PlayHitReaction();
+        
+        if (HealthComp->IsStaggered())
         {
             UE_LOG(LogTemp, Warning, TEXT("Vent staggered %s!"), *HitActor->GetName());
         }

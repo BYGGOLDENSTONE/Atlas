@@ -18,15 +18,6 @@ void UCombatComponent::BeginPlay()
 {
     Super::BeginPlay();
     
-    if (CombatRules)
-    {
-        CurrentPoise = CombatRules->CombatRules.MaxPoise;
-    }
-    else
-    {
-        CurrentPoise = 100.0f; // Default value if no CombatRules set
-    }
-
     DamageCalculator = NewObject<UDamageCalculator>(this);
     
     VulnerabilityComponent = GetOwner()->FindComponentByClass<UVulnerabilityComponent>();
@@ -40,20 +31,12 @@ void UCombatComponent::BeginPlay()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-    if (CombatRules && !bPoiseRegenActive && CurrentPoise < CombatRules->CombatRules.MaxPoise)
-    {
-        PoiseRegenDelayTime += DeltaTime;
-        if (PoiseRegenDelayTime >= CombatRules->CombatRules.PoiseRegenDelay)
-        {
-            StartPoiseRegen();
-        }
-    }
 }
 
 bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
 {
-    if (IsStaggered() || IsAttacking())
+    UHealthComponent* HealthComp = GetOwner()->FindComponentByClass<UHealthComponent>();
+    if ((HealthComp && HealthComp->IsStaggered()) || IsAttacking())
     {
         return false;
     }
@@ -97,7 +80,8 @@ void UCombatComponent::EndAttack()
 
 bool UCombatComponent::StartBlock()
 {
-    if (IsStaggered() || IsAttacking())
+    UHealthComponent* HealthComp = GetOwner()->FindComponentByClass<UHealthComponent>();
+    if ((HealthComp && HealthComp->IsStaggered()) || IsAttacking())
     {
         return false;
     }
@@ -169,78 +153,6 @@ void UCombatComponent::EndVulnerability()
     GetWorld()->GetTimerManager().ClearTimer(VulnerabilityTimerHandle);
 }
 
-void UCombatComponent::TakePoiseDamage(float Damage)
-{
-    CurrentPoise = FMath::Max(0.0f, CurrentPoise - Damage);
-    PoiseRegenDelayTime = 0.0f;
-    bPoiseRegenActive = false;
-    LastCombatActionTime = GetWorld()->GetTimeSeconds();
-
-    if (CurrentPoise <= 0.0f && !IsStaggered())
-    {
-        AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
-        OnStaggered.Broadcast();
-
-        if (IsAttacking())
-        {
-            EndAttack();
-        }
-        if (IsBlocking())
-        {
-            EndBlock();
-        }
-
-        GetWorld()->GetTimerManager().SetTimer(
-            StaggerRecoveryTimerHandle,
-            this,
-            &UCombatComponent::RecoverFromStagger,
-            2.0f,
-            false
-        );
-    }
-}
-
-void UCombatComponent::RecoverFromStagger()
-{
-    RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
-    ResetPoise();
-}
-
-void UCombatComponent::ResetPoise()
-{
-    CurrentPoise = CombatRules ? CombatRules->CombatRules.MaxPoise : 100.0f;
-    PoiseRegenDelayTime = 0.0f;
-    bPoiseRegenActive = false;
-}
-
-void UCombatComponent::StartPoiseRegen()
-{
-    bPoiseRegenActive = true;
-    GetWorld()->GetTimerManager().SetTimer(
-        PoiseRegenTimerHandle,
-        this,
-        &UCombatComponent::RegenPoise,
-        0.1f,
-        true
-    );
-}
-
-void UCombatComponent::RegenPoise()
-{
-    if (!IsStaggered() && CombatRules)
-    {
-        CurrentPoise = FMath::Min(
-            CurrentPoise + (CombatRules->CombatRules.PoiseRegenRate * 0.1f),
-            CombatRules->CombatRules.MaxPoise
-        );
-
-        if (CurrentPoise >= CombatRules->CombatRules.MaxPoise)
-        {
-            bPoiseRegenActive = false;
-            GetWorld()->GetTimerManager().ClearTimer(PoiseRegenTimerHandle);
-        }
-    }
-}
 
 void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTag)
 {
@@ -264,7 +176,10 @@ void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTa
         TargetCombat->CombatStateTags
     );
 
-    TargetCombat->TakePoiseDamage(CurrentAttackData->AttackData.StaggerDamage);
+    if (UHealthComponent* TargetHealth = HitActor->FindComponentByClass<UHealthComponent>())
+    {
+        TargetHealth->TakePoiseDamage(CurrentAttackData->AttackData.StaggerDamage);
+    }
 }
 
 void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
@@ -289,7 +204,10 @@ void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
         TargetCombat->CombatStateTags
     );
 
-    TargetCombat->TakePoiseDamage(CurrentAttackData->AttackData.StaggerDamage);
+    if (UHealthComponent* TargetHealth = HitCharacter->FindComponentByClass<UHealthComponent>())
+    {
+        TargetHealth->TakePoiseDamage(CurrentAttackData->AttackData.StaggerDamage);
+    }
 }
 
 
@@ -343,15 +261,11 @@ void UCombatComponent::ApplyVulnerabilityWithIFrames(int32 Charges, bool bGrantI
 }
 
 
-bool UCombatComponent::IsStaggered() const
-{
-    return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
-}
-
 bool UCombatComponent::IsInCombat() const
 {
     // Check if we're actively attacking, blocking, or recently damaged
-    if (IsAttacking() || IsBlocking() || IsStaggered())
+    UHealthComponent* HealthComp = GetOwner()->FindComponentByClass<UHealthComponent>();
+    if (IsAttacking() || IsBlocking() || (HealthComp && HealthComp->IsStaggered()))
     {
         return true;
     }

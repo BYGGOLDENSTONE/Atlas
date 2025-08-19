@@ -16,7 +16,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnded);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBlockStarted, bool, bSuccess);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlockEnded);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVulnerabilityApplied);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaggered);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ATLAS_API UCombatComponent : public UActorComponent
@@ -41,8 +40,6 @@ public:
     UPROPERTY(BlueprintReadOnly, Category = "Combat State")
     FGameplayTagContainer CombatStateTags;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Combat State")
-    float CurrentPoise = 100.0f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Combat State")
     int32 VulnerabilityCharges = 0;  // Deprecated - use VulnerabilityComponent instead
@@ -69,11 +66,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void ApplyVulnerabilityWithIFrames(int32 Charges = 1, bool bGrantIFrames = false);
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void TakePoiseDamage(float Damage);
-
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void ResetPoise();
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsAttacking() const;
@@ -89,8 +81,6 @@ public:
     bool HasIFrames() const;
 
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    bool IsStaggered() const;
     
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool IsInCombat() const;
@@ -134,9 +124,6 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Combat Events")
     FOnVulnerabilityApplied OnVulnerabilityApplied;
 
-    UPROPERTY(BlueprintAssignable, Category = "Combat Events")
-    FOnStaggered OnStaggered;
-
 private:
     UPROPERTY()
     UAttackDataAsset* CurrentAttackData;
@@ -148,17 +135,9 @@ private:
     UVulnerabilityComponent* VulnerabilityComponent;
 
     FTimerHandle VulnerabilityTimerHandle;
-    FTimerHandle PoiseRegenTimerHandle;
-    FTimerHandle StaggerRecoveryTimerHandle;
-
-    float PoiseRegenDelayTime = 0.0f;
-    bool bPoiseRegenActive = false;
     float LastCombatActionTime = 0.0f;
 
     void EndVulnerability();  // Deprecated - handled by VulnerabilityComponent
-    void StartPoiseRegen();
-    void RegenPoise();
-    void RecoverFromStagger();
 
     void AddCombatStateTag(const FGameplayTag& Tag);
     void RemoveCombatStateTag(const FGameplayTag& Tag);

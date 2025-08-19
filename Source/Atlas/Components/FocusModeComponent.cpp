@@ -394,7 +394,7 @@ bool UFocusModeComponent::TryInteractWithFocusedTarget()
     }
     
     // Use focus range for interaction, not individual interaction distance
-    // This allows interaction from anywhere within focus range (1000 units)
+    // This allows interaction from anywhere within focus range (2000 units)
     if (CurrentTargetInfo.WorldDistance > FocusRange)
     {
         UE_LOG(LogTemp, Warning, TEXT("Too far to interact with %s (Distance: %.0f, Max: %.0f)"), 

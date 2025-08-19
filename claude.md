@@ -17,7 +17,7 @@
   * Block: 40% damage reduction (RMB hold)
   * Vulnerability: 8x damage multiplier with charge system
 
-* **Stagger/Poise**: Prevents infinite trading, action lock on poise break
+* **Stagger/Poise**: Managed by HealthComponent, prevents infinite trading, action lock on poise break
 * **Mobility**:
 
   * Dash: 4-directional dash (Space), invincibility frames
@@ -25,8 +25,10 @@
 
 ### Key Mechanics
 
-* **Focus Mode (Q)**: Screen-space targeting for interactables (1000 unit range)
-* **Interactables**: Vent (projectile stagger), Valve (AoE with archetype-specific effects)
+* **Focus Mode (Q)**: Screen-space targeting for interactables (2000 unit range)
+* **Interactables**: Neutral objects that affect all characters
+  * **Vent**: Physics projectile, applies stagger, despawns after hit
+  * **Valve**: Two types - Vulnerability or Stagger AoE effect
 
 ### AI System
 
@@ -41,8 +43,8 @@
 * Heavy: 500 knockback + ragdoll
 * Vulnerability: 1s duration, 1 charge default, 8x multiplier
 * Block: 60% damage taken (40% reduction) - RMB hold
-* Poise: 100 max, 20 jab damage, 15/s regen after 1.5s
-* Focus Range: 1000 units
+* Poise: 100 max, 20 jab damage, 15/s regen after 1.5s (managed by HealthComponent)
+* Focus Range: 2000 units
 * Dash: 400 units distance, 1s duration, 2s cooldown (configurable)
 
 ## Development Rules
@@ -71,17 +73,18 @@
 * Ragdoll knockback system working
 * **Missing**: Wall impact detection and bonus damage (moved to P8)
 
-### ✅ P6: Stagger System + Poise - COMPLETED
+### ✅ P6: Stagger System + Poise - COMPLETED (Refactored 2025-01-19)
 
-* Full poise system (100 max, 20 jab damage, 15/s regen)
+* Full poise system moved to HealthComponent (100 max, 20 jab damage, 15/s regen)
 * Stagger on poise break with recovery timer
 * Action lock during stagger state
+* Hit reaction animations on poise damage
 
 ### ✅ P7: Focus Mode \& Interactables - COMPLETED
 
 * **Focus Mode System**:
 
-  * Q key hold to activate (1000 unit detection range)
+  * Q key hold to activate (2000 unit detection range)
   * Screen-space targeting prioritizes closest to center
   * Release Q to interact with focused target
   * Debug visualization with colored spheres and lines
@@ -97,18 +100,21 @@
   * InteractableBase abstract class with cooldown management
   * Visual feedback for focused/cooldown states
 
-* **Vent Interactable**: Physics-based projectile
+* **Vent Interactable**: Physics-based projectile (Refactored 2025-01-19)
 
   * Launches itself when triggered (predetermined direction)
   * Configurable physics (mass, speed, bounce)
-  * Applies stagger on hit (50 poise damage)
+  * Applies stagger on hit (50 poise damage) to any character
+  * Despawns after hitting a character
+  * Plays hit reaction animation on impact
   * One-time use only
 
-* **Valve Interactable**: Area effect visualization
+* **Valve Interactable**: Area effect (Refactored 2025-01-19)
 
   * 500 unit AoE radius with visual effects
-  * Four types: Fire (red), Electric (cyan), Poison (green), Physical (white)
-  * Optional vulnerability/stagger application
+  * Two types: Vulnerability (purple) or Stagger (yellow)
+  * Affects all characters in range (neutral behavior)
+  * Single instant effect (no damage over time)
   * 10-second cooldown
 
 ### ✅ P8: Wall Impact - COMPLETED (Refactored 2025-08-19)

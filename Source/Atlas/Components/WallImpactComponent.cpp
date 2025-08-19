@@ -240,21 +240,21 @@ void UWallImpactComponent::ApplyWallImpactEffects(AActor* Target, const FHitResu
     UE_LOG(LogTemp, Warning, TEXT("  - Wall Break VFX at: %s"), *WallHit.Location.ToString());
     
     // Apply extended stagger for wall impact
-    UCombatComponent* CombatComp = Target->FindComponentByClass<UCombatComponent>();
-    if (CombatComp)
+    UHealthComponent* HealthComp = Target->FindComponentByClass<UHealthComponent>();
+    if (HealthComp)
     {
         // Apply full poise damage to guarantee stagger
-        CombatComp->TakePoiseDamage(100.0f);
+        HealthComp->TakePoiseDamage(100.0f);
         
         // Set up extended stagger timer for wall impact (2 seconds)
         FTimerHandle ExtendedStaggerTimer;
         FTimerDelegate StaggerDelegate;
-        StaggerDelegate.BindLambda([CombatComp, this]()
+        StaggerDelegate.BindLambda([HealthComp, this]()
         {
-            if (CombatComp && CombatComp->IsStaggered())
+            if (HealthComp && HealthComp->IsStaggered())
             {
                 // Keep them staggered for the full duration
-                CombatComp->TakePoiseDamage(50.0f);
+                HealthComp->TakePoiseDamage(50.0f);
             }
         });
         
@@ -310,11 +310,11 @@ void UWallImpactComponent::ApplyFloorImpactEffects(AActor* Target, const FHitRes
     UE_LOG(LogTemp, Warning, TEXT("  - Recovery Timer Started"));
     UE_LOG(LogTemp, Warning, TEXT("  - Floor Impact at: %s"), *FloorHit.Location.ToString());
     
-    UCombatComponent* CombatComp = Target->FindComponentByClass<UCombatComponent>();
-    if (CombatComp)
+    UHealthComponent* HealthComp = Target->FindComponentByClass<UHealthComponent>();
+    if (HealthComp)
     {
         // Apply moderate poise damage for floor impact
-        CombatComp->TakePoiseDamage(50.0f);
+        HealthComp->TakePoiseDamage(50.0f);
         
         // Set up recovery timer for floor impact (1 second)
         FTimerHandle FloorRecoveryTimer;

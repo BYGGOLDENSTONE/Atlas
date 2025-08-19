@@ -207,6 +207,15 @@ bool UDashComponent::CheckStateRestrictions() const
 		return false;
 	}
 
+	// Check if staggered via HealthComponent
+	if (UHealthComponent* HealthComp = OwnerCharacter->FindComponentByClass<UHealthComponent>())
+	{
+		if (HealthComp->IsStaggered())
+		{
+			return false;
+		}
+	}
+
 	if (CombatComponent)
 	{
 		if (CombatComponent->IsAttacking())
@@ -219,10 +228,6 @@ bool UDashComponent::CheckStateRestrictions() const
 			return false;
 		}
 		
-		if (CombatComponent->IsStaggered())
-		{
-			return false;
-		}
 	}
 
 	if (UCharacterMovementComponent* MovementComp = OwnerCharacter->GetCharacterMovement())

@@ -9,6 +9,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamageTaken, float, DamageAmount
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealed, float, HealAmount, AActor*, HealInstigator);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, KilledBy);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRevived);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnPoiseChanged, float, CurrentPoise, float, MaxPoise, float, PoiseDelta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaggered);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaggerRecovered);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ATLAS_API UHealthComponent : public UActorComponent
@@ -20,6 +23,7 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (ClampMin = "1.0"))
@@ -33,6 +37,24 @@ public:
     
     UPROPERTY(BlueprintReadOnly, Category = "Health")
     bool bIsInvincible = false;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Poise", meta = (ClampMin = "1.0"))
+    float MaxPoise = 100.0f;
+    
+    UPROPERTY(BlueprintReadOnly, Category = "Poise")
+    float CurrentPoise;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Poise")
+    float PoiseRegenRate = 15.0f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Poise")
+    float PoiseRegenDelay = 1.5f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Poise")
+    float StaggerDuration = 2.0f;
+    
+    UPROPERTY(BlueprintReadOnly, Category = "Poise")
+    bool bIsStaggered = false;
 
     UFUNCTION(BlueprintCallable, Category = "Health")
     void TakeDamage(float DamageAmount, AActor* DamageInstigator);
@@ -66,6 +88,27 @@ public:
     
     UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsInvincible() const { return bIsInvincible; }
+    
+    UFUNCTION(BlueprintCallable, Category = "Poise")
+    void TakePoiseDamage(float PoiseDamage, AActor* DamageInstigator = nullptr);
+    
+    UFUNCTION(BlueprintCallable, Category = "Poise")
+    void ResetPoise();
+    
+    UFUNCTION(BlueprintCallable, Category = "Poise")
+    float GetPoisePercent() const;
+    
+    UFUNCTION(BlueprintCallable, Category = "Poise")
+    bool IsStaggered() const { return bIsStaggered; }
+    
+    UFUNCTION(BlueprintCallable, Category = "Poise")
+    float GetCurrentPoise() const { return CurrentPoise; }
+    
+    UFUNCTION(BlueprintCallable, Category = "Poise")
+    float GetMaxPoise() const { return MaxPoise; }
+    
+    UFUNCTION(BlueprintCallable, Category = "Animation")
+    void PlayHitReaction();
 
     UPROPERTY(BlueprintAssignable, Category = "Health Events")
     FOnHealthChanged OnHealthChanged;
@@ -81,10 +124,28 @@ public:
 
     UPROPERTY(BlueprintAssignable, Category = "Health Events")
     FOnRevived OnRevived;
+    
+    UPROPERTY(BlueprintAssignable, Category = "Poise Events")
+    FOnPoiseChanged OnPoiseChanged;
+    
+    UPROPERTY(BlueprintAssignable, Category = "Poise Events")
+    FOnStaggered OnStaggered;
+    
+    UPROPERTY(BlueprintAssignable, Category = "Poise Events")
+    FOnStaggerRecovered OnStaggerRecovered;
 
 private:
     AActor* LastDamageInstigator;
+    
+    FTimerHandle PoiseRegenTimerHandle;
+    FTimerHandle StaggerRecoveryTimerHandle;
+    float PoiseRegenDelayTime = 0.0f;
+    bool bPoiseRegenActive = false;
 
     void HandleDeath(AActor* KilledBy);
     void BroadcastHealthChange(float HealthDelta);
+    void BroadcastPoiseChange(float PoiseDelta);
+    void StartPoiseRegen();
+    void RegenPoise();
+    void RecoverFromStagger();
 };

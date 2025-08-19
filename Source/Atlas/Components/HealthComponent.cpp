@@ -2,10 +2,14 @@
 #include "CombatComponent.h"
 #include "GameFramework/Actor.h"
 #include "Engine/Engine.h"
+#include "TimerManager.h"
+#include "GameFramework/Character.h"
+#include "Animation/AnimInstance.h"
 
 UHealthComponent::UHealthComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
+    PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.bStartWithTickEnabled = true;
 }
 
 void UHealthComponent::BeginPlay()
@@ -13,7 +17,9 @@ void UHealthComponent::BeginPlay()
     Super::BeginPlay();
     
     CurrentHealth = MaxHealth;
+    CurrentPoise = MaxPoise;
     bIsDead = false;
+    bIsStaggered = false;
 }
 
 void UHealthComponent::TakeDamage(float DamageAmount, AActor* DamageInstigator)
@@ -155,4 +161,162 @@ void UHealthComponent::HandleDeath(AActor* KilledBy)
 void UHealthComponent::BroadcastHealthChange(float HealthDelta)
 {
     OnHealthChanged.Broadcast(CurrentHealth, MaxHealth, HealthDelta);
+}
+
+void UHealthComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    
+    if (!bPoiseRegenActive && CurrentPoise < MaxPoise && !bIsStaggered)
+    {
+        PoiseRegenDelayTime += DeltaTime;
+        if (PoiseRegenDelayTime >= PoiseRegenDelay)
+        {
+            StartPoiseRegen();
+        }
+    }
+}
+
+void UHealthComponent::TakePoiseDamage(float PoiseDamage, AActor* DamageInstigator)
+{
+    if (bIsStaggered || PoiseDamage <= 0.0f)
+    {
+        return;
+    }
+    
+    float ActualDamage = FMath::Min(PoiseDamage, CurrentPoise);
+    CurrentPoise = FMath::Max(0.0f, CurrentPoise - ActualDamage);
+    PoiseRegenDelayTime = 0.0f;
+    bPoiseRegenActive = false;
+    
+    BroadcastPoiseChange(-ActualDamage);
+    
+    UE_LOG(LogTemp, Log, TEXT("%s took %.1f poise damage. Poise: %.1f/%.1f"),
+        *GetOwner()->GetName(), ActualDamage, CurrentPoise, MaxPoise);
+    
+    if (CurrentPoise <= 0.0f && !bIsStaggered)
+    {
+        bIsStaggered = true;
+        OnStaggered.Broadcast();
+        
+        if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+        {
+            CombatComp->CombatStateTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
+            
+            if (CombatComp->IsAttacking())
+            {
+                CombatComp->EndAttack();
+            }
+            if (CombatComp->IsBlocking())
+            {
+                CombatComp->EndBlock();
+            }
+        }
+        
+        PlayHitReaction();
+        
+        GetWorld()->GetTimerManager().SetTimer(
+            StaggerRecoveryTimerHandle,
+            this,
+            &UHealthComponent::RecoverFromStagger,
+            StaggerDuration,
+            false
+        );
+        
+        if (GEngine)
+        {
+            FString DebugMessage = FString::Printf(TEXT("%s STAGGERED!"), *GetOwner()->GetName());
+            GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, DebugMessage);
+        }
+    }
+}
+
+void UHealthComponent::ResetPoise()
+{
+    CurrentPoise = MaxPoise;
+    PoiseRegenDelayTime = 0.0f;
+    bPoiseRegenActive = false;
+    BroadcastPoiseChange(MaxPoise - CurrentPoise);
+}
+
+float UHealthComponent::GetPoisePercent() const
+{
+    return MaxPoise > 0.0f ? CurrentPoise / MaxPoise : 0.0f;
+}
+
+void UHealthComponent::PlayHitReaction()
+{
+    if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+    {
+        if (UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance())
+        {
+            UAnimMontage* HitMontage = nullptr;
+            
+            if (bIsStaggered)
+            {
+                AnimInstance->Montage_Play(HitMontage, 1.0f);
+            }
+            else
+            {
+                AnimInstance->Montage_Play(HitMontage, 1.0f);
+            }
+        }
+    }
+}
+
+void UHealthComponent::BroadcastPoiseChange(float PoiseDelta)
+{
+    OnPoiseChanged.Broadcast(CurrentPoise, MaxPoise, PoiseDelta);
+}
+
+void UHealthComponent::StartPoiseRegen()
+{
+    bPoiseRegenActive = true;
+    GetWorld()->GetTimerManager().SetTimer(
+        PoiseRegenTimerHandle,
+        this,
+        &UHealthComponent::RegenPoise,
+        0.1f,
+        true
+    );
+}
+
+void UHealthComponent::RegenPoise()
+{
+    if (!bIsStaggered)
+    {
+        float RegenAmount = PoiseRegenRate * 0.1f;
+        float OldPoise = CurrentPoise;
+        CurrentPoise = FMath::Min(CurrentPoise + RegenAmount, MaxPoise);
+        
+        if (CurrentPoise != OldPoise)
+        {
+            BroadcastPoiseChange(CurrentPoise - OldPoise);
+        }
+        
+        if (CurrentPoise >= MaxPoise)
+        {
+            bPoiseRegenActive = false;
+            GetWorld()->GetTimerManager().ClearTimer(PoiseRegenTimerHandle);
+        }
+    }
+}
+
+void UHealthComponent::RecoverFromStagger()
+{
+    bIsStaggered = false;
+    
+    if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+    {
+        CombatComp->CombatStateTags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
+    }
+    
+    OnStaggerRecovered.Broadcast();
+    ResetPoise();
+    
+    if (GEngine)
+    {
+        FString DebugMessage = FString::Printf(TEXT("%s recovered from stagger"), *GetOwner()->GetName());
+        GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, DebugMessage);
+    }
 }

@@ -1,5 +1,45 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-19 - Interactables & Poise System Refactor
+
+### Major Changes
+- **Poise System Moved to HealthComponent**
+  - Moved all poise management from CombatComponent to HealthComponent
+  - Centralized health and stagger mechanics in one component
+  - Added PlayHitReaction() for animation feedback
+  - Poise regen (15/s after 1.5s delay) now handled by HealthComponent tick
+  
+- **Interactables Refactored to be Neutral**
+  - All interactables now affect any character (player or enemy)
+  - Removed ally/enemy targeting distinction
+  - Vent: Despawns after hitting any character, plays hit reaction
+  - Valve: Two distinct types (Vulnerability or Stagger)
+  
+- **Valve Simplification**
+  - Removed damage dealing and effect types (Fire/Electric/Poison/Physical)
+  - Simplified to two variants: Vulnerability (purple) or Stagger (yellow)
+  - Removed damage-over-time mechanics
+  - Single instant effect on trigger
+  
+- **Focus Mode Range Increased**
+  - Extended from 1000 to 2000 units
+  - Better interaction range for environmental objects
+  
+### Technical Details
+- HealthComponent now manages both health and poise with proper events
+- DashComponent and WallImpactComponent updated to use HealthComponent for stagger checks
+- Fixed compilation errors with PlayerCharacter vs AtlasCharacter naming
+- All combat components properly reference HealthComponent for poise
+
+### Files Modified
+- HealthComponent.h/cpp - Added poise system from CombatComponent
+- CombatComponent.h/cpp - Removed poise system, now uses HealthComponent
+- VentInteractable.cpp - Added despawn and hit reactions
+- ValveInteractable.h/cpp - Simplified to two types, removed damage
+- FocusModeComponent.h/cpp - Range increased to 2000
+- DashComponent.cpp - Updated to check stagger via HealthComponent
+- WallImpactComponent.cpp - Updated to apply poise damage via HealthComponent
+
 ## Session: 2025-08-19 - Wall Impact System Refactor & Debug Improvements
 
 ### Major Changes

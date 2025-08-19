@@ -50,7 +50,7 @@ protected:
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus Mode")
-    float FocusRange = 1000.0f;
+    float FocusRange = 2000.0f;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Focus Mode")
     float ScreenCenterTolerance = 100.0f;

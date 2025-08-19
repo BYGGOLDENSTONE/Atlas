@@ -6,33 +6,10 @@
 #include "ValveInteractable.generated.h"
 
 UENUM(BlueprintType)
-enum class EValveEffectType : uint8
+enum class EValveType : uint8
 {
-    Fire UMETA(DisplayName = "Fire"),
-    Electric UMETA(DisplayName = "Electric"),
-    Poison UMETA(DisplayName = "Poison"),
-    Physical UMETA(DisplayName = "Physical")
-};
-
-USTRUCT(BlueprintType)
-struct FValveArchetypeEffect
-{
-    GENERATED_BODY()
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FGameplayTag ArchetypeTag;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float DamageMultiplier = 1.0f;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float RadiusMultiplier = 1.0f;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bAppliesVulnerability = false;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bAppliesStagger = false;
+    Vulnerability UMETA(DisplayName = "Vulnerability"),
+    Stagger UMETA(DisplayName = "Stagger")
 };
 
 UCLASS()
@@ -49,31 +26,16 @@ protected:
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    EValveEffectType EffectType = EValveEffectType::Fire;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    float BaseDamage = 50.0f;
+    EValveType ValveType = EValveType::Vulnerability;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
     float AoERadius = 500.0f;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    float EffectDuration = 3.0f;
+    float StaggerPoiseDamage = 30.0f;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    bool bDamageOverTime = false;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    float TickDamageInterval = 0.5f;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    TArray<FValveArchetypeEffect> ArchetypeEffects;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    bool bAffectsAllies = false;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
-    bool bAffectsEnemies = true;
+    int32 VulnerabilityCharges = 1;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Valve")
     TSubclassOf<AActor> AoEEffectClass;
@@ -82,16 +44,10 @@ public:
     void TriggerAoEEffect(AActor* Interactor);
     
     UFUNCTION(BlueprintCallable, Category = "Valve")
-    void ApplyEffectToActor(AActor* Target, AActor* Interactor);
+    void ApplyEffectToActor(AActor* Target);
     
     UFUNCTION(BlueprintCallable, Category = "Valve")
     TArray<AActor*> GetActorsInRadius() const;
-    
-    UFUNCTION(BlueprintCallable, Category = "Valve")
-    FGameplayTag GetDamageTypeTag() const;
-    
-    UFUNCTION(BlueprintCallable, Category = "Valve")
-    FValveArchetypeEffect GetArchetypeEffect(AActor* Target) const;
     
     UFUNCTION(BlueprintImplementableEvent, Category = "Valve")
     void OnAoETriggered(const TArray<AActor*>& AffectedActors);
@@ -100,20 +56,8 @@ public:
     void PlayValveAnimation();
     
     UFUNCTION(BlueprintImplementableEvent, Category = "Valve")
-    void SpawnVisualEffect(EValveEffectType Type, float Radius);
-
-    UFUNCTION(BlueprintCallable, Category = "Valve")
-    void ApplyVisualEffectToActor(AActor* Target, AActor* Interactor);
+    void SpawnVisualEffect(EValveType Type, float Radius);
 
 private:
-    void StartDamageOverTime();
-    void StopDamageOverTime();
-    void ApplyTickDamage();
-    void StartEffectOverTime();
-    void StopEffectOverTime();
-    void ApplyTickEffect();
-    
-    FTimerHandle DamageOverTimeHandle;
-    TArray<TWeakObjectPtr<AActor>> ActiveTargets;
     TWeakObjectPtr<AActor> LastInteractor;
 };
