@@ -18,7 +18,7 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::TakeDamage(float DamageAmount, AActor* DamageInstigator)
 {
-    if (bIsDead || DamageAmount <= 0.0f)
+    if (bIsDead || DamageAmount <= 0.0f || bIsInvincible)
     {
         return;
     }

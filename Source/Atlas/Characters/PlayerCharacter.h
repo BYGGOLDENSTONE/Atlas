@@ -9,6 +9,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UFocusModeComponent;
+class UDashComponent;
 
 UCLASS()
 class ATLAS_API APlayerCharacter : public AGameCharacterBase
@@ -33,7 +34,10 @@ protected:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* BlockSpaceHoldAction;
+	UInputAction* BlockRMBHoldAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashSpaceAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* FocusQHoldAction;
@@ -43,6 +47,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	UFocusModeComponent* FocusModeComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
+	UDashComponent* DashComponent;
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,4 +63,7 @@ protected:
 	void FocusStart();
 	void FocusStop();
 	void HeavyAttack();
+	void Dash();
+	
+	FVector2D LastMovementInput;
 };

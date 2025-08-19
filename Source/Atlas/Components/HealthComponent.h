@@ -30,6 +30,9 @@ public:
 
     UPROPERTY(BlueprintReadOnly, Category = "Health")
     bool bIsDead = false;
+    
+    UPROPERTY(BlueprintReadOnly, Category = "Health")
+    bool bIsInvincible = false;
 
     UFUNCTION(BlueprintCallable, Category = "Health")
     void TakeDamage(float DamageAmount, AActor* DamageInstigator);
@@ -57,6 +60,12 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Health")
     float GetMaxHealth() const { return MaxHealth; }
+    
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    void SetInvincible(bool bInvincible) { bIsInvincible = bInvincible; }
+    
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    bool IsInvincible() const { return bIsInvincible; }
 
     UPROPERTY(BlueprintAssignable, Category = "Health Events")
     FOnHealthChanged OnHealthChanged;
