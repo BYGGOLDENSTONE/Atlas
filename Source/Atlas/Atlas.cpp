@@ -4,6 +4,7 @@
 #include "Modules/ModuleManager.h"
 #include "Core/AtlasGameplayTags.h"
 #include "Debug/VulnerabilityDebugCommands.h"
+#include "Debug/StationIntegrityDebugCommands.h"
 
 class FAtlasModule : public FDefaultGameModuleImpl
 {
@@ -11,6 +12,7 @@ class FAtlasModule : public FDefaultGameModuleImpl
     {
         FAtlasGameplayTags::InitializeNativeTags();
         FVulnerabilityDebugCommands::RegisterCommands();
+        FStationIntegrityDebugCommands::RegisterCommands();
     }
 };
 

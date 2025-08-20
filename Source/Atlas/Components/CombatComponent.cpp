@@ -1,10 +1,13 @@
 #include "CombatComponent.h"
 #include "../Data/AttackDataAsset.h"
 #include "../Data/CombatRulesDataAsset.h"
+#include "../Data/StationIntegrityDataAsset.h"
 #include "DamageCalculator.h"
 #include "HealthComponent.h"
 #include "VulnerabilityComponent.h"
+#include "StationIntegrityComponent.h"
 #include "../Characters/GameCharacterBase.h"
+#include "../Core/AtlasGameState.h"
 #include "GameFramework/Character.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -50,6 +53,29 @@ bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
     }
 
     CurrentAttackData = *AttackDataPtr;
+    
+    // Apply station integrity cost for high-risk abilities (can destroy station!)
+    AAtlasGameState* GameState = AAtlasGameState::GetAtlasGameState(GetWorld());
+    if (GameState && GameState->StationIntegrityComponent)
+    {
+        UStationIntegrityComponent* IntegrityComp = GameState->StationIntegrityComponent;
+        if (IntegrityComp->IntegrityDataAsset)
+        {
+            float IntegrityCost = IntegrityComp->IntegrityDataAsset->GetIntegrityCostForAbility(AttackTag);
+            if (IntegrityCost > 0.0f)
+            {
+                // Apply the integrity cost regardless - player must manage the risk!
+                IntegrityComp->ApplyAbilityIntegrityCost(AttackTag, GetOwner());
+                UE_LOG(LogTemp, Warning, TEXT("Applied %f integrity damage for ability %s - Station at %f%%"), 
+                    IntegrityCost, *AttackTag.ToString(), IntegrityComp->GetIntegrityPercent());
+                
+                if (IntegrityComp->GetIntegrityPercent() <= 50.0f)
+                {
+                    UE_LOG(LogTemp, Error, TEXT("WARNING: Station integrity critical!"));
+                }
+            }
+        }
+    }
     AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
     LastCombatActionTime = GetWorld()->GetTimeSeconds();
 

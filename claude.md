@@ -58,11 +58,12 @@
 - **Crippled (Orange)**: 3 critical hits, 4x damage, 3s duration
 - **Exposed (Red)**: 5 critical hits, 8x damage, 4s duration
 
-### P12-13 - Station Integrity System
-- **80% Integrity**: Lights flicker, steam leaks
-- **60% Integrity**: Gravity fluctuations
-- **40% Integrity**: Structural failures
-- **20% Integrity**: Hull breaches, defensive systems activate
+### P12 - Station Integrity System (Implemented)
+- **100% Integrity**: Station stable, all systems normal
+- **50% Integrity**: Critical threshold, environmental warnings
+- **0% Integrity**: Station destroyed, game over, run resets
+- High-risk abilities damage station (player AND enemies can destroy it)
+- Core risk/reward mechanic: powerful abilities vs station survival
 
 ### P14-16 - Player Abilities
 **Low Risk** (No Integrity Cost):
@@ -103,6 +104,7 @@ AI-controlled passive abilities:
 - `FocusModeComponent`: Target detection and interaction
 - `WallImpactComponent`: Collision-based knockback impact detection
 - `VulnerabilityComponent`: Damage multiplier state with charges
+- `StationIntegrityComponent`: Station health tracking, threshold events
 
 ### Animation System
 - `AttackNotifyState`: Animation-driven attack windows
@@ -117,6 +119,7 @@ AI-controlled passive abilities:
 ### Data Assets
 - `AttackDataAsset`: Attack definitions (damage, knockback, tags)
 - `CombatRulesDataAsset`: Global combat values and rules
+- `StationIntegrityDataAsset`: Integrity costs for abilities
 - Tag-based rule validation
 
 ## Technical Architecture
@@ -149,6 +152,10 @@ AI-controlled passive abilities:
 - `Atlas.ToggleFocusMode` - Toggle focus mode
 - `Atlas.ShowFocusDebug` - Visual debugging
 - `Atlas.SpawnTestInteractable` - Spawn test objects
+- `Atlas.DamageIntegrity [amount]` - Damage station integrity
+- `Atlas.SetIntegrityPercent [percent]` - Set integrity percentage
+- `Atlas.ShowIntegrityStatus` - Display integrity status
+- `Atlas.ResetIntegrity` - Reset to 100%
 - Various combat state inspection commands
 
 ### Debug Visualization
@@ -166,12 +173,13 @@ AI-controlled passive abilities:
 - **P9**: Dash system with state restrictions
 - **P10**: Advanced AI (BTTasks for Soul Attack, Catch Special, Combos)
 - **P11**: Tiered Vulnerability System (Stunned/Crippled/Exposed)
+- **P12**: Station Integrity System (100%/50%/0% thresholds, game over on failure)
 
-## Current Task: P12 - Station Integrity System
+## Current Task: P13 - Environmental Effects at Integrity Thresholds
 **Todo**: 
-- Add station health bar (separate from player health)
-- Implement integrity damage from high-risk abilities
-- Create instability effects at different integrity levels
+- Add visual/gameplay effects at 50% integrity
+- Implement environmental hazards
+- Create warning systems for critical integrity
 
 ## Setup Required
 - See `ENGINE_SETUP_GUIDE.md` for configuration steps

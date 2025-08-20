@@ -1,5 +1,57 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-20 - P12 Station Integrity System
+
+### Changes
+- **Phase P12 - Station Integrity System Completed**
+  - Core risk/reward mechanic: powerful abilities damage the station
+  - Both player AND enemies can destroy the station (game over at 0%)
+  - Three integrity thresholds:
+    - **100%**: Station stable, all systems normal
+    - **50%**: Critical warning threshold (future environmental effects)
+    - **0%**: Station destroyed, game over, run resets
+  - High-risk abilities apply integrity damage when used
+  - No blocking of abilities - player must manage the risk
+
+### Technical Implementation
+- **New Components**:
+  - `StationIntegrityComponent`: Tracks station health with events
+  - `AtlasGameState`: Holds integrity component for global access
+  - `AtlasGameInstance`: Handles game over states with different reasons
+  - `StationIntegrityDataAsset`: Configurable integrity costs per ability
+
+- **Integration**:
+  - CombatComponent checks and applies integrity costs on ability use
+  - GameMode configured to use custom GameState
+  - Added gameplay tags for risk levels (High/Medium/Low)
+  - Console commands for testing and debugging
+
+- **Console Commands Added**:
+  - `Atlas.DamageIntegrity [amount]` - Apply integrity damage
+  - `Atlas.SetIntegrityPercent [percent]` - Set specific percentage
+  - `Atlas.ShowIntegrityStatus` - Display current status
+  - `Atlas.TestHighRiskAbility [cost]` - Test ability with cost
+  - `Atlas.ResetIntegrity` - Reset to 100%
+
+### Files Created
+- Source/Atlas/Components/StationIntegrityComponent.h/cpp
+- Source/Atlas/Core/AtlasGameState.h/cpp
+- Source/Atlas/Core/AtlasGameInstance.h/cpp
+- Source/Atlas/Data/StationIntegrityDataAsset.h/cpp
+- Source/Atlas/Debug/StationIntegrityDebugCommands.h/cpp
+
+### Files Modified
+- AtlasGameMode.cpp - Set custom GameState class
+- CombatComponent.cpp - Apply integrity costs on abilities
+- AtlasGameplayTags.h/cpp - Added risk level tags
+- Atlas.cpp - Registered debug commands
+- CLAUDE.md - Updated documentation
+
+### Next Steps
+- P13: Add environmental effects at 50% threshold
+- Create UI for station integrity display
+- Implement visual warnings for critical state
+
 ## Session: 2025-01-20 - P10 & P11 Completion
 
 ### Changes

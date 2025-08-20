@@ -41,6 +41,11 @@ void FAtlasGameplayTags::InitializeNativeTags()
     // Ability Tags
     GameplayTags.Ability_Focus = Manager.AddNativeGameplayTag(FName("Ability.Focus"), FString("Focus mode active"));
     GameplayTags.Ability_SoftLock = Manager.AddNativeGameplayTag(FName("Ability.SoftLock"), FString("Soft lock targeting active"));
+    
+    // Station Integrity Risk Tags
+    GameplayTags.Ability_Risk_High = Manager.AddNativeGameplayTag(FName("Ability.Risk.High"), FString("High-risk ability that damages station integrity"));
+    GameplayTags.Ability_Risk_Medium = Manager.AddNativeGameplayTag(FName("Ability.Risk.Medium"), FString("Medium-risk ability with minor integrity cost"));
+    GameplayTags.Ability_Risk_Low = Manager.AddNativeGameplayTag(FName("Ability.Risk.Low"), FString("Low-risk ability with no integrity cost"));
 
     // Interactable Tags
     GameplayTags.Interactable_Type_Vent = Manager.AddNativeGameplayTag(FName("Interactable.Type.Vent"), FString("Vent interactable object"));

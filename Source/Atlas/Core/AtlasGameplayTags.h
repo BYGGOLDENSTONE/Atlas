@@ -46,6 +46,11 @@ public:
     // Ability Tags
     FGameplayTag Ability_Focus;
     FGameplayTag Ability_SoftLock;
+    
+    // Station Integrity Risk Tags
+    FGameplayTag Ability_Risk_High;
+    FGameplayTag Ability_Risk_Medium;
+    FGameplayTag Ability_Risk_Low;
 
     // Interactable Tags
     FGameplayTag Interactable_Type_Vent;
