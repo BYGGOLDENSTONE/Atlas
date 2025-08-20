@@ -23,6 +23,10 @@ void UCombatComponent::BeginPlay()
     
     DamageCalculator = NewObject<UDamageCalculator>(this);
     
+    // Cache component references for performance
+    HealthComponent = GetOwner()->FindComponentByClass<UHealthComponent>();
+    ensure(HealthComponent); // Warn if missing but don't crash
+    
     VulnerabilityComponent = GetOwner()->FindComponentByClass<UVulnerabilityComponent>();
     if (!VulnerabilityComponent)
     {
@@ -38,8 +42,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 bool UCombatComponent::StartAttack(const FGameplayTag& AttackTag)
 {
-    UHealthComponent* HealthComp = GetOwner()->FindComponentByClass<UHealthComponent>();
-    if ((HealthComp && HealthComp->IsStaggered()) || IsAttacking())
+    if ((HealthComponent && HealthComponent->IsStaggered()) || IsAttacking())
     {
         return false;
     }
@@ -106,8 +109,7 @@ void UCombatComponent::EndAttack()
 
 bool UCombatComponent::StartBlock()
 {
-    UHealthComponent* HealthComp = GetOwner()->FindComponentByClass<UHealthComponent>();
-    if ((HealthComp && HealthComp->IsStaggered()) || IsAttacking())
+    if ((HealthComponent && HealthComponent->IsStaggered()) || IsAttacking())
     {
         return false;
     }
@@ -234,8 +236,7 @@ void UCombatComponent::ApplyVulnerabilityWithIFrames(int32 Charges, bool bGrantI
 bool UCombatComponent::IsInCombat() const
 {
     // Check if we're actively attacking, blocking, or recently damaged
-    UHealthComponent* HealthComp = GetOwner()->FindComponentByClass<UHealthComponent>();
-    if (IsAttacking() || IsBlocking() || (HealthComp && HealthComp->IsStaggered()))
+    if (IsAttacking() || IsBlocking() || (HealthComponent && HealthComponent->IsStaggered()))
     {
         return true;
     }
@@ -271,29 +272,6 @@ bool UCombatComponent::HasCombatStateTag(const FGameplayTag& Tag) const
 }
 
 
-
-void UCombatComponent::DealDamageToTarget(AActor* Target, float Damage, const FGameplayTagContainer& AttackTags)
-{
-    if (!Target || !DamageCalculator)
-    {
-        return;
-    }
-
-    UHealthComponent* TargetHealth = Target->FindComponentByClass<UHealthComponent>();
-    if (TargetHealth)
-    {
-        TargetHealth->TakeDamage(Damage, GetOwner());
-    }
-
-    UCombatComponent* TargetCombat = Target->FindComponentByClass<UCombatComponent>();
-    if (TargetCombat)
-    {
-        if (AttackTags.HasTag(FGameplayTag::RequestGameplayTag("Combat.Status.Stunned")))
-        {
-            TargetCombat->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Staggered"));
-        }
-    }
-}
 
 UAnimMontage* UCombatComponent::GetAttackMontage(const FGameplayTag& AttackTag) const
 {

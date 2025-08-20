@@ -13,8 +13,12 @@ UUniversalAction::UUniversalAction()
 	bIsBlocking = false;
 	bIsDashing = false;
 	bIsAttacking = false;
-	DashTimer = 0.0f;
-	AttackTimer = 0.0f;
+	bIsChanneling = false;
+	ActionTimer = 0.0f;
+	ChannelProgress = 0.0f;
+	
+	// Initialize the action executor map
+	InitializeExecutorMap();
 }
 
 bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
@@ -37,24 +41,16 @@ void UUniversalAction::OnActivate(AGameCharacterBase* Owner)
 		return;
 	}
 
-	// Route to appropriate execution based on action tag
-	if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.Dash")))
+	// Execute action based on type
+	ExecuteActionByType();
+	
+	// Apply station integrity cost if configured
+	if (ActionData && ActionData->IntegrityCost > 0.0f)
 	{
-		ExecuteDash();
-	}
-	else if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.Block")))
-	{
-		ExecuteBlock();
-	}
-	else if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.BasicAttack")) ||
-	         ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.HeavyAttack")))
-	{
-		ExecuteMeleeAttack();
-	}
-	else
-	{
-		// Generic ability execution
-		ExecuteGenericAbility();
+		if (UStationIntegrityComponent* StationIntegrity = GetStationIntegrity())
+		{
+			StationIntegrity->ApplyDamage(ActionData->IntegrityCost);
+		}
 	}
 }
 
@@ -62,25 +58,43 @@ void UUniversalAction::OnTick(float DeltaTime)
 {
 	Super::OnTick(DeltaTime);
 
-	// Handle ongoing states
-	if (bIsDashing)
+	// Handle universal action timer
+	if (ActionTimer > 0.0f)
 	{
-		DashTimer -= DeltaTime;
-		if (DashTimer <= 0.0f)
+		ActionTimer -= DeltaTime;
+		
+		// Check for action completion based on type
+		if (ActionTimer <= 0.0f)
 		{
-			bIsDashing = false;
-			OnRelease();
+			if (bIsDashing)
+			{
+				bIsDashing = false;
+				if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+				{
+					CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+				}
+			}
+			if (bIsAttacking)
+			{
+				bIsAttacking = false;
+			}
+			if (bIsChanneling)
+			{
+				bIsChanneling = false;
+			}
+			
+			// Check if we should auto-release
+			if (!ActionData || ActionData->bAutoReleaseOnComplete)
+			{
+				OnRelease();
+			}
 		}
 	}
 	
-	if (bIsAttacking)
+	// Update channel progress for channeled abilities
+	if (bIsChanneling && ActionData && ActionData->ChargeTime > 0.0f)
 	{
-		AttackTimer -= DeltaTime;
-		if (AttackTimer <= 0.0f)
-		{
-			bIsAttacking = false;
-			OnRelease();
-		}
+		ChannelProgress = FMath::Clamp((ActionData->ChargeTime - ActionTimer) / ActionData->ChargeTime, 0.0f, 1.0f);
 	}
 }
 
@@ -95,22 +109,36 @@ void UUniversalAction::OnRelease()
 		}
 		bIsBlocking = false;
 	}
-
-	if (bIsActive)
+	
+	// Handle toggle actions
+	if (ActionData && ActionData->bIsToggleAction)
 	{
-		bIsActive = false;
-		StartCooldown();
-		SetActionState(EActionState::Cooldown);
+		// Toggle actions don't auto-release, they wait for another press
+		return;
 	}
+
+	// Call base implementation to handle common release logic
+	Super::OnRelease();
 }
 
 void UUniversalAction::OnInterrupted()
 {
+	// Check if this action can be interrupted
+	if (ActionData && !ActionData->bCanBeInterrupted)
+	{
+		// Action cannot be interrupted, ignore the request
+		return;
+	}
+	
 	bIsBlocking = false;
 	bIsDashing = false;
 	bIsAttacking = false;
+	bIsChanneling = false;
+	ActionTimer = 0.0f;
+	ChannelProgress = 0.0f;
 	
-	OnRelease();
+	// Call base implementation to handle interruption
+	Super::OnInterrupted();
 }
 
 void UUniversalAction::ExecuteDash()
@@ -137,7 +165,7 @@ void UUniversalAction::ExecuteDash()
 	Character->LaunchCharacter(DashVelocity, true, true);
 	
 	bIsDashing = true;
-	DashTimer = ActionData ? ActionData->DashDuration : 0.3f;
+	ActionTimer = ActionData ? ActionData->DashDuration : 0.3f;
 	
 	// Add invincibility frames if needed
 	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
@@ -172,14 +200,33 @@ void UUniversalAction::ExecuteMeleeAttack()
 		if (CombatComp->StartAttack(AttackTag))
 		{
 			bIsAttacking = true;
-			AttackTimer = 0.5f; // Default attack duration, could use montage length
+			// Use data-driven attack duration
+			if (ActionData)
+			{
+				ActionTimer = ActionData->ActionDuration;
+			}
+			else
+			{
+				ActionTimer = 0.5f; // Fallback default
+			}
 			
 			// Play animation if available
 			if (ActionData && ActionData->ActionMontage && CurrentOwner)
 			{
 				if (ACharacter* Character = Cast<ACharacter>(CurrentOwner))
 				{
-					Character->PlayAnimMontage(ActionData->ActionMontage);
+					// Play montage with configured play rate and section
+					float PlayRate = ActionData->MontagePlayRate;
+					FName SectionName = ActionData->MontageSectionName;
+					
+					if (SectionName != NAME_None)
+					{
+						Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate, SectionName);
+					}
+					else
+					{
+						Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate);
+					}
 				}
 			}
 			
@@ -195,6 +242,232 @@ void UUniversalAction::ExecuteGenericAbility()
 	
 	UE_LOG(LogTemp, Log, TEXT("Executed Generic Ability: %s"), *ActionTag.ToString());
 	
-	// Most abilities are instant, so release after execution
+	// Check if this is a channeled ability
+	if (ActionData && ActionData->ChargeTime > 0.0f)
+	{
+		bIsChanneling = true;
+		ActionTimer = ActionData->ChargeTime;
+		ChannelProgress = 0.0f;
+	}
+	else
+	{
+		// Instant ability, release after execution
+		OnRelease();
+	}
+}
+
+void UUniversalAction::ExecuteFocusMode()
+{
+	if (!CurrentOwner)
+		return;
+		
+	// Toggle focus mode through a component or state
+	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+	{
+		FGameplayTag FocusTag = FGameplayTag::RequestGameplayTag("Combat.State.FocusMode");
+		if (CombatComp->HasCombatStateTag(FocusTag))
+		{
+			CombatComp->RemoveCombatStateTag(FocusTag);
+			UE_LOG(LogTemp, Log, TEXT("Exited Focus Mode"));
+		}
+		else
+		{
+			CombatComp->AddCombatStateTag(FocusTag);
+			UE_LOG(LogTemp, Log, TEXT("Entered Focus Mode"));
+		}
+	}
+	
 	OnRelease();
+}
+
+void UUniversalAction::ExecuteAreaEffect()
+{
+	if (!CurrentOwner || !ActionData)
+		return;
+		
+	// Spawn area effect at owner location
+	FVector EffectLocation = CurrentOwner->GetActorLocation();
+	float Radius = ActionData->EffectRadius;
+	float Damage = ActionData->EffectDamage;
+	
+	// Draw debug sphere for visualization
+	if (CurrentOwner->GetWorld())
+	{
+		DrawDebugSphere(CurrentOwner->GetWorld(), EffectLocation, Radius, 32, FColor::Red, false, 2.0f);
+	}
+	
+	// Apply damage to all actors in radius
+	TArray<FOverlapResult> OverlapResults;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(CurrentOwner);
+	
+	if (CurrentOwner->GetWorld()->OverlapMultiByChannel(
+		OverlapResults,
+		EffectLocation,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(Radius),
+		QueryParams))
+	{
+		for (const FOverlapResult& Result : OverlapResults)
+		{
+			if (AActor* HitActor = Result.GetActor())
+			{
+				// Apply damage or effects based on ActionData
+				UE_LOG(LogTemp, Log, TEXT("Area effect hit: %s"), *HitActor->GetName());
+			}
+		}
+	}
+	
+	// Check for duration-based effects
+	if (ActionData->EffectDuration > 0.0f)
+	{
+		ActionTimer = ActionData->EffectDuration;
+		bIsChanneling = true;
+	}
+	else
+	{
+		OnRelease();
+	}
+}
+
+void UUniversalAction::ExecuteRangedAttack()
+{
+	if (!CurrentOwner || !ActionData)
+		return;
+		
+	// Spawn projectile or perform hitscan
+	FVector StartLocation = CurrentOwner->GetActorLocation() + FVector(0, 0, 50);
+	FVector ForwardVector = CurrentOwner->GetActorForwardVector();
+	
+	// Simple line trace for now
+	FHitResult HitResult;
+	FVector EndLocation = StartLocation + (ForwardVector * ActionData->ProjectileRange);
+	
+	if (CurrentOwner->GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		ECC_Pawn))
+	{
+		if (AActor* HitActor = HitResult.GetActor())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Ranged attack hit: %s"), *HitActor->GetName());
+			// Apply damage based on ActionData->ProjectileDamage
+		}
+	}
+	
+	// Draw debug line
+	if (CurrentOwner->GetWorld())
+	{
+		DrawDebugLine(CurrentOwner->GetWorld(), StartLocation, EndLocation, FColor::Yellow, false, 1.0f);
+	}
+	
+	OnRelease();
+}
+
+void UUniversalAction::ExecuteUtility()
+{
+	if (!CurrentOwner || !ActionData)
+		return;
+		
+	// Handle utility actions based on specific tags
+	if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.SystemHack")))
+	{
+		// System hack specific logic
+		UE_LOG(LogTemp, Log, TEXT("Executing System Hack"));
+	}
+	else if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.GravityAnchor")))
+	{
+		// Gravity anchor specific logic
+		UE_LOG(LogTemp, Log, TEXT("Executing Gravity Anchor"));
+	}
+	
+	// Check for charge time
+	if (ActionData->ChargeTime > 0.0f)
+	{
+		bIsChanneling = true;
+		ActionTimer = ActionData->ChargeTime;
+	}
+	else
+	{
+		OnRelease();
+	}
+}
+
+void UUniversalAction::InitializeExecutorMap()
+{
+	// Map action tags to their execution functions
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.Dash"), &UUniversalAction::ExecuteDash);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.Block"), &UUniversalAction::ExecuteBlock);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.BasicAttack"), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.HeavyAttack"), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.FocusMode"), &UUniversalAction::ExecuteFocusMode);
+	
+	// Map area effect abilities
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.KineticPulse"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.SeismicStamp"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.LocalizedEMP"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.FloorDestabilizer"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.AirlockBreach"), &UUniversalAction::ExecuteAreaEffect);
+	
+	// Map ranged abilities
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.DebrisPull"), &UUniversalAction::ExecuteRangedAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.ImpactGauntlet"), &UUniversalAction::ExecuteRangedAttack);
+	
+	// Map utility abilities
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.CoolantSpray"), &UUniversalAction::ExecuteUtility);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.SystemHack"), &UUniversalAction::ExecuteUtility);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.GravityAnchor"), &UUniversalAction::ExecuteUtility);
+}
+
+void UUniversalAction::ExecuteActionByType()
+{
+	// First check if we have a specific executor for this tag
+	if (ActionExecutor* Executor = ActionExecutorMap.Find(ActionTag))
+	{
+		(this->**Executor)();
+		return;
+	}
+	
+	// Fall back to action type-based execution
+	if (!ActionData)
+	{
+		ExecuteGenericAbility();
+		return;
+	}
+	
+	switch (ActionData->ActionType)
+	{
+		case EActionType::Movement:
+			ExecuteDash();
+			break;
+		case EActionType::Defense:
+			ExecuteBlock();
+			break;
+		case EActionType::MeleeAttack:
+			ExecuteMeleeAttack();
+			break;
+		case EActionType::RangedAttack:
+			ExecuteRangedAttack();
+			break;
+		case EActionType::AreaEffect:
+			ExecuteAreaEffect();
+			break;
+		case EActionType::Utility:
+			ExecuteUtility();
+			break;
+		case EActionType::Special:
+		default:
+			ExecuteGenericAbility();
+			break;
+	}
+}
+
+void UUniversalAction::BeginDestroy()
+{
+	// Clear the executor map
+	ActionExecutorMap.Empty();
+	
+	Super::BeginDestroy();
 }

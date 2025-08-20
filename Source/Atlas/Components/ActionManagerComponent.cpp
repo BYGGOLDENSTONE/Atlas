@@ -209,11 +209,48 @@ void UActionManagerComponent::InterruptCurrentAction()
 
 void UActionManagerComponent::LoadAvailableActions()
 {
-	// This would typically load from a data table or asset registry
-	// For now, we'll manually add paths to action data assets
-	// In production, this would scan the ActionDataAssetPath directory
+	// If actions were already set in editor, keep them
+	if (AvailableActionDataAssets.Num() > 0)
+	{
+		UE_LOG(LogTemp, Log, TEXT("ActionManager: Using %d pre-configured action data assets"), AvailableActionDataAssets.Num());
+		return;
+	}
 	
-	UE_LOG(LogTemp, Log, TEXT("ActionManager: Loading available actions from %s"), *ActionDataAssetPath);
+	// Manually load known action data assets
+	// In production, this would use asset registry to scan the directory
+	const TArray<FString> ActionAssetPaths = {
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_BasicAttack"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_HeavyAttack"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_Block"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_Dash"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_FocusMode"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_KineticPulse"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_DebrisPull"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_CoolantSpray"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_SystemHack"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_FloorDestabilizer"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_ImpactGauntlet"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_LocalizedEMP"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_SeismicStamp"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_GravityAnchor"),
+		TEXT("/Game/Atlas/DataAssets/Actions/DA_AirlockBreach")
+	};
+	
+	for (const FString& AssetPath : ActionAssetPaths)
+	{
+		UActionDataAsset* ActionData = LoadObject<UActionDataAsset>(nullptr, *AssetPath);
+		if (ActionData)
+		{
+			AvailableActionDataAssets.Add(ActionData);
+			UE_LOG(LogTemp, Log, TEXT("ActionManager: Loaded action data asset: %s"), *ActionData->ActionName);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ActionManager: Failed to load action data asset at path: %s"), *AssetPath);
+		}
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("ActionManager: Loaded %d action data assets"), AvailableActionDataAssets.Num());
 }
 
 UActionDataAsset* UActionManagerComponent::GetActionDataByTag(FGameplayTag ActionTag) const

@@ -9,7 +9,6 @@
 class UInputMappingContext;
 class UInputAction;
 class UFocusModeComponent;
-class UDashComponent;
 class UActionManagerComponent;
 
 UCLASS()

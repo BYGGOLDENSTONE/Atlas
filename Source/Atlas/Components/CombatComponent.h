@@ -91,9 +91,6 @@ public:
 
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
-    void DealDamageToTarget(AActor* Target, float Damage, const FGameplayTagContainer& AttackTags);
-
-    UFUNCTION(BlueprintCallable, Category = "Combat")
     class UAnimMontage* GetAttackMontage(const FGameplayTag& AttackTag) const;
 
     // Combat State Management
@@ -126,6 +123,9 @@ private:
 
     UPROPERTY()
     UVulnerabilityComponent* VulnerabilityComponent;
+
+    UPROPERTY()
+    UHealthComponent* HealthComponent;
 
     float LastCombatActionTime = 0.0f;
 };

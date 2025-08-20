@@ -5,6 +5,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
+#include "../Components/ActionManagerComponent.h"
+#include "../Actions/BaseAction.h"
 
 AGameCharacterBase::AGameCharacterBase()
 {
@@ -35,8 +37,8 @@ AGameCharacterBase::AGameCharacterBase()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
-
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	ActionManagerComponent = CreateDefaultSubobject<UActionManagerComponent>(TEXT("ActionManagerComponent"));
 }
 
 void AGameCharacterBase::BeginPlay()
@@ -52,4 +54,251 @@ void AGameCharacterBase::Tick(float DeltaTime)
 void AGameCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+// ICombatInterface Implementation
+bool AGameCharacterBase::IsInCombat_Implementation() const
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->IsInCombat();
+	}
+	return false;
+}
+
+bool AGameCharacterBase::IsAttacking_Implementation() const
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->IsAttacking();
+	}
+	return false;
+}
+
+bool AGameCharacterBase::IsBlocking_Implementation() const
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->IsBlocking();
+	}
+	return false;
+}
+
+bool AGameCharacterBase::IsVulnerable_Implementation() const
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->IsVulnerable();
+	}
+	return false;
+}
+
+bool AGameCharacterBase::HasIFrames_Implementation() const
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->HasIFrames();
+	}
+	return false;
+}
+
+void AGameCharacterBase::AddCombatStateTag_Implementation(const FGameplayTag& Tag)
+{
+	if (CombatComponent)
+	{
+		CombatComponent->AddCombatStateTag(Tag);
+	}
+}
+
+void AGameCharacterBase::RemoveCombatStateTag_Implementation(const FGameplayTag& Tag)
+{
+	if (CombatComponent)
+	{
+		CombatComponent->RemoveCombatStateTag(Tag);
+	}
+}
+
+bool AGameCharacterBase::HasCombatStateTag_Implementation(const FGameplayTag& Tag) const
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->HasCombatStateTag(Tag);
+	}
+	return false;
+}
+
+bool AGameCharacterBase::StartAttack_Implementation(const FGameplayTag& AttackTag)
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->StartAttack(AttackTag);
+	}
+	return false;
+}
+
+void AGameCharacterBase::EndAttack_Implementation()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->EndAttack();
+	}
+}
+
+bool AGameCharacterBase::StartBlock_Implementation()
+{
+	if (CombatComponent)
+	{
+		return CombatComponent->StartBlock();
+	}
+	return false;
+}
+
+void AGameCharacterBase::EndBlock_Implementation()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->EndBlock();
+	}
+}
+
+// IHealthInterface Implementation
+float AGameCharacterBase::GetCurrentHealth_Implementation() const
+{
+	if (HealthComponent)
+	{
+		return HealthComponent->GetCurrentHealth();
+	}
+	return 0.0f;
+}
+
+float AGameCharacterBase::GetMaxHealth_Implementation() const
+{
+	if (HealthComponent)
+	{
+		return HealthComponent->GetMaxHealth();
+	}
+	return 100.0f;
+}
+
+float AGameCharacterBase::GetHealthPercent_Implementation() const
+{
+	if (HealthComponent)
+	{
+		return HealthComponent->GetHealthPercent();
+	}
+	return 1.0f;
+}
+
+bool AGameCharacterBase::IsAlive_Implementation() const
+{
+	if (HealthComponent)
+	{
+		return HealthComponent->IsAlive();
+	}
+	return true;
+}
+
+bool AGameCharacterBase::IsDead_Implementation() const
+{
+	if (HealthComponent)
+	{
+		return !HealthComponent->IsAlive();
+	}
+	return false;
+}
+
+void AGameCharacterBase::ApplyDamage_Implementation(float DamageAmount, AActor* DamageInstigator)
+{
+	if (HealthComponent)
+	{
+		HealthComponent->TakeDamage(DamageAmount);
+	}
+}
+
+void AGameCharacterBase::ApplyHealing_Implementation(float HealAmount, AActor* Healer)
+{
+	if (HealthComponent)
+	{
+		HealthComponent->Heal(HealAmount);
+	}
+}
+
+// IActionInterface Implementation
+bool AGameCharacterBase::CanPerformAction_Implementation(const FGameplayTag& ActionTag) const
+{
+	// Delegate to action manager or check conditions
+	return true;
+}
+
+bool AGameCharacterBase::TryPerformAction_Implementation(const FGameplayTag& ActionTag)
+{
+	if (ActionManagerComponent)
+	{
+		// Find which slot has this action and trigger it
+		TArray<FName> Slots = ActionManagerComponent->GetAllSlotNames();
+		for (const FName& Slot : Slots)
+		{
+			if (UBaseAction* Action = ActionManagerComponent->GetActionInSlot(Slot))
+			{
+				if (Action->GetActionTag() == ActionTag)
+				{
+					ActionManagerComponent->OnSlotPressed(Slot);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void AGameCharacterBase::InterruptCurrentAction_Implementation()
+{
+	if (ActionManagerComponent)
+	{
+		ActionManagerComponent->InterruptCurrentAction();
+	}
+}
+
+bool AGameCharacterBase::IsPerformingAction_Implementation() const
+{
+	if (ActionManagerComponent)
+	{
+		return ActionManagerComponent->IsActionActive();
+	}
+	return false;
+}
+
+UBaseAction* AGameCharacterBase::GetCurrentAction_Implementation() const
+{
+	if (ActionManagerComponent)
+	{
+		return ActionManagerComponent->GetCurrentAction();
+	}
+	return nullptr;
+}
+
+bool AGameCharacterBase::AssignActionToSlot_Implementation(FName SlotName, const FGameplayTag& ActionTag)
+{
+	if (ActionManagerComponent)
+	{
+		return ActionManagerComponent->AssignActionToSlot(SlotName, ActionTag);
+	}
+	return false;
+}
+
+void AGameCharacterBase::ClearActionSlot_Implementation(FName SlotName)
+{
+	if (ActionManagerComponent)
+	{
+		ActionManagerComponent->ClearSlot(SlotName);
+	}
+}
+
+UBaseAction* AGameCharacterBase::GetActionInSlot_Implementation(FName SlotName) const
+{
+	if (ActionManagerComponent)
+	{
+		return ActionManagerComponent->GetActionInSlot(SlotName);
+	}
+	return nullptr;
 }

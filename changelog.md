@@ -1,6 +1,30 @@
 # Atlas Development Changelog
 
-## Session: 2025-08-20 - Major Cleanup & Documentation
+## Session: 2025-08-20 (Latest) - Architecture Refactoring
+
+### Major Architecture Improvements
+- **Function Map Routing**: Replaced if/else chains with O(1) function pointer map in UniversalAction
+- **Interface Layer**: Created ICombatInterface, IHealthInterface, IActionInterface
+- **Eliminated Circular Dependencies**: Components now communicate via interfaces
+- **Data-Driven Configuration**: Added 10+ new fields to ActionDataAsset:
+  - ActionDuration, MontagePlayRate, AttackWindupTime, AttackRecoveryTime
+  - bCanBeInterrupted, bAutoReleaseOnComplete, bIsToggleAction
+  - InputBufferWindow, MontageStartSection, MontageSectionName
+- **Unified Timer System**: Single ActionTimer replaces DashTimer/AttackTimer
+- **Improved Action Execution**: Added dedicated methods for each action type
+
+### Files Created
+- `ICombatInterface.h` - Combat system interface
+- `IHealthInterface.h` - Health system interface  
+- `IActionInterface.h` - Action system interface
+- `ARCHITECTURE_IMPROVEMENTS.md` - Complete documentation of changes
+
+### Documentation Cleanup
+- Updated CLAUDE.md with latest architecture
+- Removed 5 outdated documentation files
+- Consolidated essential information for next session
+
+## Session: 2025-08-20 (Earlier) - Major Cleanup & Documentation
 
 ### Code Cleanup
 - **Removed Deprecated Action Files** (8 files, ~2000 lines):

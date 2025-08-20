@@ -108,4 +108,14 @@ protected:
 	// Data Asset reference
 	UPROPERTY()
 	UActionDataAsset* ActionData;
+
+	// Cached component references (set during activation)
+	UPROPERTY()
+	class UCombatComponent* CachedCombatComponent;
+
+	UPROPERTY()
+	class UHealthComponent* CachedHealthComponent;
+
+	UPROPERTY()
+	class UStationIntegrityComponent* CachedStationIntegrity;
 };

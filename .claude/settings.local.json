@@ -14,7 +14,10 @@
       "Bash(dir:*)",
       "Bash(del SoftLockComponent.h SoftLockComponent.cpp)",
       "Bash(del:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(cmd /c del:*)",
+      "Bash(cmd /c mkdir:*)",
+      "Bash(cmd /c move:*)"
     ],
     "deny": [],
     "ask": []

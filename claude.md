@@ -38,13 +38,20 @@ Atlas_ResetSlots                       # Reset to defaults
 - **Knockback**: Direction-based with wall/floor impact detection
 
 ## Key Components
-- `UniversalAction`: Handles all action types via data
+- `UniversalAction`: Handles all action types via function map routing (O(1) lookup)
 - `ActionManagerComponent`: Manages 5 action slots
-- `ActionDataAsset`: Context-sensitive configuration
+- `ActionDataAsset`: Fully data-driven config (timing, behavior, interrupts)
 - `HealthComponent`: Health + poise management
-- `CombatComponent`: Legacy combat (being phased out)
+- `CombatComponent`: Legacy combat (migrate remaining to UniversalAction)
 - `DamageCalculator`: Centralized damage math
 - `StationIntegrityComponent`: Station health tracking
+
+## Architecture (Latest Refactor)
+- **Function Map Routing**: Replaced if/else chains with efficient map lookup
+- **Interface Layer**: ICombatInterface, IHealthInterface, IActionInterface
+- **No Circular Dependencies**: Components communicate via interfaces
+- **Data-Driven Everything**: All timings, durations, behaviors in DataAssets
+- **Unified Timer**: Single ActionTimer replaces multiple timer variables
 
 ## Required DataAssets (20 Total)
 ### Actions (15) - in Content/Data/Actions/
@@ -58,17 +65,19 @@ Atlas_ResetSlots                       # Reset to defaults
 
 ## Development Rules
 - NO GAS - custom component system
-- Data-driven via DataAssets
+- Data-driven via DataAssets (all magic numbers removed)
 - Tag-based rules (Action.Ability.*)
-- Component interfaces (IInteractable, ICombatant)
+- Interface-based communication (ICombatInterface, IHealthInterface, IActionInterface)
 - No parry or camera lock systems
+- Use interfaces over direct component access
 
 ## Next Tasks
-- Create all 15 ActionDataAssets in editor
-- Test ability assignments and balance
-- Phase out remaining CombatComponent logic
+- Update all 15 ActionDataAssets with new timing fields in editor
+- Test refactored function map routing and interfaces
+- Migrate final CombatComponent attack/block logic to UniversalAction
 - Implement P17-18 enemy archetypes
 - P21-22 Wife's Arm passive system
+- Verify all new DataAsset fields work (ActionDuration, MontagePlayRate, etc.)
 
 ## Debug Commands
 ```
@@ -81,7 +90,15 @@ Atlas.ShowFocusDebug
 ```
 
 ## Documentation
-- `UNIVERSAL_ACTION_GUIDE.md` - Action system usage
-- `REQUIRED_DATA_ASSETS.md` - DataAsset requirements
-- `COMPONENT_ARCHITECTURE.md` - System dependencies
+- `ARCHITECTURE_IMPROVEMENTS.md` - Latest refactoring details and testing checklist
 - `changelog.md` - Development history
+
+## New DataAsset Fields (Must Configure)
+- `ActionDuration`: How long action takes
+- `MontagePlayRate`: Animation speed multiplier
+- `AttackWindupTime`: Time before damage
+- `AttackRecoveryTime`: Time after damage
+- `bCanBeInterrupted`: Can action be cancelled
+- `bAutoReleaseOnComplete`: Auto-end when timer expires
+- `bIsToggleAction`: Toggle on/off (e.g., Focus Mode)
+- `InputBufferWindow`: Action queueing window

@@ -4,6 +4,8 @@
 #include "../Components/HealthComponent.h"
 #include "../Components/StationIntegrityComponent.h"
 #include "../DataAssets/ActionDataAsset.h"
+#include "../Interfaces/ICombatInterface.h"
+#include "../Interfaces/IHealthInterface.h"
 #include "GameFramework/GameStateBase.h"
 #include "Engine/World.h"
 
@@ -14,6 +16,9 @@ UBaseAction::UBaseAction()
 	CurrentState = EActionState::Idle;
 	CurrentOwner = nullptr;
 	ActionData = nullptr;
+	CachedCombatComponent = nullptr;
+	CachedHealthComponent = nullptr;
+	CachedStationIntegrity = nullptr;
 }
 
 bool UBaseAction::CanActivate(AGameCharacterBase* Owner)
@@ -53,6 +58,7 @@ void UBaseAction::OnActivate(AGameCharacterBase* Owner)
 {
 	if (!Owner)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("BaseAction::OnActivate called with null Owner"));
 		return;
 	}
 
@@ -60,13 +66,24 @@ void UBaseAction::OnActivate(AGameCharacterBase* Owner)
 	bIsActive = true;
 	SetActionState(EActionState::Active);
 
-	// Check integrity cost
-	if (ActionData && ActionData->IntegrityCost > 0.0f)
+	// Cache component references for this activation
+	CachedCombatComponent = Owner->GetCombatComponent();
+	CachedHealthComponent = Owner->GetHealthComponent();
+	
+	// Safely get station integrity from game state
+	CachedStationIntegrity = nullptr;
+	if (UWorld* World = Owner->GetWorld())
 	{
-		if (UStationIntegrityComponent* IntegrityComp = GetStationIntegrity())
+		if (AGameStateBase* GameState = World->GetGameState())
 		{
-			IntegrityComp->ApplyIntegrityDamage(ActionData->IntegrityCost, Owner);
+			CachedStationIntegrity = GameState->FindComponentByClass<UStationIntegrityComponent>();
 		}
+	}
+
+	// Check integrity cost
+	if (ActionData && ActionData->IntegrityCost > 0.0f && CachedStationIntegrity)
+	{
+		CachedStationIntegrity->ApplyIntegrityDamage(ActionData->IntegrityCost, Owner);
 	}
 }
 
@@ -86,6 +103,11 @@ void UBaseAction::OnRelease()
 		bIsActive = false;
 		StartCooldown();
 		SetActionState(EActionState::Idle);
+		
+		// Clear cached references
+		CachedCombatComponent = nullptr;
+		CachedHealthComponent = nullptr;
+		CachedStationIntegrity = nullptr;
 	}
 }
 
@@ -100,6 +122,11 @@ void UBaseAction::OnInterrupted()
 			CurrentCooldown = ActionData->Cooldown * 0.5f;
 		}
 		SetActionState(EActionState::Cooldown);
+		
+		// Clear cached references
+		CachedCombatComponent = nullptr;
+		CachedHealthComponent = nullptr;
+		CachedStationIntegrity = nullptr;
 	}
 }
 
@@ -147,32 +174,35 @@ void UBaseAction::SetActionState(EActionState NewState)
 
 UCombatComponent* UBaseAction::GetOwnerCombatComponent() const
 {
+	// Try cached reference first, then get from owner
+	if (CachedCombatComponent)
+	{
+		return CachedCombatComponent;
+	}
 	if (CurrentOwner)
 	{
-		return CurrentOwner->FindComponentByClass<UCombatComponent>();
+		return CurrentOwner->GetCombatComponent();
 	}
 	return nullptr;
 }
 
 UHealthComponent* UBaseAction::GetOwnerHealthComponent() const
 {
+	// Try cached reference first, then get from owner
+	if (CachedHealthComponent)
+	{
+		return CachedHealthComponent;
+	}
 	if (CurrentOwner)
 	{
-		return CurrentOwner->FindComponentByClass<UHealthComponent>();
+		return CurrentOwner->GetHealthComponent();
 	}
 	return nullptr;
 }
 
 UStationIntegrityComponent* UBaseAction::GetStationIntegrity() const
 {
-	if (CurrentOwner && CurrentOwner->GetWorld())
-	{
-		if (AGameStateBase* GameState = CurrentOwner->GetWorld()->GetGameState())
-		{
-			return GameState->FindComponentByClass<UStationIntegrityComponent>();
-		}
-	}
-	return nullptr;
+	return CachedStationIntegrity;
 }
 
 bool UBaseAction::HasRequiredTags(AGameCharacterBase* Owner) const
@@ -182,7 +212,20 @@ bool UBaseAction::HasRequiredTags(AGameCharacterBase* Owner) const
 		return true;
 	}
 
-	// For now, just return true - we'll implement tag checking when we have the character tag system
+	// Check if owner has required tags using interface
+	if (ActionData->RequiredTags.Num() > 0)
+	{
+		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Owner))
+		{
+			for (const FGameplayTag& RequiredTag : ActionData->RequiredTags)
+			{
+				if (!CombatInterface->HasCombatStateTag(RequiredTag))
+				{
+					return false;
+				}
+			}
+		}
+	}
 	return true;
 }
 
@@ -193,6 +236,19 @@ bool UBaseAction::IsBlockedByTags(AGameCharacterBase* Owner) const
 		return false;
 	}
 
-	// For now, just return false - we'll implement tag checking when we have the character tag system
+	// Check if owner has any blocking tags using interface
+	if (ActionData->BlockedDuringTags.Num() > 0)
+	{
+		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Owner))
+		{
+			for (const FGameplayTag& BlockedTag : ActionData->BlockedDuringTags)
+			{
+				if (CombatInterface->HasCombatStateTag(BlockedTag))
+				{
+					return true;
+				}
+			}
+		}
+	}
 	return false;
 }
