@@ -112,15 +112,20 @@ AI-controlled passive abilities:
 
 ## Key Components
 
-### Core Combat
+### Core Combat (To be refactored)
 - `HealthComponent`: Health + poise management, damage/stagger events
-- `CombatComponent`: Attack/block states, combat state management
+- `CombatComponent`: Attack/block states (will become Actions)
 - `DamageCalculator`: Centralized damage calculation and knockback
-- `DashComponent`: Movement ability with i-frames
+- `DashComponent`: Movement ability (will become DashAction)
 - `FocusModeComponent`: Target detection and interaction
 - `WallImpactComponent`: Collision-based knockback impact detection
 - `VulnerabilityComponent`: Damage multiplier state with charges
 - `StationIntegrityComponent`: Station health tracking, threshold events
+
+### New Action System (Next Session)
+- `BaseAction`: Base class for all player actions
+- `ActionManagerComponent`: Manages 5 customizable action slots
+- Actions can be freely assigned to: LMB, RMB, E, R, Space
 
 ### Animation System
 - `AttackNotifyState`: Animation-driven attack windows
@@ -191,12 +196,16 @@ AI-controlled passive abilities:
 - **P11**: Tiered Vulnerability System (Stunned/Crippled/Exposed)
 - **P12**: Station Integrity System (100%/50%/0% thresholds, game over on failure)
 
-## Current Task: P14-16 - Player Abilities (Low Risk)
-**Todo**: 
-- Implement Kinetic Pulse: Short-range force push
-- Implement Debris Pull: Magnetic object manipulation
-- Implement Coolant Spray: Creates slip hazard
-- Implement Basic System Hack: Remote interaction
+## Current Task: P14-16 - Unified Action System Refactor
+**Completed**: 
+- ✅ Implemented 4 Low Risk abilities (Kinetic Pulse, Debris Pull, Coolant Spray, System Hack)
+- ✅ Created AbilityBase and AbilityDataAsset system
+
+**Next Session - Unified Action System**:
+- Refactor to unified BaseAction system for ALL player actions
+- Implement 5-slot customizable action system (LMB, RMB, E, R, Space)
+- Migrate existing combat/movement to new system
+- Create ActionManagerComponent for slot management
 
 ## Setup Required
 - See `ENGINE_SETUP_GUIDE.md` for configuration steps
