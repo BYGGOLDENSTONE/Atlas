@@ -51,6 +51,16 @@
   - Floor threshold: Surface normal Z > 0.7
   - Min force for tracking: 150 units
 
+## Development Priorities
+
+### Current Focus
+- **Core Mechanics First**: Implementing gameplay systems before polish
+- **Deferred Systems**:
+  - **AI Improvements**: Basic AI exists, advanced behaviors delayed
+  - **UI/UX Polish**: Functional UI only, visual polish later
+  - **P13 Environmental Effects**: Visual/audio feedback deferred
+- **Active Development**: Player abilities and combat mechanics
+
 ## Planned Features
 
 ### P11 - Vulnerability Tiers (Implemented)
@@ -64,6 +74,12 @@
 - **0% Integrity**: Station destroyed, game over, run resets
 - High-risk abilities damage station (player AND enemies can destroy it)
 - Core risk/reward mechanic: powerful abilities vs station survival
+
+### P13 - Environmental Effects at Integrity Thresholds (DEFERRED)
+- Visual/gameplay effects at 50% integrity
+- Environmental hazards
+- Warning systems for critical integrity
+- **Note**: Deferred to focus on core mechanics
 
 ### P14-16 - Player Abilities
 **Low Risk** (No Integrity Cost):
@@ -175,11 +191,12 @@ AI-controlled passive abilities:
 - **P11**: Tiered Vulnerability System (Stunned/Crippled/Exposed)
 - **P12**: Station Integrity System (100%/50%/0% thresholds, game over on failure)
 
-## Current Task: P13 - Environmental Effects at Integrity Thresholds
+## Current Task: P14-16 - Player Abilities (Low Risk)
 **Todo**: 
-- Add visual/gameplay effects at 50% integrity
-- Implement environmental hazards
-- Create warning systems for critical integrity
+- Implement Kinetic Pulse: Short-range force push
+- Implement Debris Pull: Magnetic object manipulation
+- Implement Coolant Spray: Creates slip hazard
+- Implement Basic System Hack: Remote interaction
 
 ## Setup Required
 - See `ENGINE_SETUP_GUIDE.md` for configuration steps
