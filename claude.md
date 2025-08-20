@@ -77,7 +77,17 @@ Atlas_ResetSlots                       # Reset to defaults
 - **Risk.*** = Station integrity risk levels
 - **Interactable.*** = Environmental interactions
 
+## CRITICAL ISSUE - Fix Next Session
+**🔴 CRASH BUG**: Game crashes when using abilities (LMB/RMB/etc)
+- Occurs when abilities are triggered through input system
+- Likely related to CombatComponent::StartAttack expecting AttackDataAsset
+- Need to verify DataAsset configuration and CombatComponent's AttackDataMap
+
 ## Next Tasks
+- **PRIORITY**: Fix ability usage crash
+  - Check CombatComponent's AttackDataMap configuration
+  - Verify ActionDataAssets are properly configured
+  - Ensure ProcessHit has valid attack data
 - Update all 15 ActionDataAssets with new timing fields in editor
 - Test refactored function map routing and interfaces
 - Migrate final CombatComponent attack/block logic to UniversalAction

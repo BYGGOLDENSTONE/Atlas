@@ -31,6 +31,11 @@
 - **More stable** - Fixed crash on startup, all compilation errors resolved
 - **Better maintainability** - Clear tag structure, each ability self-contained
 
+### Known Issues (To Fix Next Session)
+- **Ability Usage Crash**: Game crashes when using abilities through input system
+  - Likely caused by CombatComponent expecting AttackDataAsset in AttackDataMap
+  - Need to verify DataAsset configuration and ensure proper attack data setup
+
 ## Session: 2025-08-20 (Earlier) - Architecture Refactoring
 
 ### Major Architecture Improvements
