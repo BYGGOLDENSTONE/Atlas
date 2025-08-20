@@ -96,6 +96,11 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     class UAnimMontage* GetAttackMontage(const FGameplayTag& AttackTag) const;
 
+    // Combat State Management
+    void AddCombatStateTag(const FGameplayTag& Tag);
+    void RemoveCombatStateTag(const FGameplayTag& Tag);
+    bool HasCombatStateTag(const FGameplayTag& Tag) const;
+
     UPROPERTY(BlueprintAssignable, Category = "Combat Events")
     FOnAttackStarted OnAttackStarted;
 
@@ -123,8 +128,4 @@ private:
     UVulnerabilityComponent* VulnerabilityComponent;
 
     float LastCombatActionTime = 0.0f;
-
-    void AddCombatStateTag(const FGameplayTag& Tag);
-    void RemoveCombatStateTag(const FGameplayTag& Tag);
-    bool HasCombatStateTag(const FGameplayTag& Tag) const;
 };

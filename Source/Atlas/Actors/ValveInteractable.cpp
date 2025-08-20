@@ -114,12 +114,13 @@ void AValveInteractable::ApplyEffectToActor(AActor* Target)
     
     if (ValveType == EValveType::Vulnerability)
     {
-        // Apply vulnerability
+        // Apply vulnerability using new tier system
         if (UVulnerabilityComponent* VulnComp = Target->FindComponentByClass<UVulnerabilityComponent>())
         {
-            VulnComp->ApplyVulnerability(VulnerabilityCharges, false);
-            UE_LOG(LogTemp, Warning, TEXT("Valve applied %d vulnerability charges to %s"), 
-                VulnerabilityCharges, *Target->GetName());
+            // Valve applies Stunned tier (yellow) - lightest vulnerability
+            VulnComp->ApplyVulnerabilityTier(EVulnerabilityTier::Stunned);
+            UE_LOG(LogTemp, Warning, TEXT("Valve applied Stunned vulnerability to %s"), 
+                *Target->GetName());
         }
     }
     else if (ValveType == EValveType::Stagger)

@@ -67,9 +67,10 @@ FDamageInfo UDamageCalculator::ProcessDamage(
         DamageInfo.bWasBlocked = bWasBlocked;
         DamageInfo.bWasVulnerable = bWasVulnerable;
 
-        if (bWasVulnerable && TargetVuln)
+        if (bWasVulnerable && TargetVuln && DamageInfo.FinalDamage > 0.0f)
         {
-            TargetVuln->ConsumeCharge();
+            // New tier system: notify of critical hit instead of consuming charge
+            TargetVuln->OnCriticalHitLanded();
         }
     }
     else
