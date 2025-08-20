@@ -2,6 +2,7 @@
 #include "GameFramework/Character.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
+#include "Engine/OverlapResult.h"
 #include "DrawDebugHelpers.h"
 #include "../Data/DebrisPullDataAsset.h"
 #include "Kismet/GameplayStatics.h"

@@ -11,12 +11,17 @@
 #include "../Components/HealthComponent.h"
 #include "../Components/FocusModeComponent.h"
 #include "../Components/DashComponent.h"
+#include "../Components/ActionManagerComponent.h"
 #include "GameplayTagContainer.h"
 
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
+	// Create the new Action Manager Component
+	ActionManagerComponent = CreateDefaultSubobject<UActionManagerComponent>(TEXT("ActionManagerComponent"));
+	
+	// DEPRECATED: These will be removed after migration
 	FocusModeComponent = CreateDefaultSubobject<UFocusModeComponent>(TEXT("FocusModeComponent"));
 	DashComponent = CreateDefaultSubobject<UDashComponent>(TEXT("DashComponent"));
 }
@@ -50,11 +55,43 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		
+		// Movement and camera controls remain the same
 		if (MoveAction)
 			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		if (LookAction)
 			EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+		
+		// NEW: Bind universal action slots
+		if (ActionManagerComponent)
+		{
+			if (Slot1Action)
+			{
+				EnhancedInputComponent->BindAction(Slot1Action, ETriggerEvent::Started, ActionManagerComponent, &UActionManagerComponent::OnSlot1Pressed);
+				EnhancedInputComponent->BindAction(Slot1Action, ETriggerEvent::Completed, ActionManagerComponent, &UActionManagerComponent::OnSlot1Released);
+			}
+			if (Slot2Action)
+			{
+				EnhancedInputComponent->BindAction(Slot2Action, ETriggerEvent::Started, ActionManagerComponent, &UActionManagerComponent::OnSlot2Pressed);
+				EnhancedInputComponent->BindAction(Slot2Action, ETriggerEvent::Completed, ActionManagerComponent, &UActionManagerComponent::OnSlot2Released);
+			}
+			if (Slot3Action)
+			{
+				EnhancedInputComponent->BindAction(Slot3Action, ETriggerEvent::Started, ActionManagerComponent, &UActionManagerComponent::OnSlot3Pressed);
+				EnhancedInputComponent->BindAction(Slot3Action, ETriggerEvent::Completed, ActionManagerComponent, &UActionManagerComponent::OnSlot3Released);
+			}
+			if (Slot4Action)
+			{
+				EnhancedInputComponent->BindAction(Slot4Action, ETriggerEvent::Started, ActionManagerComponent, &UActionManagerComponent::OnSlot4Pressed);
+				EnhancedInputComponent->BindAction(Slot4Action, ETriggerEvent::Completed, ActionManagerComponent, &UActionManagerComponent::OnSlot4Released);
+			}
+			if (Slot5Action)
+			{
+				EnhancedInputComponent->BindAction(Slot5Action, ETriggerEvent::Started, ActionManagerComponent, &UActionManagerComponent::OnSlot5Pressed);
+				EnhancedInputComponent->BindAction(Slot5Action, ETriggerEvent::Completed, ActionManagerComponent, &UActionManagerComponent::OnSlot5Released);
+			}
+		}
+		
+		// DEPRECATED: Old direct action bindings (kept for compatibility during migration)
 		if (AttackLMBAction)
 			EnhancedInputComponent->BindAction(AttackLMBAction, ETriggerEvent::Triggered, this, &APlayerCharacter::AttackLMB);
 		
@@ -67,10 +104,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		if (DashSpaceAction)
 		{
 			EnhancedInputComponent->BindAction(DashSpaceAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Dash);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("DashSpaceAction is NULL - Dash will not work!"));
 		}
 		
 		if (FocusQHoldAction)

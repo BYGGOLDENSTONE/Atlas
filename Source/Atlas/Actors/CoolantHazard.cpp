@@ -84,7 +84,7 @@ void ACoolantHazard::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ACoolantHazard::Initialize(const FCoolantSprayConfig& Config, AActor* InInstigator)
 {
 	SprayConfig = Config;
-	Instigator = InInstigator;
+	HazardInstigator = InInstigator;
 	RemainingDuration = Config.HazardDuration;
 
 	// Set collision radius
@@ -104,7 +104,7 @@ void ACoolantHazard::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Check if should affect owner
-	if (!SprayConfig.bAffectsOwner && OtherActor == Instigator)
+	if (!SprayConfig.bAffectsOwner && OtherActor == HazardInstigator)
 	{
 		return;
 	}

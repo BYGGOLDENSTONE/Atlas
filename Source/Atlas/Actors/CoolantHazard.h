@@ -49,7 +49,7 @@ private:
 	FCoolantSprayConfig SprayConfig;
 	
 	UPROPERTY()
-	AActor* Instigator;
+	AActor* HazardInstigator;
 
 	UPROPERTY()
 	TMap<ACharacter*, float> AffectedCharacters;

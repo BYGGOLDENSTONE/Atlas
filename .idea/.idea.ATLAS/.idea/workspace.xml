@@ -13,8 +13,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/AbilityBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/AbilityBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/DebrisPullAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/DebrisPullAbility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actors/CoolantHazard.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actors/CoolantHazard.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actors/CoolantHazard.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actors/CoolantHazard.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasPlayerController.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -189,6 +197,7 @@
       <workItem from="1755640608914" duration="927000" />
       <workItem from="1755675697477" duration="1371000" />
       <workItem from="1755683630340" duration="2155000" />
+      <workItem from="1755690431721" duration="827000" />
     </task>
     <servers />
   </component>

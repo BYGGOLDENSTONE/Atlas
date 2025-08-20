@@ -3,11 +3,12 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
+#include "Engine/OverlapResult.h"
 #include "DrawDebugHelpers.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/CombatComponent.h"
-#include "../Core/DamageCalculator.h"
 #include "../Data/KineticPulseDataAsset.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 UKineticPulseAbility::UKineticPulseAbility()
@@ -128,15 +129,20 @@ void UKineticPulseAbility::ApplyPulseToActor(AActor* Target, const FVector& Puls
 	FVector KnockbackDirection = CalculatePulseDirection(Target->GetActorLocation(), PulseOrigin);
 	FVector KnockbackForce = KnockbackDirection * Config.PulseForce;
 
-	// Apply damage and knockback through damage calculator
-	FDamageContext DamageContext;
-	DamageContext.DamageAmount = Config.PulseDamage;
-	DamageContext.KnockbackForce = KnockbackForce;
-	DamageContext.PoiseDamage = Config.PulsePoiseDamage;
-	DamageContext.Instigator = GetOwner();
-	DamageContext.DamageCauser = GetOwner();
-
-	DamageCalculator->ApplyDamage(Target, DamageContext);
+	// Apply damage directly to health component and knockback
+	if (UHealthComponent* HealthComp = Target->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComp->TakeDamage(Config.PulseDamage, GetOwner());
+	}
+	
+	// Apply knockback
+	if (ACharacter* TargetCharacter = Cast<ACharacter>(Target))
+	{
+		if (UCharacterMovementComponent* MovementComp = TargetCharacter->GetCharacterMovement())
+		{
+			MovementComp->AddImpulse(KnockbackForce, true);
+		}
+	}
 }
 
 void UKineticPulseAbility::ApplyPulseToPhysicsActor(AActor* Target, const FVector& PulseOrigin)

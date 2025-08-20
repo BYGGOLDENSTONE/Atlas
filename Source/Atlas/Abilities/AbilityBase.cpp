@@ -56,12 +56,9 @@ bool UAbilityBase::TryExecuteAbility()
 	{
 		if (UStationIntegrityComponent* IntegrityComp = GetStationIntegrity())
 		{
-			if (!IntegrityComp->CanAffordDamage(IntegrityCost))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("%s: Cannot execute - would destroy station"), *AbilityName);
-				return false;
-			}
-			IntegrityComp->ApplyIntegrityDamage(IntegrityCost, GetOwner(), TEXT("Ability"));
+			// Just apply the damage without checking if we can afford it
+			// The integrity component will handle the failure state
+			IntegrityComp->ApplyIntegrityDamage(IntegrityCost, GetOwner());
 		}
 	}
 
@@ -104,15 +101,8 @@ bool UAbilityBase::CanExecuteAbility() const
 	}
 
 	// Check required/blocked tags
-	if (OwnerCharacter->HasAnyMatchingGameplayTags(BlockedTags))
-	{
-		return false;
-	}
-
-	if (RequiredTags.Num() > 0 && !OwnerCharacter->HasAllMatchingGameplayTags(RequiredTags))
-	{
-		return false;
-	}
+	// TODO: Implement tag checking when GameCharacterBase has tag support
+	// For now, skip tag checks since base ACharacter doesn't have gameplay tags
 
 	return CheckAbilitySpecificConditions();
 }

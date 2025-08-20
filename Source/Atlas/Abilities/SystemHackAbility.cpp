@@ -3,7 +3,7 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "../Data/SystemHackDataAsset.h"
-#include "../Interfaces/Interactable.h"
+#include "../Interfaces/IInteractable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 

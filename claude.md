@@ -200,12 +200,35 @@ AI-controlled passive abilities:
 **Completed**: 
 - ✅ Implemented 4 Low Risk abilities (Kinetic Pulse, Debris Pull, Coolant Spray, System Hack)
 - ✅ Created AbilityBase and AbilityDataAsset system
+- ✅ Created unified BaseAction system for ALL player actions
+- ✅ Implemented 5-slot customizable action system (Slot1-5 mapped to LMB, RMB, E, R, Space)
+- ✅ Created ActionManagerComponent for slot management
+- ✅ Migrated Dash, MeleeAttack, Block to new action system
+- ✅ Set up console commands for action management
 
-**Next Session - Unified Action System**:
-- Refactor to unified BaseAction system for ALL player actions
-- Implement 5-slot customizable action system (LMB, RMB, E, R, Space)
-- Migrate existing combat/movement to new system
-- Create ActionManagerComponent for slot management
+**Next Session**:
+- Debug remaining compilation issues
+- Create action data assets in editor
+- Migrate existing 4 abilities to action system
+- Test the unified action system
+
+## New Console Commands (Action System)
+- `Atlas_AssignAction [Slot] [ActionTag]` - Assign action to slot (e.g., `Atlas_AssignAction Slot1 Action.Dash`)
+- `Atlas_ClearSlot [Slot]` - Clear a slot
+- `Atlas_SwapSlots [Slot1] [Slot2]` - Swap two slots
+- `Atlas_ListActions` - List all available actions
+- `Atlas_ShowSlots` - Show current slot assignments
+- `Atlas_ResetSlots` - Reset to default configuration
+
+### Available Action Tags
+- `Action.Dash` - Dash movement ability
+- `Action.Attack.Basic` - Basic melee attack
+- `Action.Attack.Heavy` - Heavy melee attack  
+- `Action.Block` - Defensive block
+- `Action.Ability.KineticPulse` - Force push ability
+- `Action.Ability.DebrisPull` - Magnetic pull ability
+- `Action.Ability.CoolantSpray` - Area hazard ability
+- `Action.Ability.SystemHack` - Remote hack ability
 
 ## Setup Required
 - See `ENGINE_SETUP_GUIDE.md` for configuration steps

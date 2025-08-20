@@ -10,6 +10,7 @@ class UInputMappingContext;
 class UInputAction;
 class UFocusModeComponent;
 class UDashComponent;
+class UActionManagerComponent;
 
 UCLASS()
 class ATLAS_API APlayerCharacter : public AGameCharacterBase
@@ -29,22 +30,43 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	// NEW: Universal Action Slots
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Action Slots", meta = (AllowPrivateAccess = "true"))
+	UInputAction* Slot1Action; // Default: LMB
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Action Slots", meta = (AllowPrivateAccess = "true"))
+	UInputAction* Slot2Action; // Default: RMB
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Action Slots", meta = (AllowPrivateAccess = "true"))
+	UInputAction* Slot3Action; // Default: E
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Action Slots", meta = (AllowPrivateAccess = "true"))
+	UInputAction* Slot4Action; // Default: R
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Action Slots", meta = (AllowPrivateAccess = "true"))
+	UInputAction* Slot5Action; // Default: Space
+
+	// DEPRECATED: Old direct action inputs (will be removed after migration)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
 	UInputAction* AttackLMBAction;
 
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
 	UInputAction* BlockRMBHoldAction;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
 	UInputAction* DashSpaceAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
 	UInputAction* FocusQHoldAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
 	UInputAction* HeavyEAction;
 
+	// NEW: Action Manager Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
+	UActionManagerComponent* ActionManagerComponent;
+
+	// DEPRECATED: Will be removed after migration to action system
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	UFocusModeComponent* FocusModeComponent;
 	
