@@ -1,6 +1,37 @@
 # Atlas Development Changelog
 
-## Session: 2025-08-20 (Latest) - Architecture Refactoring
+## Session: 2025-01-20 (Evening) - Tag System Cleanup & Bug Fixes
+
+### Major Changes
+- **Simplified Gameplay Tag System**:
+  - Removed redundant Attack.Jab and Attack.Heavy tags
+  - All abilities now use Action.* tags directly (Action.BasicAttack, Action.HeavyAttack, etc.)
+  - Removed Attack.Blockable/Unblockable - each ability handles its own properties via DataAssets
+  - Cleaner, more intuitive tag hierarchy with better documentation
+
+- **Fixed Critical Bugs**:
+  - Fixed engine crash in UniversalAction::InitializeExecutorMap() - moved to lazy initialization
+  - Fixed duplicate ActionManagerComponent creation in PlayerCharacter
+  - Fixed all compilation errors related to method signatures and missing includes
+  - Fixed gameplay tag references throughout codebase
+
+- **Code Organization**:
+  - Reorganized AtlasGameplayTags.h with clear sections and inline documentation
+  - Updated all AI tasks to use Action tags directly
+  - Cleaned up redundant tag mappings in UniversalAction
+
+### Technical Fixes
+- Added missing includes (StationIntegrityComponent, OverlapResult, etc.)
+- Fixed method calls to match actual signatures (TakeDamage, Heal, EndVulnerability, etc.)
+- Added missing Interactable gameplay tags
+- Fixed UE_LOG formatting issues with FName to string conversions
+
+### Results
+- **Cleaner tag system** - 5 categories instead of 6, no redundancy
+- **More stable** - Fixed crash on startup, all compilation errors resolved
+- **Better maintainability** - Clear tag structure, each ability self-contained
+
+## Session: 2025-08-20 (Earlier) - Architecture Refactoring
 
 ### Major Architecture Improvements
 - **Function Map Routing**: Replaced if/else chains with O(1) function pointer map in UniversalAction

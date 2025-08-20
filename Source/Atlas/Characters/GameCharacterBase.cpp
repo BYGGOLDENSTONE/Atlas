@@ -211,7 +211,7 @@ void AGameCharacterBase::ApplyDamage_Implementation(float DamageAmount, AActor* 
 {
 	if (HealthComponent)
 	{
-		HealthComponent->TakeDamage(DamageAmount);
+		HealthComponent->TakeDamage(DamageAmount, DamageInstigator);
 	}
 }
 
@@ -219,7 +219,7 @@ void AGameCharacterBase::ApplyHealing_Implementation(float HealAmount, AActor* H
 {
 	if (HealthComponent)
 	{
-		HealthComponent->Heal(HealAmount);
+		HealthComponent->Heal(HealAmount, Healer);
 	}
 }
 

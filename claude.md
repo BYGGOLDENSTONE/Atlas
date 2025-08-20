@@ -66,10 +66,16 @@ Atlas_ResetSlots                       # Reset to defaults
 ## Development Rules
 - NO GAS - custom component system
 - Data-driven via DataAssets (all magic numbers removed)
-- Tag-based rules (Action.Ability.*)
 - Interface-based communication (ICombatInterface, IHealthInterface, IActionInterface)
 - No parry or camera lock systems
 - Use interfaces over direct component access
+
+## Gameplay Tag Structure
+- **Action.*** = Player abilities (15 total, each handles its own logic)
+- **State.*** = Combat states (attacking, blocking, vulnerable, etc)
+- **Anim.*** = Animation triggers (hit reactions, death, etc)
+- **Risk.*** = Station integrity risk levels
+- **Interactable.*** = Environmental interactions
 
 ## Next Tasks
 - Update all 15 ActionDataAssets with new timing fields in editor

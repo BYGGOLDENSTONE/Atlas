@@ -106,11 +106,10 @@ void UBTTask_SoulAttack::ExecuteSoulAttack(AEnemyCharacter* Enemy, AActor* Targe
 	{
 		if (HitActor != Enemy && HitActor == Target)
 		{
-			FGameplayTagContainer AttackTags;
-			AttackTags.AddTag(FGameplayTag::RequestGameplayTag(UnblockableTag));
-			AttackTags.AddTag(FGameplayTag::RequestGameplayTag(UnparryableTag));
-			
-			CombatComp->DealDamageToTarget(HitActor, Damage, AttackTags);
+			// Soul Attack uses heavy attack action
+			// The ability's DataAsset should define whether it's blockable
+			FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag("Action.HeavyAttack");
+			CombatComp->ProcessHit(HitActor, AttackTag);
 			
 			FVector PushDirection = (HitActor->GetActorLocation() - Enemy->GetActorLocation()).GetSafeNormal();
 			if (ACharacter* HitCharacter = Cast<ACharacter>(HitActor))

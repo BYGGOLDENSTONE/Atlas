@@ -33,11 +33,6 @@ void FAtlasGameplayTags::InitializeNativeTags()
     GameplayTags.State_Dead = Manager.AddNativeGameplayTag(FName("State.Dead"), FString("Dead"));
     GameplayTags.State_IFrames = Manager.AddNativeGameplayTag(FName("State.IFrames"), FString("Invincible"));
 
-    // ===== ATTACK TYPES (for AI/legacy) =====
-    GameplayTags.Attack_Jab = Manager.AddNativeGameplayTag(FName("Attack.Jab"), FString("Jab Attack"));
-    GameplayTags.Attack_Heavy = Manager.AddNativeGameplayTag(FName("Attack.Heavy"), FString("Heavy Attack"));
-    GameplayTags.Attack_Unblockable = Manager.AddNativeGameplayTag(FName("Attack.Unblockable"), FString("Unblockable"));
-
     // ===== ANIMATION =====
     GameplayTags.Anim_HitLight = Manager.AddNativeGameplayTag(FName("Anim.HitLight"), FString("Light Hit Reaction"));
     GameplayTags.Anim_HitHeavy = Manager.AddNativeGameplayTag(FName("Anim.HitHeavy"), FString("Heavy Hit Reaction"));
@@ -50,4 +45,10 @@ void FAtlasGameplayTags::InitializeNativeTags()
     GameplayTags.Risk_High = Manager.AddNativeGameplayTag(FName("Risk.High"), FString("High Risk"));
     GameplayTags.Risk_Medium = Manager.AddNativeGameplayTag(FName("Risk.Medium"), FString("Medium Risk"));
     GameplayTags.Risk_Low = Manager.AddNativeGameplayTag(FName("Risk.Low"), FString("Low Risk"));
+
+    // ===== INTERACTABLES =====
+    GameplayTags.Interactable_State_Ready = Manager.AddNativeGameplayTag(FName("Interactable.State.Ready"), FString("Interactable Ready"));
+    GameplayTags.Interactable_State_Cooldown = Manager.AddNativeGameplayTag(FName("Interactable.State.Cooldown"), FString("Interactable Cooldown"));
+    GameplayTags.Interactable_Type_Valve = Manager.AddNativeGameplayTag(FName("Interactable.Type.Valve"), FString("Valve Interactable"));
+    GameplayTags.Interactable_Type_Vent = Manager.AddNativeGameplayTag(FName("Interactable.Type.Vent"), FString("Vent Interactable"));
 }

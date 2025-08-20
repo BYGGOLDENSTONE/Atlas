@@ -154,9 +154,9 @@ void UBTTask_CatchSpecial::OnCatchSuccess(AActor* CaughtTarget)
 	UCombatComponent* EnemyCombat = CachedEnemy->GetCombatComponent();
 	if (EnemyCombat)
 	{
-		FGameplayTagContainer CatchTags;
-		CatchTags.AddTag(FGameplayTag::RequestGameplayTag("Combat.Status.Stunned"));
-		EnemyCombat->DealDamageToTarget(CaughtTarget, 10.0f, CatchTags);
+		// Apply damage using ProcessHit with BasicAttack tag
+		FGameplayTag AttackTag = FGameplayTag::RequestGameplayTag("Action.BasicAttack");
+		EnemyCombat->ProcessHit(CaughtTarget, AttackTag);
 	}
 
 	FTimerHandle StunTimer;

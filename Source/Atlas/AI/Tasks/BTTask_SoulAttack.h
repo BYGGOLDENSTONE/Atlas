@@ -27,12 +27,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Soul Attack")
 	UAnimMontage* SoulAttackMontage;
 
-	UPROPERTY(EditAnywhere, Category = "Soul Attack")
-	FName UnblockableTag = "Combat.Attack.Unblockable";
-
-	UPROPERTY(EditAnywhere, Category = "Soul Attack")
-	FName UnparryableTag = "Combat.Attack.Unparryable";
-
 private:
 	void ExecuteSoulAttack(class AEnemyCharacter* Enemy, class AActor* Target);
 };

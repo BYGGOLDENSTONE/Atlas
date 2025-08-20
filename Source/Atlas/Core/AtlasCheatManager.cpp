@@ -53,13 +53,13 @@ void UAtlasCheatManager::Atlas_ListActions()
 	{
 		UE_LOG(LogTemp, Log, TEXT("=== Available Actions ==="));
 		UE_LOG(LogTemp, Log, TEXT("Action.Dash - Dash movement ability"));
-		UE_LOG(LogTemp, Log, TEXT("Action.Attack.Basic - Basic melee attack"));
-		UE_LOG(LogTemp, Log, TEXT("Action.Attack.Heavy - Heavy melee attack"));
+		UE_LOG(LogTemp, Log, TEXT("Action.BasicAttack - Basic melee attack"));
+		UE_LOG(LogTemp, Log, TEXT("Action.HeavyAttack - Heavy melee attack"));
 		UE_LOG(LogTemp, Log, TEXT("Action.Block - Defensive block"));
-		UE_LOG(LogTemp, Log, TEXT("Action.Ability.KineticPulse - Force push ability"));
-		UE_LOG(LogTemp, Log, TEXT("Action.Ability.DebrisPull - Magnetic pull ability"));
-		UE_LOG(LogTemp, Log, TEXT("Action.Ability.CoolantSpray - Area hazard ability"));
-		UE_LOG(LogTemp, Log, TEXT("Action.Ability.SystemHack - Remote hack ability"));
+		UE_LOG(LogTemp, Log, TEXT("Action.KineticPulse - Force push ability"));
+		UE_LOG(LogTemp, Log, TEXT("Action.DebrisPull - Magnetic pull ability"));
+		UE_LOG(LogTemp, Log, TEXT("Action.CoolantSpray - Area hazard ability"));
+		UE_LOG(LogTemp, Log, TEXT("Action.SystemHack - Remote hack ability"));
 		
 		// Also list from available data assets
 		ActionManager->ExecuteListActionsCommand();
@@ -113,10 +113,10 @@ void UAtlasCheatManager::Atlas_ResetSlots()
 		}
 		
 		// Set default configuration
-		ActionManager->AssignActionToSlot(TEXT("Slot1"), FGameplayTag::RequestGameplayTag(FName("Action.Attack.Basic")));
+		ActionManager->AssignActionToSlot(TEXT("Slot1"), FGameplayTag::RequestGameplayTag(FName("Action.BasicAttack")));
 		ActionManager->AssignActionToSlot(TEXT("Slot2"), FGameplayTag::RequestGameplayTag(FName("Action.Block")));
-		ActionManager->AssignActionToSlot(TEXT("Slot3"), FGameplayTag::RequestGameplayTag(FName("Action.Attack.Heavy")));
-		ActionManager->AssignActionToSlot(TEXT("Slot4"), FGameplayTag::RequestGameplayTag(FName("Action.Ability.KineticPulse")));
+		ActionManager->AssignActionToSlot(TEXT("Slot3"), FGameplayTag::RequestGameplayTag(FName("Action.HeavyAttack")));
+		ActionManager->AssignActionToSlot(TEXT("Slot4"), FGameplayTag::RequestGameplayTag(FName("Action.KineticPulse")));
 		ActionManager->AssignActionToSlot(TEXT("Slot5"), FGameplayTag::RequestGameplayTag(FName("Action.Dash")));
 		
 		UE_LOG(LogTemp, Log, TEXT("Reset slots to default configuration"));

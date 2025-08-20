@@ -2,10 +2,14 @@
 #include "../Characters/GameCharacterBase.h"
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
+#include "../Components/StationIntegrityComponent.h"
+#include "../Core/AtlasGameplayTags.h"
 #include "../DataAssets/ActionDataAsset.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
+#include "Engine/OverlapResult.h"
+#include "CollisionQueryParams.h"
 #include "DrawDebugHelpers.h"
 
 UUniversalAction::UUniversalAction()
@@ -17,8 +21,8 @@ UUniversalAction::UUniversalAction()
 	ActionTimer = 0.0f;
 	ChannelProgress = 0.0f;
 	
-	// Initialize the action executor map
-	InitializeExecutorMap();
+	// Don't initialize executor map here - gameplay tags aren't ready yet
+	// It will be initialized on first use
 }
 
 bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
@@ -49,7 +53,7 @@ void UUniversalAction::OnActivate(AGameCharacterBase* Owner)
 	{
 		if (UStationIntegrityComponent* StationIntegrity = GetStationIntegrity())
 		{
-			StationIntegrity->ApplyDamage(ActionData->IntegrityCost);
+			StationIntegrity->ApplyIntegrityDamage(ActionData->IntegrityCost);
 		}
 	}
 }
@@ -192,12 +196,8 @@ void UUniversalAction::ExecuteMeleeAttack()
 {
 	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
 	{
-		// Determine attack type from tag
-		FGameplayTag AttackTag = ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.HeavyAttack")) 
-			? FGameplayTag::RequestGameplayTag("Attack.Type.Heavy")
-			: FGameplayTag::RequestGameplayTag("Attack.Type.Jab");
-		
-		if (CombatComp->StartAttack(AttackTag))
+		// Use the action tag directly - no mapping needed
+		if (CombatComp->StartAttack(ActionTag))
 		{
 			bIsAttacking = true;
 			// Use data-driven attack duration
@@ -230,7 +230,7 @@ void UUniversalAction::ExecuteMeleeAttack()
 				}
 			}
 			
-			UE_LOG(LogTemp, Log, TEXT("Executed Melee Attack: %s"), *AttackTag.ToString());
+			UE_LOG(LogTemp, Log, TEXT("Executed Melee Attack: %s"), *ActionTag.ToString());
 		}
 	}
 }
@@ -372,12 +372,12 @@ void UUniversalAction::ExecuteUtility()
 		return;
 		
 	// Handle utility actions based on specific tags
-	if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.SystemHack")))
+	if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.SystemHack")))
 	{
 		// System hack specific logic
 		UE_LOG(LogTemp, Log, TEXT("Executing System Hack"));
 	}
-	else if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.GravityAnchor")))
+	else if (ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.GravityAnchor")))
 	{
 		// Gravity anchor specific logic
 		UE_LOG(LogTemp, Log, TEXT("Executing Gravity Anchor"));
@@ -397,32 +397,38 @@ void UUniversalAction::ExecuteUtility()
 
 void UUniversalAction::InitializeExecutorMap()
 {
-	// Map action tags to their execution functions
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.Dash"), &UUniversalAction::ExecuteDash);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.Block"), &UUniversalAction::ExecuteBlock);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.BasicAttack"), &UUniversalAction::ExecuteMeleeAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.HeavyAttack"), &UUniversalAction::ExecuteMeleeAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.FocusMode"), &UUniversalAction::ExecuteFocusMode);
+	// Map action tags to their execution functions - using correct tag names
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Dash"), &UUniversalAction::ExecuteDash);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Block"), &UUniversalAction::ExecuteBlock);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.BasicAttack"), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.HeavyAttack"), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.FocusMode"), &UUniversalAction::ExecuteFocusMode);
 	
 	// Map area effect abilities
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.KineticPulse"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.SeismicStamp"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.LocalizedEMP"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.FloorDestabilizer"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.AirlockBreach"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.KineticPulse"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.SeismicStamp"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.LocalizedEMP"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.FloorDestabilizer"), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.AirlockBreach"), &UUniversalAction::ExecuteAreaEffect);
 	
 	// Map ranged abilities
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.DebrisPull"), &UUniversalAction::ExecuteRangedAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.ImpactGauntlet"), &UUniversalAction::ExecuteRangedAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.DebrisPull"), &UUniversalAction::ExecuteRangedAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.ImpactGauntlet"), &UUniversalAction::ExecuteRangedAttack);
 	
 	// Map utility abilities
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.CoolantSpray"), &UUniversalAction::ExecuteUtility);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.SystemHack"), &UUniversalAction::ExecuteUtility);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Ability.GravityAnchor"), &UUniversalAction::ExecuteUtility);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.CoolantSpray"), &UUniversalAction::ExecuteUtility);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.SystemHack"), &UUniversalAction::ExecuteUtility);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.GravityAnchor"), &UUniversalAction::ExecuteUtility);
 }
 
 void UUniversalAction::ExecuteActionByType()
 {
+	// Initialize map on first use (lazy initialization to avoid constructor issues)
+	if (ActionExecutorMap.Num() == 0)
+	{
+		InitializeExecutorMap();
+	}
+	
 	// First check if we have a specific executor for this tag
 	if (ActionExecutor* Executor = ActionExecutorMap.Find(ActionTag))
 	{

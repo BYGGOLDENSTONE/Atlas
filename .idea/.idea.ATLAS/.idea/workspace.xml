@@ -14,17 +14,32 @@
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/8/QM/3382XK9RTSZ5SHEWGS28N7.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/8/QM/3382XK9RTSZ5SHEWGS28N7.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/AbilityAction.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/AbilityAction.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BlockAction.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BlockAction.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/DashAction.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/DashAction.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/MeleeAttackAction.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/MeleeAttackAction.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_Attack_Heavy.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_Attack_Jab.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_CombatRules_Default.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_Dash.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_Debug.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/DA_StationIntegrity.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/abilitieis/DA_Action_Block.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/Dataassets/abilitieis/DA_Action_Dash.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/core/BP_GameState.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/core/BP_GameState.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_CatchSpecial.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_CatchSpecial.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasCheatManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasCheatManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +53,82 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://8" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -201,6 +292,7 @@
       <workItem from="1755683630340" duration="2155000" />
       <workItem from="1755690431721" duration="4588000" />
       <workItem from="1755698825158" duration="453000" />
+      <workItem from="1755721371106" duration="4430000" />
     </task>
     <servers />
   </component>

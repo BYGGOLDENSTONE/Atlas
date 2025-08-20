@@ -242,7 +242,7 @@ void UActionManagerComponent::LoadAvailableActions()
 		if (ActionData)
 		{
 			AvailableActionDataAssets.Add(ActionData);
-			UE_LOG(LogTemp, Log, TEXT("ActionManager: Loaded action data asset: %s"), *ActionData->ActionName);
+			UE_LOG(LogTemp, Log, TEXT("ActionManager: Loaded action data asset: %s"), *ActionData->ActionName.ToString());
 		}
 		else
 		{

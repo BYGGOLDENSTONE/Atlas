@@ -153,9 +153,9 @@ void FAtlasDebugCommands::ShowFocusDebug(const TArray<FString>& Args)
     {
         if (UFocusModeComponent* FocusComp = Character->FindComponentByClass<UFocusModeComponent>())
         {
-            FocusComp->SetDebugDrawEnabled(!FocusComp->IsDebugDrawEnabled());
+            FocusComp->bDebugDrawFocusInfo = !FocusComp->bDebugDrawFocusInfo;
             UE_LOG(LogTemp, Warning, TEXT("Focus debug display: %s"), 
-                FocusComp->IsDebugDrawEnabled() ? TEXT("ON") : TEXT("OFF"));
+                FocusComp->bDebugDrawFocusInfo ? TEXT("ON") : TEXT("OFF"));
         }
     }
 }
@@ -192,7 +192,7 @@ void FAtlasDebugCommands::ClearVulnerability()
 {
     if (UVulnerabilityComponent* VulnComp = GetVulnerabilityComponent())
     {
-        VulnComp->ClearVulnerability();
+        VulnComp->EndVulnerability();
         UE_LOG(LogTemp, Warning, TEXT("Cleared vulnerability"));
     }
 }
@@ -261,7 +261,7 @@ void FAtlasDebugCommands::ResetIntegrity(const TArray<FString>& Args)
 {
     if (UStationIntegrityComponent* IntegrityComp = GetStationIntegrity())
     {
-        IntegrityComp->ResetToMax();
+        IntegrityComp->SetIntegrityPercent(100.0f);
         UE_LOG(LogTemp, Warning, TEXT("Station integrity reset to maximum"));
     }
 }
@@ -298,7 +298,7 @@ void FAtlasDebugCommands::InfinitePoise(const TArray<FString>& Args)
         {
             if (bInfinitePoiseEnabled)
             {
-                HealthComp->SetCurrentPoise(HealthComp->GetMaxPoise());
+                HealthComp->ResetPoise();
             }
             UE_LOG(LogTemp, Warning, TEXT("Infinite Poise: %s"), bInfinitePoiseEnabled ? TEXT("ON") : TEXT("OFF"));
         }

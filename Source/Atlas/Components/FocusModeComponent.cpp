@@ -69,7 +69,7 @@ void UFocusModeComponent::StartFocusMode()
     
     if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
     {
-        CombatComp->CombatStateTags.AddTag(FAtlasGameplayTags::Get().Ability_Focus);
+        CombatComp->CombatStateTags.AddTag(FAtlasGameplayTags::Get().Action_FocusMode);
     }
     
     OnFocusModeChanged.Broadcast(true);
@@ -91,7 +91,7 @@ void UFocusModeComponent::StopFocusMode()
     
     if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
     {
-        CombatComp->CombatStateTags.RemoveTag(FAtlasGameplayTags::Get().Ability_Focus);
+        CombatComp->CombatStateTags.RemoveTag(FAtlasGameplayTags::Get().Action_FocusMode);
     }
     
     OnFocusModeChanged.Broadcast(false);

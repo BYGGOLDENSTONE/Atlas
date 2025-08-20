@@ -9,7 +9,6 @@
 class UInputMappingContext;
 class UInputAction;
 class UFocusModeComponent;
-class UActionManagerComponent;
 
 UCLASS()
 class ATLAS_API APlayerCharacter : public AGameCharacterBase
@@ -48,10 +47,6 @@ protected:
 	// Focus mode input (still needed for focus system)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* FocusQHoldAction;
-
-	// NEW: Action Manager Component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
-	UActionManagerComponent* ActionManagerComponent;
 
 	// Focus Mode Component (still needed for focus system)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
