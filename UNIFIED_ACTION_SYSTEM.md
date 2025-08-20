@@ -1,37 +1,21 @@
-# Unified Action System Design
+# Unified Action System - COMPLETED
 
 ## Overview
-A flexible system where ALL player actions (attacks, abilities, movement) can be assigned to any of 5 input slots, allowing complete combat customization.
+A fully implemented data-driven system where ALL abilities can be assigned to any of 5 input slots. No distinction between "core" and "special" actions - complete player freedom.
 
 ## Architecture
 
 ### Core Components
 
-#### 1. BaseAction (Base Class)
-```cpp
-class UBaseAction : public UActorComponent
-{
-    // Common properties for all actions
-    - ActionName
-    - Cooldown
-    - ExecutionDuration
-    - IntegrityCost (0 for low risk)
-    - RequiredTags/BlockedTags
-    - State (Ready/Executing/Cooldown)
-    
-    // Virtual methods
-    - CanExecute()
-    - Execute()
-    - Interrupt()
-    - GetActionType()
-}
-```
+#### 1. UniversalAction (Single Implementation)
+- One class handles ALL action types through data configuration
+- Behavior determined entirely by ActionDataAsset
+- No need for separate action classes
 
-#### 2. Action Types (Inherit from BaseAction)
-- **CombatAction**: Basic Attack, Heavy Attack, Combos
-- **DefensiveAction**: Block, Parry (future)
-- **MovementAction**: Dash, Dodge (future)
-- **AbilityAction**: Kinetic Pulse, Debris Pull, Coolant Spray, System Hack
+#### 2. ActionDataAsset (Configuration)
+- Context-sensitive fields that show/hide based on ActionType
+- Contains all parameters: damage, cooldown, range, IntegrityCost, etc.
+- IntegrityCost is fully configurable - YOU decide the balance
 
 #### 3. ActionManagerComponent
 ```cpp
@@ -57,58 +41,32 @@ class UActionManagerComponent : public UActorComponent
 }
 ```
 
-## Implementation Plan
+## Current Implementation (COMPLETED)
 
-### Phase 1: Create Base System
-1. Create `UBaseAction` class
-2. Create `UActionManagerComponent`
-3. Define action slot enum and input mapping
-
-### Phase 2: Migrate Existing Systems
-1. **Convert CombatComponent actions**:
-   - BasicAttackAction (from AttackLMB)
-   - HeavyAttackAction (from HeavyAttack)
-   - BlockAction (from Block)
-
-2. **Convert DashComponent**:
-   - DashAction (from Dash ability)
-
-3. **Convert Abilities**:
-   - Rename AbilityBase to AbilityAction
-   - Update all 4 abilities to inherit from BaseAction
-
-### Phase 3: Input System
-1. Remove hard-coded input bindings from PlayerCharacter
-2. Route all inputs through ActionManagerComponent
-3. Create input action mapping for 5 slots
-
-### Phase 4: Action Inventory
-1. Create action inventory system
-2. UI for action selection (basic debug UI)
-3. Save/load action configurations
+### What's Done
+✅ UniversalAction class handling all action types
+✅ ActionManagerComponent with 5 configurable slots
+✅ ActionDataAsset with context-sensitive fields
+✅ All 15 abilities implemented and working
+✅ Console commands for runtime configuration
+✅ Removed all legacy action classes
+✅ Cleaned up PlayerCharacter input handling
 
 ## Example Configurations
 
-### Default Loadout
-- **LMB**: BasicAttackAction
-- **RMB**: BlockAction
-- **E**: HeavyAttackAction
-- **R**: KineticPulseAction
-- **Space**: DashAction
+### Example Loadout
+```
+Slot1 (LMB): Any ability
+Slot2 (RMB): Any ability
+Slot3 (E): Any ability
+Slot4 (R): Any ability
+Slot5 (Space): Any ability
+```
 
-### Ability-Focused Loadout
-- **LMB**: KineticPulseAction
-- **RMB**: DebrisPullAction
-- **E**: CoolantSprayAction
-- **R**: SystemHackAction
-- **Space**: DashAction
-
-### Defensive Loadout
-- **LMB**: BlockAction
-- **RMB**: BasicAttackAction
-- **E**: DashAction
-- **R**: KineticPulseAction
-- **Space**: CoolantSprayAction
+Players can assign ANY of the 15 abilities to ANY slot. Examples:
+- 5 different attacks for aggressive play
+- Mix of defense and utility for tactical play
+- All movement abilities for mobility focus
 
 ## Benefits
 1. **Player Choice**: Complete control over control scheme
@@ -117,24 +75,22 @@ class UActionManagerComponent : public UActorComponent
 4. **Future Proof**: Easy to add new actions
 5. **Modular**: Each action is self-contained
 
-## Migration Notes
+## Available Abilities (15 Total)
 
-### From Current System
-- **CombatComponent**: Extract attack/block logic into actions
-- **DashComponent**: Convert to DashAction
-- **AbilityBase**: Rename and adjust to inherit from BaseAction
-- **PlayerCharacter**: Remove direct input handling
+All abilities start with IntegrityCost = 0. Adjust in DataAssets for balance:
 
-### Data Assets
-- Create `UActionDataAsset` base class
-- Each action type has specific data asset
-- Centralized configuration
+- BasicAttack, HeavyAttack, Block
+- Dash, FocusMode
+- KineticPulse, DebrisPull, CoolantSpray, SystemHack
+- FloorDestabilizer, ImpactGauntlet, LocalizedEMP
+- SeismicStamp, GravityAnchor, AirlockBreach
 
-## Risk Tiers Integration
-Actions will have IntegrityCost:
-- **Low Risk** (0 cost): Basic attacks, dash, low-tier abilities
-- **Medium Risk** (5-10 cost): Enhanced attacks, mid-tier abilities  
-- **High Risk** (15-25 cost): Ultimate abilities, devastating attacks
+## Integrity Cost System
+Each ability's IntegrityCost is fully configurable in its DataAsset:
+- Set to 0 for no station damage
+- Increase value for risk/reward gameplay
+- Create different game modes by adjusting costs
+- Complete control over balance through data
 
 ## Testing Plan
 1. Create debug commands to swap actions

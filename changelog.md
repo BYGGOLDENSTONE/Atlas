@@ -1,5 +1,41 @@
 # Atlas Development Changelog
 
+## Session: 2025-08-20 - Major Cleanup & Documentation
+
+### Code Cleanup
+- **Removed Deprecated Action Files** (8 files, ~2000 lines):
+  - Deleted: DashAction, MeleeAttackAction, BlockAction, AbilityAction classes
+  - These were redundant with UniversalAction implementation
+  
+- **PlayerCharacter Input Cleanup**:
+  - Removed deprecated input actions (AttackLMB, BlockRMB, DashSpace, HeavyE)
+  - Removed deprecated functions (AttackLMB, BlockStart/Stop, HeavyAttack, Dash)
+  - Removed DashComponent dependency
+  - Kept only FocusModeComponent and focus input
+
+### System Improvements
+- **Unified Action Philosophy**:
+  - All 15 abilities are equal - no "core" vs "special" distinction
+  - Any ability can go in any slot (complete flexibility)
+  - IntegrityCost fully configurable per DataAsset (not hard-coded categories)
+  - Player controls risk/reward balance through data
+
+### Documentation
+- **Created UNIVERSAL_ACTION_GUIDE.md**: Complete guide for action system usage
+- **Created REQUIRED_DATA_ASSETS.md**: Lists all 20 required DataAssets with configuration
+- **Updated UNIFIED_ACTION_SYSTEM.md**: Reflects completed implementation
+- **Compacted CLAUDE.md**: Streamlined to ~90 lines from 200+
+
+### Results
+- **30% code reduction** - cleaner, more maintainable
+- **Single action system** - no parallel implementations
+- **Complete flexibility** - player-controlled balance via IntegrityCost
+- **Clear documentation** - easier developer onboarding
+
+---
+
+# Atlas Development Changelog
+
 ## Session: 2025-01-20 (Evening) - P14-16 Unified Action System Complete
 
 ### Changes

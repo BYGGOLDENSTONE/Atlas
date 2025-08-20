@@ -10,7 +10,6 @@
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/FocusModeComponent.h"
-#include "../Components/DashComponent.h"
 #include "../Components/ActionManagerComponent.h"
 #include "GameplayTagContainer.h"
 
@@ -21,9 +20,8 @@ APlayerCharacter::APlayerCharacter()
 	// Create the new Action Manager Component
 	ActionManagerComponent = CreateDefaultSubobject<UActionManagerComponent>(TEXT("ActionManagerComponent"));
 	
-	// DEPRECATED: These will be removed after migration
+	// Focus Mode Component (still needed for focus system)
 	FocusModeComponent = CreateDefaultSubobject<UFocusModeComponent>(TEXT("FocusModeComponent"));
-	DashComponent = CreateDefaultSubobject<UDashComponent>(TEXT("DashComponent"));
 }
 
 void APlayerCharacter::BeginPlay()
@@ -91,29 +89,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			}
 		}
 		
-		// DEPRECATED: Old direct action bindings (kept for compatibility during migration)
-		if (AttackLMBAction)
-			EnhancedInputComponent->BindAction(AttackLMBAction, ETriggerEvent::Triggered, this, &APlayerCharacter::AttackLMB);
-		
-		if (BlockRMBHoldAction)
-		{
-			EnhancedInputComponent->BindAction(BlockRMBHoldAction, ETriggerEvent::Started, this, &APlayerCharacter::BlockStart);
-			EnhancedInputComponent->BindAction(BlockRMBHoldAction, ETriggerEvent::Completed, this, &APlayerCharacter::BlockStop);
-		}
-		
-		if (DashSpaceAction)
-		{
-			EnhancedInputComponent->BindAction(DashSpaceAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Dash);
-		}
-		
+		// Focus mode input (still needed for focus system)
 		if (FocusQHoldAction)
 		{
 			EnhancedInputComponent->BindAction(FocusQHoldAction, ETriggerEvent::Started, this, &APlayerCharacter::FocusStart);
 			EnhancedInputComponent->BindAction(FocusQHoldAction, ETriggerEvent::Completed, this, &APlayerCharacter::FocusStop);
 		}
-		
-		if (HeavyEAction)
-			EnhancedInputComponent->BindAction(HeavyEAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HeavyAttack);
 	}
 	else
 	{
@@ -150,31 +131,6 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void APlayerCharacter::AttackLMB()
-{
-	if (CombatComponent)
-	{
-		CombatComponent->StartAttack(FGameplayTag::RequestGameplayTag(FName("Attack.Type.Jab")));
-	}
-}
-
-
-void APlayerCharacter::BlockStart()
-{
-	if (CombatComponent)
-	{
-		CombatComponent->StartBlock();
-	}
-}
-
-void APlayerCharacter::BlockStop()
-{
-	if (CombatComponent)
-	{
-		CombatComponent->EndBlock();
-	}
-}
-
 void APlayerCharacter::FocusStart()
 {
 	if (FocusModeComponent)
@@ -196,23 +152,3 @@ void APlayerCharacter::FocusStop()
 	}
 }
 
-void APlayerCharacter::HeavyAttack()
-{
-	if (CombatComponent)
-	{
-		CombatComponent->StartAttack(FGameplayTag::RequestGameplayTag(FName("Attack.Type.Heavy")));
-	}
-}
-
-void APlayerCharacter::Dash()
-{
-	
-	if (DashComponent)
-	{
-		DashComponent->TryDash(LastMovementInput);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter::Dash() - No DashComponent found!"));
-	}
-}

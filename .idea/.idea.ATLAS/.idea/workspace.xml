@@ -14,26 +14,17 @@
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/GameplayTags.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Config/GameplayTags.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/1/0G/HOAJZN9E4DDI6Y1W3JU13K.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/1/0G/HOAJZN9E4DDI6Y1W3JU13K.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/1/2J/AQ1PWWT9TBAI7AA470T014.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/1/2J/AQ1PWWT9TBAI7AA470T014.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/6/NC/UUYHDUFQAXTRRN4RVOPIUF.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/6/NC/UUYHDUFQAXTRRN4RVOPIUF.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/9/6I/RU1L28PS820IOVH625A0DA.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/9/6I/RU1L28PS820IOVH625A0DA.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/9/MO/72II2GSLK9VS0ULW9SACWH.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/9/MO/72II2GSLK9VS0ULW9SACWH.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/A/IO/07IVU4EY14FMETPGTJULEO.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/A/IO/07IVU4EY14FMETPGTJULEO.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/AbilityBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/AbilityBase.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/AbilityBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/AbilityBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BlockAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BlockAction.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/DashAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/DashAction.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/MeleeAttackAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/MeleeAttackAction.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/DataAssets/ActionDataAsset.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/DataAssets/ActionDataAsset.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/DataAssets/ActionDataAsset.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/DataAssets/ActionDataAsset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/AbilityAction.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/AbilityAction.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BlockAction.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BlockAction.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/DashAction.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/DashAction.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/MeleeAttackAction.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/MeleeAttackAction.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,16 +38,6 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="cidr-memory-view://7" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -218,7 +199,8 @@
       <workItem from="1755640608914" duration="927000" />
       <workItem from="1755675697477" duration="1371000" />
       <workItem from="1755683630340" duration="2155000" />
-      <workItem from="1755690431721" duration="4174000" />
+      <workItem from="1755690431721" duration="4588000" />
+      <workItem from="1755698825158" duration="453000" />
     </task>
     <servers />
   </component>

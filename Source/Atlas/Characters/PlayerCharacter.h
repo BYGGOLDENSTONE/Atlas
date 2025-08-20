@@ -46,32 +46,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Action Slots", meta = (AllowPrivateAccess = "true"))
 	UInputAction* Slot5Action; // Default: Space
 
-	// DEPRECATED: Old direct action inputs (will be removed after migration)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
-	UInputAction* AttackLMBAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
-	UInputAction* BlockRMBHoldAction;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
-	UInputAction* DashSpaceAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
+	// Focus mode input (still needed for focus system)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* FocusQHoldAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Deprecated", meta = (AllowPrivateAccess = "true"))
-	UInputAction* HeavyEAction;
 
 	// NEW: Action Manager Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	UActionManagerComponent* ActionManagerComponent;
 
-	// DEPRECATED: Will be removed after migration to action system
+	// Focus Mode Component (still needed for focus system)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	UFocusModeComponent* FocusModeComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
-	UDashComponent* DashComponent;
 
 protected:
 	virtual void BeginPlay() override;
@@ -79,13 +64,8 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void AttackLMB();
-	void BlockStart();
-	void BlockStop();
 	void FocusStart();
 	void FocusStop();
-	void HeavyAttack();
-	void Dash();
 	
 	FVector2D LastMovementInput;
 };
