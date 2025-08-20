@@ -52,6 +52,26 @@
 - Create UI for station integrity display
 - Implement visual warnings for critical state
 
+## Hotfix: 2025-01-20 - Station Integrity Debug Commands
+
+### Fixed
+- Console commands now properly detect game world context
+- Commands only work during Play In Editor (PIE) or gameplay
+- Fixed "No world was found" error when using commands
+- All debug commands now use proper world context iteration
+
+### Verified Working Commands
+- `Atlas.ShowIntegrityStatus` - Displays current integrity state
+- `Atlas.DamageIntegrity [amount]` - Damages station
+- `Atlas.SetIntegrityPercent [percent]` - Sets specific percentage
+- `Atlas.TestHighRiskAbility [cost]` - Tests ability with integrity cost
+- `Atlas.ResetIntegrity` - Resets to 100%
+
+### Technical Details
+- Updated StationIntegrityDebugCommands.cpp to iterate through world contexts
+- Properly detects PIE and Game world types
+- Clear error messages when not in play mode
+
 ## Session: 2025-01-20 - P10 & P11 Completion
 
 ### Changes

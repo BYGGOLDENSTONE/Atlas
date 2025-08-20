@@ -61,9 +61,23 @@ void FStationIntegrityDebugCommands::DamageIntegrity(const TArray<FString>& Args
     
     float DamageAmount = FCString::Atof(*Args[0]);
     
-    UWorld* World = GEngine->GetWorldFromContextObject(GEngine, EGetWorldErrorMode::LogAndReturnNull);
+    // Get the game world properly
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World() && (Context.WorldType == EWorldType::Game || Context.WorldType == EWorldType::PIE))
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    
     if (!World)
     {
+        UE_LOG(LogTemp, Error, TEXT("No game world found. Make sure you're in Play mode (PIE)."));
         return;
     }
     
@@ -88,9 +102,23 @@ void FStationIntegrityDebugCommands::SetIntegrity(const TArray<FString>& Args)
     
     float NewIntegrity = FCString::Atof(*Args[0]);
     
-    UWorld* World = GEngine->GetWorldFromContextObject(GEngine, EGetWorldErrorMode::LogAndReturnNull);
+    // Get the game world properly
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World() && (Context.WorldType == EWorldType::Game || Context.WorldType == EWorldType::PIE))
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    
     if (!World)
     {
+        UE_LOG(LogTemp, Error, TEXT("No game world found. Make sure you're in Play mode (PIE)."));
         return;
     }
     
@@ -115,9 +143,23 @@ void FStationIntegrityDebugCommands::SetIntegrityPercent(const TArray<FString>& 
     
     float Percent = FCString::Atof(*Args[0]);
     
-    UWorld* World = GEngine->GetWorldFromContextObject(GEngine, EGetWorldErrorMode::LogAndReturnNull);
+    // Get the game world properly
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World() && (Context.WorldType == EWorldType::Game || Context.WorldType == EWorldType::PIE))
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    
     if (!World)
     {
+        UE_LOG(LogTemp, Error, TEXT("No game world found. Make sure you're in Play mode (PIE)."));
         return;
     }
     
@@ -134,9 +176,23 @@ void FStationIntegrityDebugCommands::SetIntegrityPercent(const TArray<FString>& 
 
 void FStationIntegrityDebugCommands::ShowIntegrityStatus(const TArray<FString>& Args)
 {
-    UWorld* World = GEngine->GetWorldFromContextObject(GEngine, EGetWorldErrorMode::LogAndReturnNull);
+    // Get the game world properly
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World() && (Context.WorldType == EWorldType::Game || Context.WorldType == EWorldType::PIE))
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    
     if (!World)
     {
+        UE_LOG(LogTemp, Error, TEXT("No game world found. Make sure you're in Play mode (PIE)."));
         return;
     }
     
@@ -167,9 +223,23 @@ void FStationIntegrityDebugCommands::TestHighRiskAbility(const TArray<FString>& 
         Cost = FCString::Atof(*Args[0]);
     }
     
-    UWorld* World = GEngine->GetWorldFromContextObject(GEngine, EGetWorldErrorMode::LogAndReturnNull);
+    // Get the game world properly
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World() && (Context.WorldType == EWorldType::Game || Context.WorldType == EWorldType::PIE))
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    
     if (!World)
     {
+        UE_LOG(LogTemp, Error, TEXT("No game world found. Make sure you're in Play mode (PIE)."));
         return;
     }
     
@@ -199,9 +269,23 @@ void FStationIntegrityDebugCommands::TestHighRiskAbility(const TArray<FString>& 
 
 void FStationIntegrityDebugCommands::ResetIntegrity(const TArray<FString>& Args)
 {
-    UWorld* World = GEngine->GetWorldFromContextObject(GEngine, EGetWorldErrorMode::LogAndReturnNull);
+    // Get the game world properly
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World() && (Context.WorldType == EWorldType::Game || Context.WorldType == EWorldType::PIE))
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    
     if (!World)
     {
+        UE_LOG(LogTemp, Error, TEXT("No game world found. Make sure you're in Play mode (PIE)."));
         return;
     }
     
