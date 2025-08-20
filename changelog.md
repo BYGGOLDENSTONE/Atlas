@@ -1,5 +1,53 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-20 (Evening) - P14-16 Unified Action System Complete
+
+### Changes
+- **Phase P14-16 - Unified Action System Completed**
+  - Created UniversalAction class to handle all actions through data
+  - Implemented context-sensitive ActionDataAsset with type-based field visibility
+  - Reorganized all gameplay tags under Action.Ability.* namespace for consistency
+  - Created AbilityAction wrapper for legacy ability components
+  - Fixed compilation issues with field references
+  - Simplified action system to use single class with data-driven behavior
+
+### Technical Implementation
+- **UniversalAction Class**:
+  - Single action class that routes behavior based on ActionType and tags
+  - Handles Dash, Block, MeleeAttack, and generic abilities
+  - Completely data-driven approach eliminates need for multiple action classes
+
+- **Context-Sensitive Data Assets**:
+  - ActionDataAsset shows/hides fields based on ActionType selection
+  - Movement type shows: DashDistance, DashDuration, Invincibility settings
+  - Defense type shows: DamageReduction, Block settings
+  - MeleeAttack type shows: Damage, Knockback, Poise settings
+  - Uses EditCondition and EditConditionHides for dynamic UI
+
+- **Unified Tag System**:
+  - All actions now under Action.Ability.* namespace
+  - No more separation between "actions", "attacks", and "abilities"
+  - Consistent naming: Action.Ability.Dash, Action.Ability.Block, etc.
+
+### Files Created
+- Source/Atlas/Actions/UniversalAction.h/cpp - Single action class for all behaviors
+- Source/Atlas/Actions/AbilityAction.h/cpp - Wrapper for legacy abilities
+
+### Files Modified
+- ActionDataAsset.h/cpp - Redesigned with context-sensitive fields
+- AtlasGameplayTags.h/cpp - All tags under Action.Ability.*
+- GameplayTags.csv - Reorganized with unified naming
+- Various action classes updated for new field names
+
+### Benefits
+- **Simpler**: One action class instead of many
+- **Cleaner UI**: Only see relevant fields in editor
+- **Consistent**: All actions treated uniformly
+- **Maintainable**: Less code duplication
+- **Intuitive**: ActionType determines visible configuration
+
+---
+
 ## Session: 2025-01-20 - P12 Station Integrity System
 
 ### Changes

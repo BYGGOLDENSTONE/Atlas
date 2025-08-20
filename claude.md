@@ -122,10 +122,12 @@ AI-controlled passive abilities:
 - `VulnerabilityComponent`: Damage multiplier state with charges
 - `StationIntegrityComponent`: Station health tracking, threshold events
 
-### New Action System (Next Session)
-- `BaseAction`: Base class for all player actions
+### Action System (Implemented)
+- `UniversalAction`: Single class handles all actions via data-driven approach
 - `ActionManagerComponent`: Manages 5 customizable action slots
-- Actions can be freely assigned to: LMB, RMB, E, R, Space
+- `ActionDataAsset`: Context-sensitive configuration (fields show/hide based on ActionType)
+- Actions can be freely assigned to any slot: LMB, RMB, E, R, Space
+- All actions unified under Action.Ability.* tag namespace
 
 ### Animation System
 - `AttackNotifyState`: Animation-driven attack windows
@@ -196,21 +198,25 @@ AI-controlled passive abilities:
 - **P11**: Tiered Vulnerability System (Stunned/Crippled/Exposed)
 - **P12**: Station Integrity System (100%/50%/0% thresholds, game over on failure)
 
-## Current Task: P14-16 - Unified Action System Refactor
+## Current Task: P14-16 - Unified Action System (COMPLETED)
 **Completed**: 
 - ✅ Implemented 4 Low Risk abilities (Kinetic Pulse, Debris Pull, Coolant Spray, System Hack)
-- ✅ Created AbilityBase and AbilityDataAsset system
 - ✅ Created unified BaseAction system for ALL player actions
 - ✅ Implemented 5-slot customizable action system (Slot1-5 mapped to LMB, RMB, E, R, Space)
 - ✅ Created ActionManagerComponent for slot management
 - ✅ Migrated Dash, MeleeAttack, Block to new action system
 - ✅ Set up console commands for action management
+- ✅ Created UniversalAction class to handle all actions through data
+- ✅ Implemented context-sensitive ActionDataAsset with type-based field visibility
+- ✅ Reorganized gameplay tags under Action.Ability.* for consistency
+- ✅ Created AbilityAction wrapper for legacy ability components
+- ✅ Fixed all compilation issues and field references
 
-**Next Session**:
-- Debug remaining compilation issues
-- Create action data assets in editor
-- Migrate existing 4 abilities to action system
-- Test the unified action system
+**Action System Architecture**:
+- **UniversalAction**: Single action class that handles all behaviors based on ActionType and tags
+- **ActionDataAsset**: Context-sensitive fields that show/hide based on ActionType selection
+- **ActionManagerComponent**: Manages 5 customizable action slots
+- **Unified Tag System**: All actions under Action.Ability.* namespace
 
 ## New Console Commands (Action System)
 - `Atlas_AssignAction [Slot] [ActionTag]` - Assign action to slot (e.g., `Atlas_AssignAction Slot1 Action.Dash`)
@@ -220,11 +226,11 @@ AI-controlled passive abilities:
 - `Atlas_ShowSlots` - Show current slot assignments
 - `Atlas_ResetSlots` - Reset to default configuration
 
-### Available Action Tags
-- `Action.Dash` - Dash movement ability
-- `Action.Attack.Basic` - Basic melee attack
-- `Action.Attack.Heavy` - Heavy melee attack  
-- `Action.Block` - Defensive block
+### Available Action Tags (All under Action.Ability.*)
+- `Action.Ability.Dash` - Dash movement ability
+- `Action.Ability.BasicAttack` - Basic melee attack
+- `Action.Ability.HeavyAttack` - Heavy melee attack  
+- `Action.Ability.Block` - Defensive block
 - `Action.Ability.KineticPulse` - Force push ability
 - `Action.Ability.DebrisPull` - Magnetic pull ability
 - `Action.Ability.CoolantSpray` - Area hazard ability

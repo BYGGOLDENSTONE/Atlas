@@ -12,7 +12,7 @@
 
 UDashAction::UDashAction()
 {
-	ActionTag = FGameplayTag::RequestGameplayTag(FName("Action.Dash"));
+	// ActionTag will be set from DataAsset
 	DashState = EDashActionState::Ready;
 	DashTimer = 0.0f;
 	InvincibilityTimer = 0.0f;
@@ -112,7 +112,7 @@ void UDashAction::StartDash(const FVector& Direction)
 	float DashDistance = 400.0f; // Default
 	if (ActionData)
 	{
-		DashDistance = ActionData->MoveDistance;
+		DashDistance = ActionData->DashDistance;
 	}
 	
 	DashTargetLocation = DashStartLocation + (DashDirection * DashDistance);
@@ -126,10 +126,10 @@ void UDashAction::StartDash(const FVector& Direction)
 	}
 
 	// Enable invincibility if configured
-	if (ActionData && ActionData->CustomFloatParameters.Contains("InvincibilityDuration"))
+	if (ActionData && ActionData->bGrantsInvincibility)
 	{
 		SetInvincibility(true);
-		InvincibilityTimer = ActionData->CustomFloatParameters["InvincibilityDuration"];
+		InvincibilityTimer = ActionData->InvincibilityDuration;
 	}
 
 	// Interrupt any ongoing combat actions
@@ -166,7 +166,7 @@ void UDashAction::UpdateDash(float DeltaTime)
 	float DashDuration = 0.3f; // Default
 	if (ActionData)
 	{
-		DashDuration = ActionData->Duration;
+		DashDuration = ActionData->DashDuration;
 	}
 
 	DashTimer += DeltaTime;

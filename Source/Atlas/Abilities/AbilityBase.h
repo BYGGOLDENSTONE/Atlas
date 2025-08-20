@@ -60,6 +60,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ability")
 	EAbilityRiskTier GetRiskTier() const { return RiskTier; }
 
+	// Allow setting integrity cost from action system
+	void SetIntegrityCost(float Cost) { IntegrityCost = Cost; }
+
+	// Force end the ability (for interruption)
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+	void ForceEndAbility();
+
 protected:
 	// Override these in derived classes
 	virtual void ExecuteAbility();

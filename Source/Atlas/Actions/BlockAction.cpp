@@ -7,7 +7,7 @@
 
 UBlockAction::UBlockAction()
 {
-	ActionTag = FGameplayTag::RequestGameplayTag(FName("Action.Block"));
+	// ActionTag will be set from DataAsset
 	bIsBlocking = false;
 	BlockHoldTime = 0.0f;
 }

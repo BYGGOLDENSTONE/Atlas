@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/CombatComponent.h"
+#include "../Components/DamageCalculator.h"
 #include "../Data/KineticPulseDataAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -25,11 +26,8 @@ void UKineticPulseAbility::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AActor* Owner = GetOwner();
-	if (Owner)
-	{
-		DamageCalculator = Owner->FindComponentByClass<UDamageCalculator>();
-	}
+	// Create our own DamageCalculator instance
+	DamageCalculator = NewObject<UDamageCalculator>(this);
 }
 
 void UKineticPulseAbility::ExecuteAbility()

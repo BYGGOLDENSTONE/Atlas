@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameplayTagContainer.h"
+#include "Atlas/Actions/BaseAction.h"
 #include "ActionManagerComponent.generated.h"
 
 // Forward declarations
-class UBaseAction;
 class UActionDataAsset;
 class AGameCharacterBase;
 

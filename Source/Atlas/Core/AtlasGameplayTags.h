@@ -58,6 +58,27 @@ public:
     FGameplayTag Interactable_State_Ready;
     FGameplayTag Interactable_State_Cooldown;
 
+    // NEW Action System Tags - All abilities
+    FGameplayTag Action_Ability_Dash;
+    FGameplayTag Action_Ability_Block;
+    FGameplayTag Action_Ability_BasicAttack;
+    FGameplayTag Action_Ability_HeavyAttack;
+    FGameplayTag Action_Ability_KineticPulse;
+    FGameplayTag Action_Ability_DebrisPull;
+    FGameplayTag Action_Ability_CoolantSpray;
+    FGameplayTag Action_Ability_SystemHack;
+    FGameplayTag Action_Ability_FloorDestabilizer;
+    FGameplayTag Action_Ability_ImpactGauntlet;
+    FGameplayTag Action_Ability_LocalizedEMP;
+    FGameplayTag Action_Ability_SeismicStamp;
+    FGameplayTag Action_Ability_GravityAnchor;
+    FGameplayTag Action_Ability_AirlockBreach;
+
+    // Vulnerability Tier Tags
+    FGameplayTag Vulnerability_Tier_Stunned;
+    FGameplayTag Vulnerability_Tier_Crippled;
+    FGameplayTag Vulnerability_Tier_Exposed;
+
 private:
     static FAtlasGameplayTags GameplayTags;
 };

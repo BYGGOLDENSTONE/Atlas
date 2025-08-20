@@ -1,0 +1,95 @@
+Tag,DevComment
+// ========================================
+// NEW ACTION SYSTEM TAGS (Current System)
+// ========================================
+
+// Action Types - Used for the new unified action system
+Action.Dash,"Dash movement action"
+Action.Block,"Defensive block action"
+Action.Attack.Basic,"Basic melee attack (Jab)"
+Action.Attack.Heavy,"Heavy melee attack"
+Action.Ability.KineticPulse,"Kinetic Pulse - force push ability"
+Action.Ability.DebrisPull,"Debris Pull - magnetic pull ability"
+Action.Ability.CoolantSpray,"Coolant Spray - area hazard ability"
+Action.Ability.SystemHack,"System Hack - remote interaction ability"
+Action.Ability.FloorDestabilizer,"Floor Destabilizer - medium risk ability"
+Action.Ability.ImpactGauntlet,"Impact Gauntlet - charged punch ability"
+Action.Ability.LocalizedEMP,"Localized EMP - disable tech ability"
+Action.Ability.SeismicStamp,"Seismic Stamp - high risk ground smash"
+Action.Ability.GravityAnchor,"Gravity Anchor - high risk object launcher"
+Action.Ability.AirlockBreach,"Airlock Breach - high risk decompression"
+
+// ========================================
+// COMBAT STATES - Used by both systems
+// ========================================
+
+Combat.State.Attacking,"Character is currently attacking"
+Combat.State.Blocking,"Character is actively blocking"
+Combat.State.Staggered,"Character is staggered (poise broken)"
+Combat.State.Vulnerable,"Character is vulnerable to damage"
+Combat.State.Invincible,"Character has i-frames"
+Combat.State.Dead,"Character is dead"
+Combat.State.Dashing,"Character is dashing"
+Combat.State.Ragdoll,"Character is in ragdoll state"
+
+// ========================================
+// VULNERABILITY TIERS
+// ========================================
+
+Vulnerability.Tier.Stunned,"Yellow tier - 2x damage, 1 hit"
+Vulnerability.Tier.Crippled,"Orange tier - 4x damage, 3 hits"
+Vulnerability.Tier.Exposed,"Red tier - 8x damage, 5 hits"
+
+// ========================================
+// CHARACTER TYPES
+// ========================================
+
+Character.Type.Player,"Player character"
+Character.Type.Enemy.Duelist,"Balanced enemy type"
+Character.Type.Enemy.Brute,"Heavy enemy type"
+Character.Type.Enemy.Controller,"Trapper enemy type"
+Character.Type.Boss,"Boss character"
+
+// ========================================
+// INTERACTABLES
+// ========================================
+
+Interactable.Type.Vent,"Vent - launches projectile"
+Interactable.Type.Valve,"Valve - AoE effect"
+Interactable.State.Ready,"Interactable ready to use"
+Interactable.State.Cooldown,"Interactable on cooldown"
+Interactable.State.Focused,"Interactable is targeted"
+
+// ========================================
+// ABILITY RISK LEVELS (Station Integrity)
+// ========================================
+
+Ability.Risk.Low,"No integrity cost"
+Ability.Risk.Medium,"Minor integrity cost"
+Ability.Risk.High,"Major integrity cost"
+
+// ========================================
+// LEGACY TAGS (Old System - Being Phased Out)
+// ========================================
+
+// Old Attack Types - Still used by AI/CombatComponent
+Attack.Type.Jab,"[LEGACY] Basic jab attack"
+Attack.Type.Heavy,"[LEGACY] Heavy attack"
+Attack.Type.Special,"[LEGACY] Special attack"
+Attack.Type.Soul,"[LEGACY] Soul attack - unblockable"
+Attack.Type.Catch,"[LEGACY] Catch special - gap closer"
+
+// Old Attack Properties
+Attack.Property.Blockable,"[LEGACY] Can be blocked"
+Attack.Property.Unblockable,"[LEGACY] Cannot be blocked"
+
+// Old Damage Types - Not actively used
+Damage.Type.Physical,"[LEGACY] Physical damage"
+Damage.Type.Fire,"[LEGACY] Fire damage"
+Damage.Type.Electric,"[LEGACY] Electric damage"
+Damage.Type.Poison,"[LEGACY] Poison damage"
+Damage.Multiplier.Vulnerability,"[LEGACY] Vulnerability multiplier"
+
+// Old Ability Tags
+Ability.Focus,"[LEGACY] Focus mode active"
+Ability.SoftLock,"[LEGACY] Soft lock targeting"

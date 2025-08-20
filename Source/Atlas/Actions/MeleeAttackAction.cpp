@@ -9,7 +9,7 @@
 
 UMeleeAttackAction::UMeleeAttackAction()
 {
-	ActionTag = FGameplayTag::RequestGameplayTag(FName("Action.Attack.Basic"));
+	// ActionTag will be set from DataAsset
 	bAttackInProgress = false;
 	CurrentMontage = nullptr;
 }
@@ -158,22 +158,18 @@ void UMeleeAttackAction::EndAttack()
 
 FGameplayTag UMeleeAttackAction::GetAttackTag() const
 {
-	// Check if data asset specifies a custom attack tag
+	// Determine attack type based on action tag
 	if (ActionData)
 	{
-		// Check custom parameters for attack type
-		if (ActionData->CustomStringParameters.Contains("AttackType"))
+		// Check if this is a heavy attack based on the action tag
+		if (ActionData->ActionTag.MatchesTagExact(FGameplayTag::RequestGameplayTag("Action.Ability.HeavyAttack")))
 		{
-			FString AttackType = ActionData->CustomStringParameters["AttackType"];
-			if (AttackType == "Heavy")
-			{
-				return FGameplayTag::RequestGameplayTag(FName("Attack.Heavy"));
-			}
+			return FGameplayTag::RequestGameplayTag(FName("Attack.Type.Heavy"));
 		}
 	}
 
 	// Default to basic attack
-	return FGameplayTag::RequestGameplayTag(FName("Attack.Light"));
+	return FGameplayTag::RequestGameplayTag(FName("Attack.Type.Jab"));
 }
 
 UAnimMontage* UMeleeAttackAction::GetAttackMontage() const

@@ -52,7 +52,8 @@ void USystemHackAbility::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 				
 				// Draw animated line
 				float Alpha = HackProgress / Config.HackDuration;
-				FColor LineColor = FColor::Lerp(FColor::Green, FColor::Cyan, Alpha);
+				FLinearColor LinearColor = FLinearColor::LerpUsingHSV(FLinearColor::Green, FLinearColor(0.0f, 1.0f, 1.0f), Alpha);
+				FColor LineColor = LinearColor.ToFColor(true);
 				DrawDebugLine(GetWorld(), StartPos, EndPos, LineColor, false, 0.0f, 0, 2.0f);
 				
 				// Draw progress indicator

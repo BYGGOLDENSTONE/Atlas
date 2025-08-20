@@ -52,4 +52,32 @@ void FAtlasGameplayTags::InitializeNativeTags()
     GameplayTags.Interactable_Type_Valve = Manager.AddNativeGameplayTag(FName("Interactable.Type.Valve"), FString("Valve interactable object"));
     GameplayTags.Interactable_State_Ready = Manager.AddNativeGameplayTag(FName("Interactable.State.Ready"), FString("Interactable is ready to use"));
     GameplayTags.Interactable_State_Cooldown = Manager.AddNativeGameplayTag(FName("Interactable.State.Cooldown"), FString("Interactable is on cooldown"));
+
+    // NEW Action System Tags - All treated as abilities
+    // Core Combat Abilities
+    GameplayTags.Action_Ability_Dash = Manager.AddNativeGameplayTag(FName("Action.Ability.Dash"), FString("Dash - movement ability"));
+    GameplayTags.Action_Ability_Block = Manager.AddNativeGameplayTag(FName("Action.Ability.Block"), FString("Block - defensive ability"));
+    GameplayTags.Action_Ability_BasicAttack = Manager.AddNativeGameplayTag(FName("Action.Ability.BasicAttack"), FString("Basic Attack - jab"));
+    GameplayTags.Action_Ability_HeavyAttack = Manager.AddNativeGameplayTag(FName("Action.Ability.HeavyAttack"), FString("Heavy Attack - knockback"));
+    
+    // Low Risk Abilities
+    GameplayTags.Action_Ability_KineticPulse = Manager.AddNativeGameplayTag(FName("Action.Ability.KineticPulse"), FString("Kinetic Pulse - force push"));
+    GameplayTags.Action_Ability_DebrisPull = Manager.AddNativeGameplayTag(FName("Action.Ability.DebrisPull"), FString("Debris Pull - magnetic pull"));
+    GameplayTags.Action_Ability_CoolantSpray = Manager.AddNativeGameplayTag(FName("Action.Ability.CoolantSpray"), FString("Coolant Spray - area hazard"));
+    GameplayTags.Action_Ability_SystemHack = Manager.AddNativeGameplayTag(FName("Action.Ability.SystemHack"), FString("System Hack - remote interaction"));
+    
+    // Medium Risk Abilities
+    GameplayTags.Action_Ability_FloorDestabilizer = Manager.AddNativeGameplayTag(FName("Action.Ability.FloorDestabilizer"), FString("Floor Destabilizer - medium risk"));
+    GameplayTags.Action_Ability_ImpactGauntlet = Manager.AddNativeGameplayTag(FName("Action.Ability.ImpactGauntlet"), FString("Impact Gauntlet - charged punch"));
+    GameplayTags.Action_Ability_LocalizedEMP = Manager.AddNativeGameplayTag(FName("Action.Ability.LocalizedEMP"), FString("Localized EMP - disable tech"));
+    
+    // High Risk Abilities
+    GameplayTags.Action_Ability_SeismicStamp = Manager.AddNativeGameplayTag(FName("Action.Ability.SeismicStamp"), FString("Seismic Stamp - ground smash"));
+    GameplayTags.Action_Ability_GravityAnchor = Manager.AddNativeGameplayTag(FName("Action.Ability.GravityAnchor"), FString("Gravity Anchor - object launcher"));
+    GameplayTags.Action_Ability_AirlockBreach = Manager.AddNativeGameplayTag(FName("Action.Ability.AirlockBreach"), FString("Airlock Breach - decompression"));
+
+    // Vulnerability Tier Tags
+    GameplayTags.Vulnerability_Tier_Stunned = Manager.AddNativeGameplayTag(FName("Vulnerability.Tier.Stunned"), FString("Yellow tier - 2x damage"));
+    GameplayTags.Vulnerability_Tier_Crippled = Manager.AddNativeGameplayTag(FName("Vulnerability.Tier.Crippled"), FString("Orange tier - 4x damage"));
+    GameplayTags.Vulnerability_Tier_Exposed = Manager.AddNativeGameplayTag(FName("Vulnerability.Tier.Exposed"), FString("Red tier - 8x damage"));
 }

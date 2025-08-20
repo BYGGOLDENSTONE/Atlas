@@ -126,6 +126,15 @@ void UAbilityBase::OnAbilityEnd()
 	StartCooldown();
 }
 
+void UAbilityBase::ForceEndAbility()
+{
+	if (CurrentState == EAbilityState::Executing)
+	{
+		ExecutionTimer = 0.0f;
+		OnAbilityEnd();
+	}
+}
+
 void UAbilityBase::StartCooldown()
 {
 	if (Cooldown > 0.0f)
