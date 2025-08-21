@@ -2,15 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Atlas/Data/RewardDataAsset.h"
-#include "Engine/DeveloperSettings.h"
 #include "RewardDataAssetFactory.generated.h"
 
 /**
  * Factory class that programmatically defines all reward DataAsset configurations
  * These serve as blueprints for creating actual DataAssets in the editor
  */
-UCLASS(Config=Game, DefaultConfig, meta = (DisplayName = "Reward DataAsset Factory"))
-class ATLAS_API URewardDataAssetFactory : public UDeveloperSettings
+UCLASS()
+class ATLAS_API URewardDataAssetFactory : public UObject
 {
 	GENERATED_BODY()
 

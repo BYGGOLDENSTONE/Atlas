@@ -3,191 +3,96 @@
 ## Overview
 This roadmap outlines the phased implementation plan for Atlas, a 1v1 roguelite dueling game. Each phase builds upon the existing unified ActionManagerComponent architecture and follows data-driven design principles.
 
-## Current Status ✅
-- **Unified Component System**: ActionManagerComponent handles all combat/actions
-- **4 Core Interfaces**: ICombatInterface, IHealthInterface, IActionInterface, IInteractable
-- **Animation-Driven Combat**: Working attack timing via notifies
-- **Basic Combat**: Attack, Block, Heavy Attack, Dash functional
-- **Vulnerability System**: 3-tier system implemented
-- **Station Integrity**: Risk/reward mechanic functional
-- **Focus Mode**: Environmental targeting system working
+## Completed Phases ✅
 
-## Phase 1: Core Combat Polish & Parry System
-**Goal**: Complete core combat mechanics per GDD requirements
+### Phase 1: Core Combat Polish & Parry System ✅
+**Status**: COMPLETE
+- Parry system with perfect/late windows
+- Soul Attack (50 damage, unblockable)
+- Combat values tuned per GDD
+- Vulnerability system fully functional
+- Wall impact bonus damage
 
-### Tasks:
-1. **Re-implement Parry System** (GDD explicitly requires this)
-   - Create ParryAction class extending BaseAction
-   - Add ParryDataAsset with timing windows
-   - Implement parry-to-vulnerability conversion
-   - Add animation notifies for parry windows
-   - Test parry vs all attack types
+### Phase 2: Reward System & Enemy AI ✅
+**Status**: COMPLETE
+- Complete reward system architecture
+- SlotManagerComponent with 6 slots
+- RunManagerComponent for room progression
+- AIDifficultyComponent for adaptive enemies
+- SaveManagerSubsystem for persistence
+- Enemy scaling based on player power
 
-2. **Soul Attack Implementation**
-   - Create SoulAttackDataAsset (unblockable, no station damage)
-   - Add unique visual effects
-   - Balance damage values (50 base per GDD)
+### Phase 3: Content Framework & UI ✅
+**Status**: COMPLETE
+- RewardDataAssetFactory with 25 rewards defined
+- RoomDataAssetFactory with 5 rooms configured  
+- UI Widget framework (RewardSelection, SlotManager, RunProgress)
+- 40+ console commands for testing
+- Comprehensive documentation for content creation
 
-3. **Combat Value Tuning**
-   - Verify 8x vulnerability multiplier
-   - Confirm 40% block reduction
-   - Test poise values (100 max, proper regen)
-   - Validate dash i-frames (0.3s window)
+## Current Phase: Phase 4
 
-## Phase 2: Reward System Architecture
-**Goal**: Implement the slot-based reward system
+### Phase 4: Environmental Systems & Interactables
+**Goal**: Transform static environments into dynamic, hazardous spaces
 
 ### Tasks:
-1. **Reward Base Classes**
-   - Create RewardDataAsset base class
-   - DefenseRewardDataAsset (Block, Parry, Dodge)
-   - OffenseRewardDataAsset (Attacks)
-   - PassiveStatRewardDataAsset (Speed, Health, etc.)
-   - PassiveAbilityRewardDataAsset (Second Life, etc.)
-   - InteractableRewardDataAsset (Hacking abilities)
+1. **Station Integrity Visualization**
+   - IntegrityVisualizerComponent with visual states
+   - Hull breach system with vacuum effects
+   - Emergency lighting and alarms
+   - Progressive damage manifestation
 
-2. **Slot Management System**
-   - Create SlotManagerComponent
-   - Implement slot UI framework
-   - Add reward equip/replace logic
-   - Support multi-slot rewards
-   - Implement reward enhancement stacking
+2. **Environmental Hazards**
+   - Base hazard component framework
+   - Electrical surges with chain lightning
+   - Toxic leaks with DOT effects
+   - Low gravity zones
+   - System malfunctions
 
-3. **Reward Persistence**
-   - Save equipped rewards at run end
-   - Load rewards at run start
-   - Handle reward enhancement levels
-   - Create save game system
+3. **Interactable Systems**
+   - Explosive valves with timed detonation
+   - Gravity wells for crowd control
+   - Hackable turrets
+   - Emergency vents with knockback
+   - Power surge panels
 
-## Phase 3: Run Structure & Level Flow
-**Goal**: Implement the 5-room run structure
+4. **Station Degradation**
+   - Time-based integrity loss
+   - Combat degradation multiplier
+   - Random emergency events
+   - Atmospheric audio system
 
-### Tasks:
-1. **Room System**
-   - Create RoomDataAsset (enemy type, reward pool, theme)
-   - Implement 5 unique rooms (A-E)
-   - Room randomization system
-   - Level progression manager
+## Future Phases
 
-2. **Reward Pool System**
-   - Create themed reward pools per room
-   - Implement reward selection UI (2 choices)
-   - Scale rewards by level (1-5)
-   - Implement reward rarity tiers
-
-3. **Run Management**
-   - Create RunManagerComponent
-   - Track current level (1-5)
-   - Handle run completion/failure
-   - Implement run statistics
-
-## Phase 4: Dynamic Enemy AI System
-**Goal**: Implement reactive enemy scaling
+## Phase 5: Polish, Optimization & Balancing
+**Goal**: Final polish and optimization
 
 ### Tasks:
-1. **Shared Ability Pool**
-   - Enemies use same ActionDataAssets as player
-   - Create EnemyAbilitySelector component
-   - Implement ability assignment from pools
+1. **Performance Optimization**
+   - Profile and optimize expensive operations
+   - Implement object pooling
+   - Optimize particle systems
+   - Reduce draw calls
 
-2. **Reactive Scaling**
-   - Count player filled slots
-   - Assign enemy abilities (player slots + 1)
-   - Balance enemy stat scaling
+2. **Visual Polish**
+   - Final VFX passes
+   - Post-processing tuning
+   - UI animations and transitions
+   - Screen effects
 
-3. **Themed AI Behaviors**
-   - Create 5 unique AI behavior trees
-   - Room A Enemy: Defense priority
-   - Room B Enemy: Offense priority
-   - Room C Enemy: Passive/tactical
-   - Room D Enemy: Aggressive/risky
-   - Room E Enemy: Interactable-focused
+3. **Gameplay Balance**
+   - Damage value tuning
+   - Reward power scaling
+   - Enemy difficulty curves
+   - Station integrity balance
 
-## Phase 5: Enhanced Interactables
-**Goal**: Expand environmental interaction system
+4. **Bug Fixing**
+   - Stability improvements
+   - Edge case handling
+   - Network optimization
+   - Save system reliability
 
-### Tasks:
-1. **New Interactable Types**
-   - Exploding Valve (AoE stagger)
-   - Launch Vent (vulnerability on collision)
-   - Gravity Well (pull effect)
-   - Shield Generator (temporary defense)
-   - Weapon Rack (temporary damage boost)
-
-2. **Hacking System**
-   - Create HackingComponent
-   - Implement hack timing/cost
-   - Add visual hacking indicators
-   - Balance risk/reward
-
-3. **Neutral Targeting**
-   - Ensure all interactables affect any character
-   - Add friendly fire warnings
-   - Implement strategic positioning
-
-## Phase 6: Passive Systems
-**Goal**: Implement all passive rewards
-
-### Tasks:
-1. **Stat Passives**
-   - Movement speed modifiers
-   - Attack speed scaling
-   - Knockback force multipliers
-   - Max health increases
-   - Station health boosts
-
-2. **Ability Passives**
-   - Second Life system (revival + slot consumption)
-   - Double jump
-   - Health regeneration
-   - Damage reflection
-   - Critical hit chance
-
-3. **Multi-Slot Passives**
-   - Implement 2-slot requirement system
-   - Ultra-powerful abilities
-   - Visual slot linking in UI
-
-## Phase 7: Visual Feedback & Polish
-**Goal**: Complete visual communication systems
-
-### Tasks:
-1. **Combat Feedback**
-   - Hit reactions and stagger animations
-   - Vulnerability visual states (Yellow/Orange/Red)
-   - Block and parry effects
-   - Damage numbers
-
-2. **UI Systems**
-   - Health bars
-   - Station integrity meter
-   - Slot management interface
-   - Reward selection screens
-   - Run progress tracker
-
-3. **Environmental Effects**
-   - Station decay visuals at 50% integrity
-   - Wall impact effects
-   - Interactable activation VFX
-   - Room transition sequences
-
-## Phase 8: Meta Progression
-**Goal**: Long-term player progression
-
-### Tasks:
-1. **Unlock System**
-   - Track total runs completed
-   - Unlock new starting rewards
-   - Achievement system
-   - Statistics tracking
-
-2. **Difficulty Scaling**
-   - Implement difficulty tiers
-   - Enemy stat scaling
-   - Reward quality adjustments
-   - New Game+ mechanics
-
-## Phase 9: Audio & Game Feel
+## Phase 6: Audio & Game Feel
 **Goal**: Complete audio implementation
 
 ### Tasks:
@@ -195,27 +100,73 @@ This roadmap outlines the phased implementation plan for Atlas, a 1v1 roguelite 
    - Impact sounds by attack type
    - Vulnerability activation stings
    - Station damage warnings
-   - Ambient station decay
+   - Weapon-specific sounds
 
-2. **Music System**
+2. **Environmental Audio**
+   - Ambient station sounds
+   - Hazard audio cues
+   - Interactable feedback
+   - Station degradation audio
+
+3. **Music System**
    - Dynamic combat music
    - Room-specific themes
    - Intensity scaling
+   - Boss encounter tracks
 
-## Phase 10: Testing & Balance
-**Goal**: Final polish and balance
+## Phase 7: Meta Progression & Achievements
+**Goal**: Long-term player engagement systems
 
 ### Tasks:
-1. **Playtesting**
-   - Full run completion testing
-   - Difficulty curve validation
-   - Reward balance verification
-   - Bug fixing
+1. **Unlock System**
+   - New reward unlocks
+   - Cosmetic unlocks
+   - Starting loadout options
+   - New room variants
 
-2. **Performance**
-   - Optimization pass
-   - Memory management
-   - Loading time reduction
+2. **Achievement System**
+   - Run achievements
+   - Combat achievements
+   - Challenge runs
+   - Hidden achievements
+
+3. **Statistics Tracking**
+   - Run history
+   - Best times
+   - Damage records
+   - Win streaks
+
+## Phase 8: Platform Integration
+**Goal**: Steam and platform-specific features
+
+### Tasks:
+1. **Steam Integration**
+   - Steam achievements
+   - Cloud saves
+   - Leaderboards
+   - Trading cards
+
+2. **Controller Support**
+   - Full gamepad support
+   - Haptic feedback
+   - Adaptive triggers (PS5)
+   - Custom button mapping
+
+## Phase 9: Final Testing & Release
+**Goal**: Ship-ready build
+
+### Tasks:
+1. **Comprehensive Testing**
+   - Full playthrough testing
+   - Balance validation
+   - Performance benchmarking
+   - Compatibility testing
+
+2. **Release Preparation**
+   - Final optimization pass
+   - Day-one patch preparation
+   - Documentation completion
+   - Marketing materials
 
 ## Technical Guidelines
 
@@ -235,13 +186,15 @@ This roadmap outlines the phased implementation plan for Atlas, a 1v1 roguelite 
 - Clear separation of concerns
 
 ## Priority Notes
-- **Phase 1-3**: Core gameplay loop (CRITICAL)
-- **Phase 4-5**: Enemy variety and depth
-- **Phase 6-7**: Polish and feedback
-- **Phase 8-10**: Long-term retention
+- **Phase 1-3**: Core gameplay loop (COMPLETE) ✅
+- **Phase 4**: Environmental systems and interactables (CURRENT)
+- **Phase 5-6**: Polish, optimization and audio
+- **Phase 7-8**: Meta progression and platform features
+- **Phase 9**: Final testing and release
 
-## Next Immediate Steps
-1. Begin Phase 1: Re-implement parry system
-2. Create Soul Attack ability
-3. Tune existing combat values to match GDD
-4. Start prototyping reward data structure
+## Next Immediate Steps (Phase 4)
+1. Implement IntegrityVisualizerComponent for station damage visualization
+2. Create base hazard component framework
+3. Develop interactable systems (explosive valves, gravity wells, turrets)
+4. Implement station degradation mechanics
+5. Test environmental hazards with existing combat systems

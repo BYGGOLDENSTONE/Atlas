@@ -4,6 +4,7 @@
 #include "Characters/PlayerCharacter.h"
 #include "Core/AtlasPlayerController.h"
 #include "Core/AtlasGameState.h"
+#include "Debug/Phase3ConsoleCommands.h"
 #include "UObject/ConstructorHelpers.h"
 
 AAtlasGameMode::AAtlasGameMode()
@@ -11,4 +12,22 @@ AAtlasGameMode::AAtlasGameMode()
 	DefaultPawnClass = APlayerCharacter::StaticClass();
 	PlayerControllerClass = AAtlasPlayerController::StaticClass();
 	GameStateClass = AAtlasGameState::StaticClass();
+}
+
+void AAtlasGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	// Register Phase 3 console commands
+	UPhase3ConsoleCommands::RegisterCommands();
+	
+	UE_LOG(LogTemp, Log, TEXT("Atlas GameMode: Phase 3 console commands registered"));
+}
+
+void AAtlasGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Unregister Phase 3 console commands
+	UPhase3ConsoleCommands::UnregisterCommands();
+	
+	Super::EndPlay(EndPlayReason);
 }

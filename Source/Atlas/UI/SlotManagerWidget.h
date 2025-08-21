@@ -100,6 +100,31 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsMultiSlotContinuation = false;
 	
+	/** Visual state flags */
+	bool bIsSelected = false;
+	bool bIsHighlighted = false;
+	bool bIsValidDropTarget = false;
+	
+	// ========================================
+	// DELEGATES
+	// ========================================
+	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlotClicked, int32, SlotIndex);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDragStarted, int32, SlotIndex);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDropReceived, int32, SourceSlot, int32, TargetSlot);
+	
+	/** Called when slot is clicked */
+	UPROPERTY(BlueprintAssignable, Category = "Slot Events")
+	FOnSlotClicked OnSlotClicked;
+	
+	/** Called when drag starts from this slot */
+	UPROPERTY(BlueprintAssignable, Category = "Slot Events")
+	FOnDragStarted OnDragStarted;
+	
+	/** Called when a drop is received on this slot */
+	UPROPERTY(BlueprintAssignable, Category = "Slot Events")
+	FOnDropReceived OnDropReceived;
+	
 	// ========================================
 	// FUNCTIONS
 	// ========================================
@@ -124,6 +149,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Slot")
 	bool CanAcceptReward(URewardDataAsset* Reward) const;
 	
+	/** Set selected state */
+	UFUNCTION(BlueprintCallable, Category = "Slot")
+	void SetSelected(bool bSelected) { bIsSelected = bSelected; UpdateVisuals(); }
+	
+	/** Set highlighted state */
+	UFUNCTION(BlueprintCallable, Category = "Slot")
+	void SetHighlighted(bool bHighlighted) { bIsHighlighted = bHighlighted; UpdateVisuals(); }
+	
 	/** Play equip animation */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Slot")
 	void PlayEquipAnimation();
@@ -146,7 +179,7 @@ protected:
 	
 private:
 	/** Create drag visual widget */
-	UUserWidget* CreateDragVisual();
+	UWidget* CreateDragVisual();
 };
 
 /**
@@ -242,6 +275,22 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	URewardDataAsset* PendingReward = nullptr;
 	
+	/** Whether we're in placement mode */
+	bool bIsPlacingReward = false;
+	
+	/** Info panel text widgets */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* InfoTitleText;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* InfoDescriptionText;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* InfoStatsText;
+	
+	/** Max slots constant */
+	static constexpr int32 MaxSlots = 6;
+	
 	// ========================================
 	// DELEGATES
 	// ========================================
@@ -257,6 +306,10 @@ public:
 	/** Called when a reward is removed */
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnRewardRemoved OnRewardRemoved;
+	
+	/** Called when a reward is replaced */
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnRewardEquipped OnRewardReplaced;
 	
 	/** Called when slots are swapped */
 	UPROPERTY(BlueprintAssignable, Category = "Events")
@@ -317,6 +370,10 @@ public:
 	/** Play reward equipped animation */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
 	void PlayEquippedAnimation(int32 SlotIndex);
+	
+	/** Play reward enhance animation */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+	void PlayEnhanceAnimation();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -335,8 +392,28 @@ private:
 	UFUNCTION()
 	void OnCancelButtonClicked();
 	
+	/** Handle slot events */
+	UFUNCTION()
+	void OnSlotClickedHandler(int32 SlotIndex);
+	
+	UFUNCTION()
+	void OnSlotDragStartedHandler(int32 SlotIndex);
+	
+	UFUNCTION()
+	void OnSlotDropReceivedHandler(int32 SourceSlot, int32 TargetSlot);
+	
+	/** Handle component events */
+	UFUNCTION()
+	void OnRewardEquippedHandler(int32 SlotIndex, URewardDataAsset* Reward);
+	
+	UFUNCTION()
+	void OnRewardRemovedHandler(int32 SlotIndex, URewardDataAsset* Reward);
+	
+	UFUNCTION()
+	void OnRewardEnhancedHandler(int32 SlotIndex, URewardDataAsset* Reward, int32 NewStackLevel);
+	
 	/** Update button states */
-	void UpdateButtonStates();
+	void UpdateActionButtons();
 	
 	/** Get slot widget at index */
 	USlotWidget* GetSlotWidget(int32 Index) const;

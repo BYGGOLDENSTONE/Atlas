@@ -129,10 +129,17 @@ FLinearColor URewardCardWidget::GetCategoryColor() const
 
 void URewardCardWidget::OnSelectButtonClicked()
 {
-	if (URewardSelectionWidget* ParentWidget = Cast<URewardSelectionWidget>(GetParent()->GetParent()))
+	// Find the parent selection widget in the widget tree
+	UWidget* Parent = GetParent();
+	while (Parent)
 	{
-		PlaySelectionAnimation();
-		ParentWidget->SelectReward(RewardData);
+		if (URewardSelectionWidget* ParentWidget = Cast<URewardSelectionWidget>(Parent))
+		{
+			PlaySelectionAnimation();
+			ParentWidget->SelectReward(RewardData);
+			break;
+		}
+		Parent = Parent->GetParent();
 	}
 }
 
@@ -325,11 +332,11 @@ void URewardSelectionWidget::CreateRewardCards()
 		NewCard->SetupCard(Reward, bIsEnhancement, CurrentStack);
 		
 		// Add to container
-		UHorizontalBoxSlot* Slot = CardsContainer->AddChildToHorizontalBox(NewCard);
-		if (Slot)
+		UHorizontalBoxSlot* CardSlot = CardsContainer->AddChildToHorizontalBox(NewCard);
+		if (CardSlot)
 		{
-			Slot->SetPadding(FMargin(10.0f));
-			Slot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			CardSlot->SetPadding(FMargin(10.0f));
+			CardSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 		}
 		
 		// Store reference

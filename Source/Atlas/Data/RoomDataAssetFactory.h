@@ -2,15 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Atlas/Data/RoomDataAsset.h"
-#include "Engine/DeveloperSettings.h"
 #include "RoomDataAssetFactory.generated.h"
 
 /**
  * Factory class that programmatically defines all room DataAsset configurations
  * These serve as blueprints for creating actual DataAssets in the editor
  */
-UCLASS(Config=Game, DefaultConfig, meta = (DisplayName = "Room DataAsset Factory"))
-class ATLAS_API URoomDataAssetFactory : public UDeveloperSettings
+UCLASS()
+class ATLAS_API URoomDataAssetFactory : public UObject
 {
 	GENERATED_BODY()
 

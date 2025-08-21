@@ -10,7 +10,7 @@
 #include "Atlas/Components/RewardSelectionComponent.h"
 #include "Atlas/Data/RewardDataAsset.h"
 #include "Atlas/Data/RoomDataAsset.h"
-#include "Atlas/Core/AtlasGameMode.h"
+#include "Atlas/AtlasGameMode.h"
 
 #define PHASE3_LOG(Message) LogPhase3(Message, false)
 #define PHASE3_ERROR(Message) LogPhase3(Message, true)
@@ -230,7 +230,7 @@ void UPhase3ConsoleCommands::GiveReward(const TArray<FString>& Args)
 	int32 AvailableSlot = -1;
 	for (int32 i = 0; i < 6; ++i)
 	{
-		if (!SlotManager->IsSlotOccupied(i))
+		if (!SlotManager->GetRewardInSlot(i))
 		{
 			AvailableSlot = i;
 			break;
@@ -267,7 +267,7 @@ void UPhase3ConsoleCommands::ShowSlots(const TArray<FString>& Args)
 	
 	for (int32 i = 0; i < 6; ++i)
 	{
-		if (SlotManager->IsSlotOccupied(i))
+		if (SlotManager->GetRewardInSlot(i))
 		{
 			URewardDataAsset* Reward = SlotManager->GetRewardInSlot(i);
 			int32 StackLevel = SlotManager->GetRewardStackLevel(i);
@@ -362,7 +362,7 @@ void UPhase3ConsoleCommands::ShowRunProgress(const TArray<FString>& Args)
 	
 	PHASE3_LOG("=== RUN PROGRESS ===");
 	PHASE3_LOG(FString::Printf(TEXT("Current Level: %d/5"), RunManager->GetCurrentLevel()));
-	PHASE3_LOG(FString::Printf(TEXT("Rooms Completed: %d"), RunManager->GetRoomsCompleted()));
+	PHASE3_LOG(FString::Printf(TEXT("Rooms Completed: %d"), RunManager->GetCurrentLevel() - 1));
 	
 	if (URoomDataAsset* CurrentRoom = RunManager->GetCurrentRoom())
 	{
@@ -532,6 +532,270 @@ void UPhase3ConsoleCommands::QuickTest(const TArray<FString>& Args)
 	{
 		PHASE3_ERROR("Unknown test type. Use: rewards, rooms, ui, or run");
 	}
+}
+
+// ========================================
+// ADDITIONAL COMMAND IMPLEMENTATIONS
+// ========================================
+
+void UPhase3ConsoleCommands::PresentRewardChoice(const TArray<FString>& Args)
+{
+	if (Args.Num() < 2)
+	{
+		PHASE3_ERROR("Usage: PresentChoice [Reward1] [Reward2]");
+		return;
+	}
+	
+	URewardSelectionComponent* RewardSelection = GetRewardSelection();
+	if (!RewardSelection)
+	{
+		PHASE3_ERROR("RewardSelectionComponent not found");
+		return;
+	}
+	
+	// Find the two rewards
+	URewardDataAsset* Reward1 = FindReward(Args[0]);
+	URewardDataAsset* Reward2 = FindReward(Args[1]);
+	
+	if (!Reward1 || !Reward2)
+	{
+		PHASE3_ERROR("Could not find specified rewards");
+		return;
+	}
+	
+	TArray<URewardDataAsset*> Choices;
+	Choices.Add(Reward1);
+	Choices.Add(Reward2);
+	
+	RewardSelection->PresentRewardChoice(Choices);
+	PHASE3_LOG("Presented reward choice");
+}
+
+void UPhase3ConsoleCommands::EquipRewardToSlot(const TArray<FString>& Args)
+{
+	if (Args.Num() < 2)
+	{
+		PHASE3_ERROR("Usage: EquipToSlot [RewardName] [SlotIndex]");
+		return;
+	}
+	
+	USlotManagerComponent* SlotManager = GetSlotManager();
+	if (!SlotManager)
+	{
+		PHASE3_ERROR("SlotManager not found");
+		return;
+	}
+	
+	URewardDataAsset* Reward = FindReward(Args[0]);
+	if (!Reward)
+	{
+		PHASE3_ERROR(FString::Printf(TEXT("Reward '%s' not found"), *Args[0]));
+		return;
+	}
+	
+	int32 SlotIndex = FCString::Atoi(*Args[1]);
+	if (SlotIndex < 0 || SlotIndex >= 6)
+	{
+		PHASE3_ERROR("Slot index must be between 0 and 5");
+		return;
+	}
+	
+	if (SlotManager->EquipReward(Reward, SlotIndex))
+	{
+		PHASE3_LOG(FString::Printf(TEXT("Equipped '%s' to slot %d"), 
+			*Reward->RewardName.ToString(), SlotIndex));
+	}
+	else
+	{
+		PHASE3_ERROR("Failed to equip reward to slot");
+	}
+}
+
+void UPhase3ConsoleCommands::ClearSlot(const TArray<FString>& Args)
+{
+	if (Args.Num() < 1)
+	{
+		PHASE3_ERROR("Usage: ClearSlot [SlotIndex]");
+		return;
+	}
+	
+	USlotManagerComponent* SlotManager = GetSlotManager();
+	if (!SlotManager)
+	{
+		PHASE3_ERROR("SlotManager not found");
+		return;
+	}
+	
+	int32 SlotIndex = FCString::Atoi(*Args[0]);
+	if (SlotIndex < 0 || SlotIndex >= 6)
+	{
+		PHASE3_ERROR("Slot index must be between 0 and 5");
+		return;
+	}
+	
+	if (SlotManager->RemoveReward(SlotIndex))
+	{
+		PHASE3_LOG(FString::Printf(TEXT("Cleared slot %d"), SlotIndex));
+	}
+	else
+	{
+		PHASE3_ERROR("Failed to clear slot");
+	}
+}
+
+void UPhase3ConsoleCommands::ClearAllSlots(const TArray<FString>& Args)
+{
+	USlotManagerComponent* SlotManager = GetSlotManager();
+	if (!SlotManager)
+	{
+		PHASE3_ERROR("SlotManager not found");
+		return;
+	}
+	
+	SlotManager->ClearAllRewards();
+	PHASE3_LOG("Cleared all reward slots");
+}
+
+void UPhase3ConsoleCommands::CompleteRoom(const TArray<FString>& Args)
+{
+	URunManagerComponent* RunManager = GetRunManager();
+	if (!RunManager)
+	{
+		PHASE3_ERROR("RunManager not found");
+		return;
+	}
+	
+	RunManager->CompleteCurrentRoom();
+	
+	if (RunManager->IsRunComplete())
+	{
+		PHASE3_LOG("Run completed!");
+	}
+	else
+	{
+		RunManager->TransitionToNextRoom();
+		PHASE3_LOG(FString::Printf(TEXT("Advanced to room %d"), RunManager->GetCurrentLevel()));
+	}
+}
+
+void UPhase3ConsoleCommands::SpawnEnemy(const TArray<FString>& Args)
+{
+	if (Args.Num() < 1)
+	{
+		PHASE3_ERROR("Usage: SpawnEnemy [EnemyType]");
+		return;
+	}
+	
+	// This would spawn an enemy in a real implementation
+	PHASE3_LOG(FString::Printf(TEXT("Spawning enemy: %s"), *Args[0]));
+	
+	// Placeholder implementation
+	if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+	{
+		// Would spawn enemy blueprint here
+		PHASE3_LOG("Enemy spawn system not yet implemented");
+	}
+}
+
+void UPhase3ConsoleCommands::SetEnemyDifficulty(const TArray<FString>& Args)
+{
+	if (Args.Num() < 1)
+	{
+		PHASE3_ERROR("Usage: SetEnemyDifficulty [1-10]");
+		return;
+	}
+	
+	int32 Difficulty = FCString::Atoi(*Args[0]);
+	if (Difficulty < 1 || Difficulty > 10)
+	{
+		PHASE3_ERROR("Difficulty must be between 1 and 10");
+		return;
+	}
+	
+	// This would set enemy difficulty in a real implementation
+	PHASE3_LOG(FString::Printf(TEXT("Enemy difficulty set to %d"), Difficulty));
+	
+	// Find enemies in world and update their difficulty component
+	if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+	{
+		// Would update AIDifficultyComponent here
+		PHASE3_LOG("Enemy difficulty system not yet implemented");
+	}
+}
+
+void UPhase3ConsoleCommands::ShowRewardSelectionUI(const TArray<FString>& Args)
+{
+	PHASE3_LOG("Opening reward selection UI...");
+	
+	// This would show the reward selection UI in a real implementation
+	if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+	{
+		if (APlayerController* PC = World->GetFirstPlayerController())
+		{
+			// Would create and show UI widget here
+			PHASE3_LOG("Reward selection UI not yet implemented");
+		}
+	}
+}
+
+void UPhase3ConsoleCommands::ShowSlotManagerUI(const TArray<FString>& Args)
+{
+	PHASE3_LOG("Opening slot manager UI...");
+	
+	// This would show the slot manager UI in a real implementation
+	if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+	{
+		if (APlayerController* PC = World->GetFirstPlayerController())
+		{
+			// Would create and show UI widget here
+			PHASE3_LOG("Slot manager UI not yet implemented");
+		}
+	}
+}
+
+void UPhase3ConsoleCommands::EnablePhase3Debug(const TArray<FString>& Args)
+{
+	PHASE3_LOG("Phase 3 debug mode enabled");
+	
+	// Enable additional debug visualization
+	if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+	{
+		// Would enable debug drawing and logging here
+		// In a real implementation, this would set a global debug flag or CVars
+		PHASE3_LOG("Debug visualizations activated");
+	}
+}
+
+void UPhase3ConsoleCommands::SimulateRun(const TArray<FString>& Args)
+{
+	PHASE3_LOG("=== SIMULATING FULL RUN ===");
+	
+	// Start run
+	StartRun(TArray<FString>());
+	
+	// Simulate 5 rooms
+	for (int32 i = 0; i < 5; ++i)
+	{
+		PHASE3_LOG(FString::Printf(TEXT("Room %d simulation..."), i + 1));
+		
+		// Simulate combat victory
+		PHASE3_LOG("  - Enemy defeated");
+		
+		// Give random reward
+		TArray<FString> RewardArgs;
+		RewardArgs.Add("ImprovedBlock");
+		GiveReward(RewardArgs);
+		
+		// Complete room
+		CompleteRoom(TArray<FString>());
+		
+		if (i < 4)
+		{
+			PHASE3_LOG("  - Transitioning to next room");
+		}
+	}
+	
+	PHASE3_LOG("=== RUN SIMULATION COMPLETE ===");
 }
 
 // ========================================

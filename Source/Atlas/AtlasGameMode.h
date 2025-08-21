@@ -13,6 +13,12 @@ class AAtlasGameMode : public AGameModeBase
 
 public:
 	AAtlasGameMode();
+	
+	/** Called when the game starts */
+	virtual void BeginPlay() override;
+	
+	/** Called when the game ends */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };
 
 

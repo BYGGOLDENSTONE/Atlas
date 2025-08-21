@@ -17,6 +17,18 @@ class UImage;
 class UVerticalBox;
 
 /**
+ * Room icon state enum
+ */
+UENUM(BlueprintType)
+enum class ERoomIconState : uint8
+{
+	Locked,
+	Current,
+	Completed,
+	Failed
+};
+
+/**
  * Individual room icon widget
  */
 UCLASS()
@@ -56,15 +68,6 @@ public:
 	// ========================================
 	// ROOM STATE
 	// ========================================
-	
-	UENUM(BlueprintType)
-	enum class ERoomIconState : uint8
-	{
-		Locked,
-		Current,
-		Completed,
-		Failed
-	};
 	
 	/** Current state of this room */
 	UPROPERTY(BlueprintReadOnly)

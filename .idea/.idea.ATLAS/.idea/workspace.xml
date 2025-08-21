@@ -14,7 +14,14 @@
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PHASE_2_IMPLEMENTATION_PLAN.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/IMPLEMENTATION_ROADMAP.md" beforeDir="false" afterPath="$PROJECT_DIR$/IMPLEMENTATION_ROADMAP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/RewardDataAssetFactory.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/RewardDataAssetFactory.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/RoomDataAssetFactory.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/RoomDataAssetFactory.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/UI/RewardSelectionWidget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/UI/RewardSelectionWidget.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/UI/RunProgressWidget.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/UI/RunProgressWidget.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/UI/SlotManagerWidget.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/UI/SlotManagerWidget.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -202,7 +209,8 @@
       <workItem from="1755778062472" duration="536000" />
       <workItem from="1755778835120" duration="1667000" />
       <workItem from="1755790077162" duration="1778000" />
-      <workItem from="1755793847945" duration="1596000" />
+      <workItem from="1755793847945" duration="1942000" />
+      <workItem from="1755812894139" duration="2242000" />
     </task>
     <servers />
   </component>
