@@ -2,6 +2,7 @@
 #include "../Actions/BaseAction.h"
 #include "../DataAssets/ActionDataAsset.h"
 #include "../Characters/GameCharacterBase.h"
+#include "../Characters/PlayerCharacter.h"
 #include "../Components/CombatComponent.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -160,7 +161,17 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 		return;
 	}
 
-	// Check if we're in an attack state and not in a combo window
+	// Check if ability inputs are enabled on PlayerCharacter
+	if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(OwnerCharacter))
+	{
+		if (!PlayerChar->AreAbilityInputsEnabled())
+		{
+			UE_LOG(LogTemp, Error, TEXT("INPUT BLOCKED: Ability inputs disabled, cannot use %s"), *SlotName.ToString());
+			return;
+		}
+	}
+
+	// Check if we're in an attack state and not in a combo window (legacy check - keeping for safety)
 	UCombatComponent* CombatComp = OwnerCharacter->GetCombatComponent();
 	if (CombatComp)
 	{

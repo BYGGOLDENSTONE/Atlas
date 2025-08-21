@@ -3,7 +3,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "../../Characters/EnemyCharacter.h"
 #include "../../Components/CombatComponent.h"
-#include "../../Components/HitboxComponent.h"
 #include "../EnemyAIController.h"
 #include "Animation/AnimInstance.h"
 #include "TimerManager.h"

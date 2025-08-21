@@ -15,18 +15,33 @@
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_BasicAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_BasicAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Enemy.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/Input/Actions/IA_Jump.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Heavy_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Heavy_Montage.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/blueprints/enemy/BY_EnemyCombat.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/enemy/BY_EnemyCombat.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/CombatStateNotify.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/CombatStateNotify.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/ComboWindowNotifyState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/ComboWindowNotifyState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Atlas.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Atlas.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/AnimationManagerComponent.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/AnimationManagerComponent.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/DataAssets/ActionDataAsset.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/DataAssets/ActionDataAsset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HitboxComponent.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HitboxComponent.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/DebugCommandsDataAsset.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/DebugCommandsDataAsset.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/StationIntegrityDebugCommands.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/StationIntegrityDebugCommands.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/VulnerabilityDebugCommands.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/VulnerabilityDebugCommands.h" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,25 +55,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="cidr-memory-view://7" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://2" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UnrealEditor/Inc/Atlas/UHT/ICombatInterface.gen.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -224,7 +221,8 @@
       <workItem from="1755690431721" duration="4588000" />
       <workItem from="1755698825158" duration="453000" />
       <workItem from="1755721371106" duration="4694000" />
-      <workItem from="1755765399499" duration="4079000" />
+      <workItem from="1755765399499" duration="4433000" />
+      <workItem from="1755770461947" duration="2408000" />
     </task>
     <servers />
   </component>

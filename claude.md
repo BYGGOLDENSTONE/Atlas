@@ -92,18 +92,26 @@ Atlas_ResetSlots                       # Reset to defaults
 
 **IMPORTANT**: Set `bCanBeInterrupted = false` in attack DataAssets to prevent spam
 
+## Recent Updates (2025-01-21)
+- **Input Blocking System**: Abilities now properly block all inputs during execution
+  - CombatStateNotify controls input enable/disable via animation
+  - No hardcoded timings - fully animation-driven
+  - Prevents ability spam and movement during attacks
+- **Code Cleanup**: Removed deprecated components and consolidated systems
+  - Deleted AnimationManagerComponent (replaced by notifies)
+  - Deleted HitboxComponent (replaced by AttackNotifyState)
+  - Consolidated 5 debug command files into single AtlasDebugCommands
+  - Removed all combat debug logs for cleaner output
+
 ## Next Tasks
 - **PRIORITY**: Configure all 15 ability DataAssets in editor
   - Set proper ActionType (MeleeAttack, etc)
   - Configure damage/knockback/poise values
   - Assign animation montages
   - Set bCanBeInterrupted = false for attacks
-- Update all 15 ActionDataAssets with new timing fields in editor
-- Test refactored function map routing and interfaces
-- Migrate final CombatComponent attack/block logic to UniversalAction
+- Add safe interruption logic (combo windows, dash, block)
 - Implement P17-18 enemy archetypes
 - P21-22 Wife's Arm passive system
-- Verify all new DataAsset fields work (ActionDuration, MontagePlayRate, etc.)
 
 ## Debug Commands
 ```

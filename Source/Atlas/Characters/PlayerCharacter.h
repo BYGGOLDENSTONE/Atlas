@@ -62,4 +62,23 @@ protected:
 	void FocusStop();
 	
 	FVector2D LastMovementInput;
+
+public:
+	// Input blocking system
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void SetAbilityInputsEnabled(bool bEnabled);
+	
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void SetMovementInputEnabled(bool bEnabled);
+	
+	UFUNCTION(BlueprintPure, Category = "Input")
+	bool AreAbilityInputsEnabled() const { return bAbilityInputsEnabled; }
+	
+	UFUNCTION(BlueprintPure, Category = "Input")
+	bool IsMovementInputEnabled() const { return bMovementInputEnabled; }
+	
+protected:
+	// Input blocking flags
+	bool bAbilityInputsEnabled = true;
+	bool bMovementInputEnabled = true;
 };

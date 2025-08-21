@@ -208,7 +208,7 @@ void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
                 }
             }
             
-            UE_LOG(LogTemp, Log, TEXT("Hit from animation with ActionData: %f damage"), Damage);
+            // Hit from animation processed - will add UI later
         }
         return;
     }
@@ -313,15 +313,13 @@ float UCombatComponent::GetTimeSinceLastCombatAction() const
 void UCombatComponent::AddCombatStateTag(const FGameplayTag& Tag)
 {
     CombatStateTags.AddTag(Tag);
-    UE_LOG(LogTemp, Warning, TEXT("CombatComponent: Added tag %s (Total tags: %d)"), 
-        *Tag.ToString(), CombatStateTags.Num());
+    // Combat state tag added
 }
 
 void UCombatComponent::RemoveCombatStateTag(const FGameplayTag& Tag)
 {
     CombatStateTags.RemoveTag(Tag);
-    UE_LOG(LogTemp, Warning, TEXT("CombatComponent: Removed tag %s (Total tags: %d)"), 
-        *Tag.ToString(), CombatStateTags.Num());
+    // Combat state tag removed
 }
 
 bool UCombatComponent::HasCombatStateTag(const FGameplayTag& Tag) const

@@ -34,7 +34,7 @@ void UComboWindowNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAni
 	{
 		// Enable input buffering for combo
 		ActionManager->SetComboWindowActive(true, ComboWindowName);
-		UE_LOG(LogTemp, Log, TEXT("ComboWindow OPEN: %s"), *ComboWindowName.ToString());
+		// Combo window opened
 	}
 }
 
@@ -60,7 +60,7 @@ void UComboWindowNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimS
 		// Close input buffering window and execute any buffered input
 		ActionManager->SetComboWindowActive(false, ComboWindowName);
 		ActionManager->ExecuteBufferedAction();
-		UE_LOG(LogTemp, Log, TEXT("ComboWindow CLOSED: %s"), *ComboWindowName.ToString());
+		// Combo window closed
 	}
 }
 

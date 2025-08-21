@@ -1,5 +1,53 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-21 (Part 2) - Input Blocking & Major Code Cleanup
+
+### Major Changes
+- **Input Blocking System Implemented**:
+  - Added SetAbilityInputsEnabled() and SetMovementInputEnabled() to PlayerCharacter
+  - CombatStateNotify now controls input enable/disable based on animation state
+  - Movement and ability inputs completely blocked during ability execution
+  - Focus mode also respects ability input blocking
+  - System is fully animation-driven with no hardcoded timings
+
+- **Removed Deprecated Components**:
+  - Deleted AnimationManagerComponent (obsolete, replaced by animation notifies)
+  - Deleted HitboxComponent (unused, replaced by AttackNotifyState)
+  - All hit detection now handled by AttackNotifyState in animations
+
+- **Debug System Consolidation**:
+  - Consolidated 5 separate debug command files into single AtlasDebugCommands
+  - Deleted: FocusModeDebugCommands, StationIntegrityDebugCommands, VulnerabilityDebugCommands
+  - Deleted: DebugCommandsDataAsset (unused data-driven system)
+  - All debug commands now in one organized location with categories
+
+- **Removed Debug Logs**:
+  - Removed combat state change logs
+  - Removed damage/poise logs (will add UI later)
+  - Removed animation logs
+  - Removed input blocking logs
+  - Cleaner console output for production testing
+
+### Technical Details
+- ActionManagerComponent now checks PlayerCharacter input flags before processing
+- Input blocking controlled by animation notifies (start/end of abilities)
+- Debug commands organized by category: Focus, Vulnerability, Station, Combat, Abilities, Actions
+- Single registration point: FAtlasDebugCommands::RegisterAllCommands()
+
+### Files Deleted (8 total)
+- AnimationManagerComponent.h/cpp
+- HitboxComponent.h/cpp  
+- FocusModeDebugCommands.h/cpp
+- StationIntegrityDebugCommands.h/cpp
+- VulnerabilityDebugCommands.h/cpp
+- DebugCommandsDataAsset.h/cpp
+
+### Results
+- **No ability spam** - inputs properly blocked during execution
+- **Cleaner codebase** - removed 8 deprecated files
+- **Better organization** - single debug command location
+- **Production ready** - removed debug log spam
+
 ## Session: 2025-01-21 - Animation-Driven Combat & Attack Spam Fix
 
 ### Major Changes

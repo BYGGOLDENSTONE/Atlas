@@ -103,6 +103,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
+	// Block movement input if disabled
+	if (!bMovementInputEnabled)
+	{
+		return;
+	}
+	
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	LastMovementInput = MovementVector;
 
@@ -132,6 +138,12 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 void APlayerCharacter::FocusStart()
 {
+	// Block focus mode if ability inputs are disabled
+	if (!bAbilityInputsEnabled)
+	{
+		return;
+	}
+	
 	if (FocusModeComponent)
 	{
 		FocusModeComponent->StartFocusMode();
@@ -149,5 +161,34 @@ void APlayerCharacter::FocusStop()
 		}
 		FocusModeComponent->StopFocusMode();
 	}
+}
+
+void APlayerCharacter::SetAbilityInputsEnabled(bool bEnabled)
+{
+	bAbilityInputsEnabled = bEnabled;
+	
+	if (!bEnabled)
+	{
+		// Force stop focus mode if disabling inputs
+		if (FocusModeComponent && FocusModeComponent->IsFocusModeActive())
+		{
+			FocusModeComponent->StopFocusMode();
+		}
+	}
+	
+	// Ability inputs state changed
+}
+
+void APlayerCharacter::SetMovementInputEnabled(bool bEnabled)
+{
+	bMovementInputEnabled = bEnabled;
+	
+	if (!bEnabled)
+	{
+		// Clear any pending movement input
+		LastMovementInput = FVector2D::ZeroVector;
+	}
+	
+	// Movement input state changed
 }
 

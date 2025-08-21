@@ -3,16 +3,14 @@
 #include "Atlas.h"
 #include "Modules/ModuleManager.h"
 #include "Core/AtlasGameplayTags.h"
-#include "Debug/VulnerabilityDebugCommands.h"
-#include "Debug/StationIntegrityDebugCommands.h"
+#include "Debug/AtlasDebugCommands.h"
 
 class FAtlasModule : public FDefaultGameModuleImpl
 {
     virtual void StartupModule() override
     {
         FAtlasGameplayTags::InitializeNativeTags();
-        FVulnerabilityDebugCommands::RegisterCommands();
-        FStationIntegrityDebugCommands::RegisterCommands();
+        FAtlasDebugCommands::RegisterAllCommands();
     }
 };
 

@@ -36,15 +36,9 @@ void UHealthComponent::TakeDamage(float DamageAmount, AActor* DamageInstigator)
     OnDamageTaken.Broadcast(ActualDamage, DamageInstigator);
     BroadcastHealthChange(-ActualDamage);
 
-    UE_LOG(LogTemp, Log, TEXT("%s took %.1f damage. Health: %.1f/%.1f"), 
-        *GetOwner()->GetName(), ActualDamage, CurrentHealth, MaxHealth);
+    // Damage taken - will add UI later
 
-    if (GEngine)
-    {
-        FString DebugMessage = FString::Printf(TEXT("%s Health: %.0f/%.0f (-%0.f)"),
-            *GetOwner()->GetName(), CurrentHealth, MaxHealth, ActualDamage);
-        GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, DebugMessage);
-    }
+    // Will add damage UI feedback later
 
     if (CurrentHealth <= 0.0f && !bIsDead)
     {
@@ -191,8 +185,7 @@ void UHealthComponent::TakePoiseDamage(float PoiseDamage, AActor* DamageInstigat
     
     BroadcastPoiseChange(-ActualDamage);
     
-    UE_LOG(LogTemp, Log, TEXT("%s took %.1f poise damage. Poise: %.1f/%.1f"),
-        *GetOwner()->GetName(), ActualDamage, CurrentPoise, MaxPoise);
+    // Poise damage taken - will add UI later
     
     if (CurrentPoise <= 0.0f && !bIsStaggered)
     {

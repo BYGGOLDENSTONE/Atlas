@@ -347,7 +347,7 @@ void UUniversalAction::ExecuteMeleeAttack()
 					Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate);
 				}
 				
-				UE_LOG(LogTemp, Log, TEXT("Playing attack montage with AnimNotifies for hit detection"));
+				// Playing attack montage with AnimNotifies for hit detection
 			}
 		}
 		else
@@ -355,7 +355,7 @@ void UUniversalAction::ExecuteMeleeAttack()
 			UE_LOG(LogTemp, Warning, TEXT("No ActionMontage configured for %s - attack won't have hit detection!"), *ActionTag.ToString());
 		}
 		
-		UE_LOG(LogTemp, Log, TEXT("Melee Attack Started: %s (State set, montage playing)"), *ActionTag.ToString());
+		// Melee Attack Started
 	}
 }
 
