@@ -18,7 +18,8 @@
       "Bash(cmd /c del:*)",
       "Bash(cmd /c mkdir:*)",
       "Bash(cmd /c move:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(cmd /c:*)"
     ],
     "deny": [],
     "ask": []

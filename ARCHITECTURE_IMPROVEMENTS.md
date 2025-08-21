@@ -5,6 +5,23 @@ This document outlines the architectural improvements made to the Atlas codebase
 
 ## Latest Updates (2025-01-21)
 
+### Interface Consolidation ✅
+**Problem**: Multiple overlapping interfaces (IBlockable, IStaggerable, ICombatInterface) created redundancy and confusion.
+
+**Solution**: Unified all combat-related interfaces into single ICombatInterface
+- Merged IBlockable functionality (block states, stability, damage reduction)
+- Merged IStaggerable functionality (poise, stagger states, recovery)
+- Organized functions into logical categories within ICombatInterface
+- Deleted redundant IBlockable.h and IStaggerable.h files
+
+**Benefits**:
+- Single interface for all combat interactions
+- No duplicate function definitions
+- Clearer API with organized sections
+- Reduced interface count from 6 to 4 core interfaces
+
+## Previous Updates (2025-01-21)
+
 ### Component Consolidation ✅
 **Problem**: Multiple overlapping components (CombatComponent, ActionManagerComponent, DamageCalculator) created confusion and complexity.
 

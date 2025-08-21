@@ -1,5 +1,31 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-21 (Part 5) - Interface Architecture Consolidation
+
+### Interface System Cleanup
+- **Unified Combat Interface**:
+  - Merged IBlockable and IStaggerable into ICombatInterface
+  - Consolidated all combat-related functions into single interface
+  - Organized functions by category (State, Attack, Block, Vulnerability, Poise, Damage)
+  - Deleted redundant interface files
+
+- **Clean Interface Architecture**:
+  - Reduced from 6 to 4 core interfaces
+  - ICombatInterface: All combat interactions (includes block/stagger)
+  - IHealthInterface: Health and shield management
+  - IActionInterface: Action system abstraction
+  - IInteractable: Environmental interactions
+
+### Files Deleted
+- Interfaces/IBlockable.h (merged into ICombatInterface)
+- Interfaces/IStaggerable.h (merged into ICombatInterface)
+
+### Benefits
+- No overlapping functionality between interfaces
+- Single source of truth for combat mechanics
+- Clearer API with logical grouping
+- Reduced complexity and file count
+
 ## Session: 2025-01-21 (Part 4) - Complete Legacy Ability System Removal
 
 ### Major Cleanup

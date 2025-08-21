@@ -48,7 +48,7 @@ Atlas_ResetSlots                       # Reset to defaults
 ## Architecture (Latest Refactor - 2025-01-21)
 - **Unified Component System**: ActionManagerComponent handles all combat/action logic
 - **Function Map Routing**: Replaced if/else chains with efficient map lookup
-- **Interface Layer**: ICombatInterface, IHealthInterface, IActionInterface
+- **Consolidated Interface Layer**: ICombatInterface (unified combat/block/stagger), IHealthInterface, IActionInterface, IInteractable
 - **No Circular Dependencies**: Components communicate via interfaces
 - **Data-Driven Everything**: All timings, durations, behaviors in DataAssets
 - **Simplified Damage Calculation**: Inline damage/knockback logic (no separate calculator)
@@ -94,6 +94,13 @@ Atlas_ResetSlots                       # Reset to defaults
 **IMPORTANT**: Set `bCanBeInterrupted = false` in attack DataAssets to prevent spam
 
 ## Recent Updates (2025-01-21)
+### Interface Consolidation
+- **Unified ICombatInterface**: Merged IBlockable and IStaggerable into ICombatInterface
+- **Removed Redundant Interfaces**: Deleted IBlockable.h and IStaggerable.h files
+- **Organized Combat Functions**: Grouped by subsystem (State, Attack, Block, Vulnerability, Poise, Damage)
+- **Clean Architecture**: 4 core interfaces - ICombatInterface, IHealthInterface, IActionInterface, IInteractable
+
+## Previous Updates (2025-01-21)
 ### Complete Legacy Code Removal
 - **Removed Abilities Folder**: Deleted all legacy ability classes (AbilityBase, CoolantSprayAbility, DebrisPullAbility, KineticPulseAbility, SystemHackAbility)
 - **Cleaned Data Structure**: Moved ActionDataAsset to Data/ folder for consistency
