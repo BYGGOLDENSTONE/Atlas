@@ -110,6 +110,16 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Action Manager|Events")
 	FOnActionActivated OnActionActivated;
+	
+	// Combo System
+	UFUNCTION(BlueprintCallable, Category = "Action Manager|Combo")
+	void SetComboWindowActive(bool bActive, FName WindowName);
+	
+	UFUNCTION(BlueprintCallable, Category = "Action Manager|Combo")
+	void ExecuteBufferedAction();
+	
+	UFUNCTION(BlueprintPure, Category = "Action Manager|Combo")
+	bool IsComboWindowActive() const { return bComboWindowActive; }
 
 protected:
 	// Helper functions
@@ -141,4 +151,10 @@ protected:
 	// Default slot assignments (for testing)
 	UPROPERTY(EditDefaultsOnly, Category = "Action Manager|Config")
 	TMap<FName, FGameplayTag> DefaultSlotAssignments;
+	
+	// Combo system state
+	bool bComboWindowActive = false;
+	FName CurrentComboWindow = NAME_None;
+	FName BufferedSlot = NAME_None;
+	float BufferedInputTime = 0.0f;
 };

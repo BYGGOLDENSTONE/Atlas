@@ -215,15 +215,21 @@ bool UBaseAction::HasRequiredTags(AGameCharacterBase* Owner) const
 	// Check if owner has required tags using interface
 	if (ActionData->RequiredTags.Num() > 0)
 	{
-		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Owner))
+		// Use Execute_ pattern for interface calls
+		if (Owner->GetClass()->ImplementsInterface(UCombatInterface::StaticClass()))
 		{
 			for (const FGameplayTag& RequiredTag : ActionData->RequiredTags)
 			{
-				if (!CombatInterface->HasCombatStateTag(RequiredTag))
+				if (!ICombatInterface::Execute_HasCombatStateTag(Owner, RequiredTag))
 				{
 					return false;
 				}
 			}
+		}
+		else
+		{
+			// If interface not implemented, we can't check tags
+			return false;
 		}
 	}
 	return true;
@@ -239,11 +245,12 @@ bool UBaseAction::IsBlockedByTags(AGameCharacterBase* Owner) const
 	// Check if owner has any blocking tags using interface
 	if (ActionData->BlockedDuringTags.Num() > 0)
 	{
-		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Owner))
+		// Use Execute_ pattern for interface calls
+		if (Owner->GetClass()->ImplementsInterface(UCombatInterface::StaticClass()))
 		{
 			for (const FGameplayTag& BlockedTag : ActionData->BlockedDuringTags)
 			{
-				if (CombatInterface->HasCombatStateTag(BlockedTag))
+				if (ICombatInterface::Execute_HasCombatStateTag(Owner, BlockedTag))
 				{
 					return true;
 				}

@@ -1,5 +1,60 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-21 - Animation-Driven Combat & Attack Spam Fix
+
+### Major Changes
+- **Fixed Critical Crash Bug**:
+  - Fixed interface casting crash in BaseAction (Cast<ICombatInterface> → Execute_ pattern)
+  - Fixed AttackDataMap configuration issue by bypassing old system
+  - UniversalAction now handles attacks directly without AttackDataMap
+
+- **Animation-Driven Combat System**:
+  - Created CombatStateNotify for attack state management
+  - Created ComboWindowNotifyState for combo input buffering
+  - Removed timer-based hit detection - animations control everything
+  - Attack timing now fully controlled by animation notifies
+  - DataAsset timing fields marked as [REFERENCE] only
+
+- **Attack Spam Prevention**:
+  - Fixed attack interruption causing spam
+  - Added same-action check to prevent self-interruption
+  - Fixed OnInterrupted() to properly clean up combat states
+  - Combat state now set immediately before animation plays
+  - Added bCanBeInterrupted check (must be false for attacks)
+
+- **Combo System Foundation**:
+  - Added combo window support to ActionManagerComponent
+  - Input buffering during combo windows
+  - Buffered actions execute when window closes
+
+### Technical Fixes
+- ProcessHitFromAnimation now uses ActionDataAsset for damage
+- SetCurrentActionData passes action data to CombatComponent
+- Fixed state mismatch between bIsAttacking and combat tags
+- Added comprehensive debug logging for state tracking
+
+### Files Created
+- CombatStateNotify.h/cpp - Combat state transitions
+- ComboWindowNotifyState.h/cpp - Combo input windows
+
+### Files Modified
+- BaseAction.cpp - Fixed interface casting
+- UniversalAction.cpp - Animation-driven attacks, spam prevention
+- CombatComponent - Support for ActionDataAsset
+- ActionManagerComponent - Combo system, input blocking
+- ActionDataAsset.h - Documented reference-only fields
+
+### Results
+- **No more crashes** when using abilities
+- **No attack spam** - proper state management
+- **Animation-driven timing** - artists control combat feel
+- **Combo-ready** - buffering system in place
+
+### Configuration Required
+- Set bCanBeInterrupted = false in all attack DataAssets
+- Add animation notifies to attack montages
+- Configure damage/knockback/poise in DataAssets
+
 ## Session: 2025-01-20 (Evening) - Tag System Cleanup & Bug Fixes
 
 ### Major Changes

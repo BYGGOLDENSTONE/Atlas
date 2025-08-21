@@ -60,7 +60,7 @@ public:
     float IntegrityCost = 0.0f;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "2. Universal", meta = (ClampMin = 0.0, Priority = 12))
-    float ActionDuration = 0.5f;  // How long the action takes to complete
+    float ActionDuration = 0.5f;  // [REFERENCE] Safety timeout - actual duration controlled by animation
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "2. Universal", meta = (ClampMin = 0.1, ClampMax = 3.0, Priority = 13))
     float MontagePlayRate = 1.0f;  // Animation playback speed multiplier
@@ -127,11 +127,11 @@ public:
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "5. Melee Attack",
         meta = (EditCondition = "ActionType == EActionType::MeleeAttack", EditConditionHides, ClampMin = 0.0))
-    float AttackWindupTime = 0.2f;  // Time before damage is dealt
+    float AttackWindupTime = 0.2f;  // [REFERENCE] Use AttackNotifyState placement in montage instead
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "5. Melee Attack",
         meta = (EditCondition = "ActionType == EActionType::MeleeAttack", EditConditionHides, ClampMin = 0.0))
-    float AttackRecoveryTime = 0.3f;  // Time after damage before action ends
+    float AttackRecoveryTime = 0.3f;  // [REFERENCE] Use ComboWindowNotifyState placement instead
 
     // ========================================
     // RANGED ATTACK CONFIG (Visible when ActionType = RangedAttack)
@@ -248,7 +248,7 @@ public:
     bool bAutoReleaseOnComplete = true;  // Automatically end action when duration expires
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "13. Timing", meta = (ClampMin = 0.0))
-    float InputBufferWindow = 0.2f;  // Time window to queue next action before current ends
+    float InputBufferWindow = 0.2f;  // [REFERENCE] Use ComboWindowNotifyState in montage for actual combo timing
 
 public:
     // Helper functions

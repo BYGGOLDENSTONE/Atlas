@@ -6,6 +6,7 @@
 #include "CombatComponent.generated.h"
 
 class UAttackDataAsset;
+class UActionDataAsset;
 class UCombatRulesDataAsset;
 class UDamageCalculator;
 class UHealthComponent;
@@ -85,6 +86,9 @@ public:
     void ProcessHit(AActor* HitActor, const FGameplayTag& AttackTag);
 
     void ProcessHitFromAnimation(class AGameCharacterBase* HitCharacter);
+    
+    // Set current action data for unified action system
+    void SetCurrentActionData(class UActionDataAsset* ActionData);
 
 
 
@@ -117,6 +121,10 @@ public:
 private:
     UPROPERTY()
     UAttackDataAsset* CurrentAttackData;
+    
+    // For unified action system
+    UPROPERTY()
+    class UActionDataAsset* CurrentActionData;
 
     UPROPERTY()
     UDamageCalculator* DamageCalculator;

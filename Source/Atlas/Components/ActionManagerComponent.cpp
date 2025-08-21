@@ -2,6 +2,7 @@
 #include "../Actions/BaseAction.h"
 #include "../DataAssets/ActionDataAsset.h"
 #include "../Characters/GameCharacterBase.h"
+#include "../Components/CombatComponent.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 
@@ -159,13 +160,47 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 		return;
 	}
 
+	// Check if we're in an attack state and not in a combo window
+	UCombatComponent* CombatComp = OwnerCharacter->GetCombatComponent();
+	if (CombatComp)
+	{
+		bool bIsAttacking = CombatComp->IsAttacking();
+		UE_LOG(LogTemp, Warning, TEXT("OnSlotPressed %s - IsAttacking: %s, ComboWindow: %s"), 
+			*SlotName.ToString(), 
+			bIsAttacking ? TEXT("TRUE") : TEXT("FALSE"),
+			bComboWindowActive ? TEXT("ACTIVE") : TEXT("INACTIVE"));
+			
+		if (bIsAttacking && !bComboWindowActive)
+		{
+			// Block all action inputs while attacking (except during combo windows)
+			UE_LOG(LogTemp, Error, TEXT("INPUT BLOCKED: Cannot use %s while attacking (not in combo window)"), *SlotName.ToString());
+			return;
+		}
+	}
+
+	// If combo window is active, buffer the input
+	if (bComboWindowActive)
+	{
+		BufferedSlot = SlotName;
+		BufferedInputTime = GetWorld()->GetTimeSeconds();
+		UE_LOG(LogTemp, Log, TEXT("Buffered input: %s during combo window %s"), *SlotName.ToString(), *CurrentComboWindow.ToString());
+		return;
+	}
+
 	UBaseAction* Action = GetActionInSlot(SlotName);
 	if (!Action)
 	{
 		return;
 	}
 
-	// Check if we need to interrupt current action
+	// Check if this is the same action already active
+	if (CurrentAction && CurrentAction == Action && CurrentAction->IsActive())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Same action already active, ignoring press for %s"), *SlotName.ToString());
+		return;
+	}
+	
+	// Check if we need to interrupt a different action
 	if (CurrentAction && CurrentAction != Action && CurrentAction->IsActive())
 	{
 		// For now, interrupt the current action
@@ -179,6 +214,10 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 		CurrentAction = Action;
 		Action->OnActivate(OwnerCharacter);
 		OnActionActivated.Broadcast(SlotName, Action);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Action cannot activate: %s"), *SlotName.ToString());
 	}
 }
 
@@ -328,6 +367,36 @@ void UActionManagerComponent::ExecuteListActionsCommand()
 				*ActionData->ActionTag.ToString(), 
 				*ActionData->ActionName.ToString());
 		}
+	}
+}
+
+void UActionManagerComponent::SetComboWindowActive(bool bActive, FName WindowName)
+{
+	bComboWindowActive = bActive;
+	CurrentComboWindow = WindowName;
+	
+	if (!bActive)
+	{
+		// Clear buffered input if window is closing without executing
+		if (BufferedSlot == NAME_None)
+		{
+			BufferedSlot = NAME_None;
+			BufferedInputTime = 0.0f;
+		}
+	}
+}
+
+void UActionManagerComponent::ExecuteBufferedAction()
+{
+	if (BufferedSlot != NAME_None)
+	{
+		FName SlotToExecute = BufferedSlot;
+		BufferedSlot = NAME_None;
+		BufferedInputTime = 0.0f;
+		
+		// Execute the buffered action
+		UE_LOG(LogTemp, Log, TEXT("Executing buffered action: %s"), *SlotToExecute.ToString());
+		OnSlotPressed(SlotToExecute);
 	}
 }
 

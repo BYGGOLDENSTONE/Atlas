@@ -2,6 +2,7 @@
 #include "../Characters/GameCharacterBase.h"
 #include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
+#include "../Components/ActionManagerComponent.h"
 #include "../Components/StationIntegrityComponent.h"
 #include "../Core/AtlasGameplayTags.h"
 #include "../DataAssets/ActionDataAsset.h"
@@ -32,7 +33,47 @@ bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
 		return false;
 	}
 
-	// Add any universal checks here
+	// Prevent activating any action while attacking (except during combo windows)
+	if (Owner && ActionData)
+	{
+		// Check if this is an attack action
+		if (ActionData->ActionType == EActionType::MeleeAttack || 
+		    ActionData->ActionType == EActionType::RangedAttack)
+		{
+			// Don't allow attack if already attacking (unless in combo window)
+			if (UCombatComponent* CombatComp = Owner->GetCombatComponent())
+			{
+				if (CombatComp->IsAttacking())
+				{
+					// Check if we're in a combo window
+					if (UActionManagerComponent* ActionManager = Owner->FindComponentByClass<UActionManagerComponent>())
+					{
+						if (!ActionManager->IsComboWindowActive())
+						{
+							UE_LOG(LogTemp, Warning, TEXT("Cannot attack while already attacking (not in combo window)"));
+							return false;
+						}
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Cannot attack while already attacking"));
+						return false;
+					}
+				}
+			}
+		}
+		
+		// Also check if we're currently in any blocking state
+		if (UCombatComponent* CombatComp = Owner->GetCombatComponent())
+		{
+			// Can't start most actions while staggered
+			if (CombatComp->HasCombatStateTag(FGameplayTag::RequestGameplayTag("State.Staggered")))
+			{
+				return false;
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -81,6 +122,10 @@ void UUniversalAction::OnTick(float DeltaTime)
 			if (bIsAttacking)
 			{
 				bIsAttacking = false;
+				if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+				{
+					CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+				}
 			}
 			if (bIsChanneling)
 			{
@@ -114,6 +159,26 @@ void UUniversalAction::OnRelease()
 		bIsBlocking = false;
 	}
 	
+	// Clean up attack state if still active
+	if (bIsAttacking)
+	{
+		bIsAttacking = false;
+		if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+		{
+			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+		}
+	}
+	
+	// Clean up dash state if still active
+	if (bIsDashing)
+	{
+		bIsDashing = false;
+		if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+		{
+			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+		}
+	}
+	
 	// Handle toggle actions
 	if (ActionData && ActionData->bIsToggleAction)
 	{
@@ -131,7 +196,28 @@ void UUniversalAction::OnInterrupted()
 	if (ActionData && !ActionData->bCanBeInterrupted)
 	{
 		// Action cannot be interrupted, ignore the request
+		UE_LOG(LogTemp, Warning, TEXT("Action cannot be interrupted: %s"), *ActionTag.ToString());
 		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Action interrupted: %s"), *ActionTag.ToString());
+	
+	// Clean up combat states properly
+	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+	{
+		if (bIsAttacking)
+		{
+			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+			CombatComp->SetCurrentActionData(nullptr);
+		}
+		if (bIsBlocking)
+		{
+			CombatComp->EndBlock();
+		}
+		if (bIsDashing)
+		{
+			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+		}
 	}
 	
 	bIsBlocking = false;
@@ -194,44 +280,82 @@ void UUniversalAction::ExecuteBlock()
 
 void UUniversalAction::ExecuteMeleeAttack()
 {
+	if (!ActionData || !CurrentOwner)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ExecuteMeleeAttack: Missing ActionData or Owner"));
+		return;
+	}
+	
+	// Melee attacks should generally not be interruptible
+	// This should be set in the DataAsset, but let's log it
+	if (ActionData->bCanBeInterrupted)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("WARNING: Melee attack %s is marked as interruptible! This allows spam!"), *ActionTag.ToString());
+	}
+
+	// Check if we can attack
 	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
 	{
-		// Use the action tag directly - no mapping needed
-		if (CombatComp->StartAttack(ActionTag))
+		// First check if already attacking - this should have been caught earlier but double check
+		bool bIsCurrentlyAttacking = CombatComp->IsAttacking();
+		UE_LOG(LogTemp, Warning, TEXT("ExecuteMeleeAttack - IsAttacking: %s"), 
+			bIsCurrentlyAttacking ? TEXT("TRUE") : TEXT("FALSE"));
+			
+		if (bIsCurrentlyAttacking)
 		{
-			bIsAttacking = true;
-			// Use data-driven attack duration
-			if (ActionData)
-			{
-				ActionTimer = ActionData->ActionDuration;
-			}
-			else
-			{
-				ActionTimer = 0.5f; // Fallback default
-			}
-			
-			// Play animation if available
-			if (ActionData && ActionData->ActionMontage && CurrentOwner)
-			{
-				if (ACharacter* Character = Cast<ACharacter>(CurrentOwner))
-				{
-					// Play montage with configured play rate and section
-					float PlayRate = ActionData->MontagePlayRate;
-					FName SectionName = ActionData->MontageSectionName;
-					
-					if (SectionName != NAME_None)
-					{
-						Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate, SectionName);
-					}
-					else
-					{
-						Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate);
-					}
-				}
-			}
-			
-			UE_LOG(LogTemp, Log, TEXT("Executed Melee Attack: %s"), *ActionTag.ToString());
+			UE_LOG(LogTemp, Error, TEXT("ExecuteMeleeAttack BLOCKED: Already attacking"));
+			return;
 		}
+		
+		if (UHealthComponent* HealthComp = GetOwnerHealthComponent())
+		{
+			if (HealthComp->IsStaggered())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ExecuteMeleeAttack blocked: Staggered"));
+				return;
+			}
+		}
+
+		// Set attacking state IMMEDIATELY to prevent spam
+		// The animation's CombatStateNotify at frame 0 will re-set this (harmless)
+		// The animation's CombatStateNotify at end will clear it
+		CombatComp->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+		bIsAttacking = true;
+		
+		// ActionTimer is only used as a safety timeout, animation controls actual duration
+		ActionTimer = ActionData->ActionDuration > 0.0f ? ActionData->ActionDuration : 2.0f; // Generous timeout
+		
+		// Store attack data in CombatComponent so ProcessHitFromAnimation can use it
+		// This allows the animation notifies to access damage values
+		CombatComp->SetCurrentActionData(ActionData);
+		
+		// Play animation montage - the montage should have AttackNotifyState 
+		// which will handle hit detection timing automatically
+		if (ActionData->ActionMontage)
+		{
+			if (ACharacter* Character = Cast<ACharacter>(CurrentOwner))
+			{
+				float PlayRate = ActionData->MontagePlayRate > 0.0f ? ActionData->MontagePlayRate : 1.0f;
+				FName SectionName = ActionData->MontageSectionName;
+				
+				if (SectionName != NAME_None)
+				{
+					Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate, SectionName);
+				}
+				else
+				{
+					Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate);
+				}
+				
+				UE_LOG(LogTemp, Log, TEXT("Playing attack montage with AnimNotifies for hit detection"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No ActionMontage configured for %s - attack won't have hit detection!"), *ActionTag.ToString());
+		}
+		
+		UE_LOG(LogTemp, Log, TEXT("Melee Attack Started: %s (State set, montage playing)"), *ActionTag.ToString());
 	}
 }
 

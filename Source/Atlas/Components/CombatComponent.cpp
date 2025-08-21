@@ -1,5 +1,6 @@
 #include "CombatComponent.h"
 #include "../Data/AttackDataAsset.h"
+#include "../DataAssets/ActionDataAsset.h"
 #include "../Data/CombatRulesDataAsset.h"
 #include "../Data/StationIntegrityDataAsset.h"
 #include "DamageCalculator.h"
@@ -15,6 +16,7 @@
 UCombatComponent::UCombatComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
+    CurrentActionData = nullptr;
 }
 
 void UCombatComponent::BeginPlay()
@@ -104,6 +106,7 @@ void UCombatComponent::EndAttack()
 {
     RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
     CurrentAttackData = nullptr;
+    CurrentActionData = nullptr;  // Clear unified action data
     OnAttackEnded.Broadcast();
 }
 
@@ -158,9 +161,60 @@ void UCombatComponent::ProcessHit(AActor* HitActor, const FGameplayTag& AttackTa
     }
 }
 
+void UCombatComponent::SetCurrentActionData(UActionDataAsset* ActionData)
+{
+    CurrentActionData = ActionData;
+}
+
 void UCombatComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
 {
-    if (!HitCharacter || !CurrentAttackData || !DamageCalculator)
+    // For unified action system, use CurrentActionData if available
+    if (!HitCharacter || !DamageCalculator)
+    {
+        return;
+    }
+    
+    // Check if we have action data from unified system
+    if (CurrentActionData)
+    {
+        // Use ActionDataAsset for damage calculation
+        if (UHealthComponent* TargetHealth = HitCharacter->FindComponentByClass<UHealthComponent>())
+        {
+            // Apply damage from ActionDataAsset
+            float Damage = CurrentActionData->MeleeDamage;
+            TargetHealth->TakeDamage(Damage, GetOwner());
+            
+            // Apply poise damage
+            if (CurrentActionData->PoiseDamage > 0.0f)
+            {
+                TargetHealth->TakePoiseDamage(CurrentActionData->PoiseDamage);
+            }
+            
+            // Apply knockback
+            if (CurrentActionData->KnockbackForce > 0.0f)
+            {
+                FVector KnockbackDirection = (HitCharacter->GetActorLocation() - GetOwner()->GetActorLocation()).GetSafeNormal();
+                if (ACharacter* TargetCharacter = Cast<ACharacter>(HitCharacter))
+                {
+                    TargetCharacter->LaunchCharacter(KnockbackDirection * CurrentActionData->KnockbackForce, true, true);
+                    
+                    // Apply ragdoll if configured
+                    if (CurrentActionData->bCausesRagdoll)
+                    {
+                        // Trigger ragdoll effect
+                        TargetCharacter->GetMesh()->SetSimulatePhysics(true);
+                        TargetCharacter->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+                    }
+                }
+            }
+            
+            UE_LOG(LogTemp, Log, TEXT("Hit from animation with ActionData: %f damage"), Damage);
+        }
+        return;
+    }
+    
+    // Fallback to old system if no ActionData
+    if (!CurrentAttackData)
     {
         return;
     }
@@ -259,11 +313,15 @@ float UCombatComponent::GetTimeSinceLastCombatAction() const
 void UCombatComponent::AddCombatStateTag(const FGameplayTag& Tag)
 {
     CombatStateTags.AddTag(Tag);
+    UE_LOG(LogTemp, Warning, TEXT("CombatComponent: Added tag %s (Total tags: %d)"), 
+        *Tag.ToString(), CombatStateTags.Num());
 }
 
 void UCombatComponent::RemoveCombatStateTag(const FGameplayTag& Tag)
 {
     CombatStateTags.RemoveTag(Tag);
+    UE_LOG(LogTemp, Warning, TEXT("CombatComponent: Removed tag %s (Total tags: %d)"), 
+        *Tag.ToString(), CombatStateTags.Num());
 }
 
 bool UCombatComponent::HasCombatStateTag(const FGameplayTag& Tag) const
