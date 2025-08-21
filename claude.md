@@ -86,6 +86,8 @@ Atlas.ToggleFocusMode
 4. Add reward persistence between runs
 5. Create initial reward pool with 10-15 rewards per category
 
+See `PHASE_2_IMPLEMENTATION_PLAN.md` for detailed implementation guide.
+
 ## Technical Rules
 - **NO GAS**: Custom component system only
 - **Data-Driven**: All values in DataAssets
