@@ -190,22 +190,18 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 		}
 	}
 
-	// Check if we're in an attack state and not in a combo window (legacy check - keeping for safety)
-	UCombatComponent* CombatComp = OwnerCharacter->GetCombatComponent();
-	if (CombatComp)
+	// Check if we're in an attack state and not in a combo window
+	bool bIsAttacking = IsAttacking();
+	UE_LOG(LogTemp, Warning, TEXT("OnSlotPressed %s - IsAttacking: %s, ComboWindow: %s"), 
+		*SlotName.ToString(), 
+		bIsAttacking ? TEXT("TRUE") : TEXT("FALSE"),
+		bComboWindowActive ? TEXT("ACTIVE") : TEXT("INACTIVE"));
+		
+	if (bIsAttacking && !bComboWindowActive)
 	{
-		bool bIsAttacking = CombatComp->IsAttacking();
-		UE_LOG(LogTemp, Warning, TEXT("OnSlotPressed %s - IsAttacking: %s, ComboWindow: %s"), 
-			*SlotName.ToString(), 
-			bIsAttacking ? TEXT("TRUE") : TEXT("FALSE"),
-			bComboWindowActive ? TEXT("ACTIVE") : TEXT("INACTIVE"));
-			
-		if (bIsAttacking && !bComboWindowActive)
-		{
-			// Block all action inputs while attacking (except during combo windows)
-			UE_LOG(LogTemp, Error, TEXT("INPUT BLOCKED: Cannot use %s while attacking (not in combo window)"), *SlotName.ToString());
-			return;
-		}
+		// Block all action inputs while attacking (except during combo windows)
+		UE_LOG(LogTemp, Error, TEXT("INPUT BLOCKED: Cannot use %s while attacking (not in combo window)"), *SlotName.ToString());
+		return;
 	}
 
 	// If combo window is active, buffer the input

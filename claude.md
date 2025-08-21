@@ -1,160 +1,90 @@
-# Atlas - Combat System Development
+# Atlas - Combat System
 
-## Project Overview
-**Engine**: UE 5.5 | **Type**: Single-player roguelite | **Genre**: 1v1 duels on decaying space station
+**Engine**: UE 5.5 | **Genre**: 1v1 roguelite duels on decaying space station
 
-## Core Concept
-Strategic combat where players manage both health and station integrity. Enemies only take significant damage when vulnerable. Powerful abilities damage the station (dual-fail state).
+## Core Mechanics
+- **Dual Fail State**: Manage both health and station integrity
+- **Vulnerability System**: Enemies take 8x damage when vulnerable
+- **Risk/Reward**: Powerful abilities damage the station
 
-## Unified Action System ✅
-**COMPLETED**: Single `UniversalAction` class with data-driven configuration via `ActionDataAsset`
-- **5 Customizable Slots**: Any ability → any slot (LMB, RMB, E, R, Space)
-- **15 Abilities Total**: All equal, no "core" vs "special" distinction
-- **Flexible Balance**: IntegrityCost configurable per ability (YOU control risk/reward)
-
-### Console Commands
-```bash
-Atlas_AssignAction [Slot] [ActionTag]  # Assign ability to slot
-Atlas_ClearSlot [Slot]                 # Clear a slot
-Atlas_SwapSlots [Slot1] [Slot2]       # Swap two slots
-Atlas_ListActions                      # List all abilities
-Atlas_ShowSlots                        # Show current setup
-Atlas_ResetSlots                       # Reset to defaults
-```
+## Action System (Data-Driven)
+- **5 Slots**: LMB, RMB, E, R, Space (any ability → any slot)
+- **15 Abilities**: All equal, fully customizable via DataAssets
+- **Single Component**: ActionManagerComponent handles everything
 
 ## Combat Values
-- **Basic Attack**: 5 damage, 100 knockback, 20 poise
-- **Heavy Attack**: 15 damage, 500 knockback + ragdoll
-- **Block**: 40% damage reduction
-- **Vulnerability**: 8x damage, 1s duration
-- **Poise**: 100 max, breaks at 0, 2s stagger
-- **Dash**: 400 units, i-frames, 2s cooldown
-- **Focus**: 2000 unit range, screen-space targeting
+| System | Values |
+|--------|---------|
+| Basic Attack | 5 damage, 100 knockback, 20 poise |
+| Heavy Attack | 15 damage, 500 knockback + ragdoll |
+| Block | 40% damage reduction |
+| Vulnerability | 8x damage multiplier |
+| Poise | 100 max, 2s stagger at 0 |
+| Dash | 400 units, i-frames, 2s cooldown |
 
-## Implemented Systems ✅
-- **P0-P12**: Core combat, animations, vulnerability tiers, station integrity
-- **P14-P16**: All 15 abilities (configurable integrity costs)
-- **Unified Actions**: Data-driven system replacing old components
-- **Knockback**: Direction-based with wall/floor impact detection
+## Architecture
+```
+GameCharacterBase
+├── ActionManagerComponent (all combat/actions)
+├── HealthComponent (health/poise)
+├── VulnerabilityComponent (tiers/i-frames)
+├── FocusModeComponent (targeting)
+└── StationIntegrityComponent (station health)
+```
 
-## Key Components
-- `ActionManagerComponent`: Unified component managing all actions, combat states, and damage calculation
-- `UniversalAction`: Handles all action types via function map routing (O(1) lookup)
-- `ActionDataAsset`: Fully data-driven config (timing, behavior, interrupts)
-- `HealthComponent`: Health + poise management
-- `StationIntegrityComponent`: Station health tracking
-- `VulnerabilityComponent`: Manages vulnerability tiers and i-frames
+### Interfaces (4)
+- `ICombatInterface` - Combat states and actions
+- `IHealthInterface` - Health management
+- `IActionInterface` - Action system
+- `IInteractable` - Environment
 
-## Architecture (Latest Refactor - 2025-01-21)
-- **Unified Component System**: ActionManagerComponent handles all combat/action logic
-- **Function Map Routing**: Replaced if/else chains with efficient map lookup
-- **Consolidated Interface Layer**: ICombatInterface (unified combat/block/stagger), IHealthInterface, IActionInterface, IInteractable
-- **No Circular Dependencies**: Components communicate via interfaces
-- **Data-Driven Everything**: All timings, durations, behaviors in DataAssets
-- **Simplified Damage Calculation**: Inline damage/knockback logic (no separate calculator)
-- **Removed Legacy Systems**: CombatComponent and DamageCalculator deleted
+## Animation-Driven Combat
+Attacks use animation notifies for timing:
+1. Frame 0: `CombatStateNotify` (set state)
+2. Attack frames: `AttackNotifyState` (hit detection)
+3. Combo window: `ComboWindowNotifyState` (buffering)
+4. Last frame: `CombatStateNotify` (clear state)
 
-## Required DataAssets (20 Total)
-### Actions (15) - in Content/Data/Actions/
-- BasicAttack, HeavyAttack, Block, Dash, FocusMode
-- KineticPulse, DebrisPull, CoolantSpray, SystemHack
-- FloorDestabilizer, ImpactGauntlet, LocalizedEMP
-- SeismicStamp, GravityAnchor, AirlockBreach
+**Important**: Set `bCanBeInterrupted = false` in attack DataAssets
 
-### System (3) - Various locations
-- CombatRules, StationIntegrity, DebugCommands
-
-## Development Rules
-- NO GAS - custom component system
-- Data-driven via DataAssets (all magic numbers removed)
-- Interface-based communication (ICombatInterface, IHealthInterface, IActionInterface)
-- No parry or camera lock systems
-- Use interfaces over direct component access
-
-## Gameplay Tag Structure
-- **Action.*** = Player abilities (15 total, each handles its own logic)
-- **State.*** = Combat states (attacking, blocking, vulnerable, etc)
-- **Anim.*** = Animation triggers (hit reactions, death, etc)
-- **Risk.*** = Station integrity risk levels
-- **Interactable.*** = Environmental interactions
-
-## Animation-Driven Combat System ✅
-**COMPLETED**: Attacks now use animation notifies for all timing
-- **AttackNotifyState**: Handles hit detection windows
-- **CombatStateNotify**: Manages combat state transitions
-- **ComboWindowNotifyState**: Enables combo input buffering
-- No more timer-based attacks - animations control everything
-
-## Setting Up Attack Montages
-1. **Frame 0**: Add `CombatStateNotify` (Set Attack State)
-2. **Attack Frames**: Add `AttackNotifyState` (Hit Detection)
-3. **Combo Window**: Add `ComboWindowNotifyState` (Input Buffer)
-4. **Last Frame**: Add `CombatStateNotify` (Clear Attack State)
-
-**IMPORTANT**: Set `bCanBeInterrupted = false` in attack DataAssets to prevent spam
-
-## Recent Updates (2025-01-21)
-### Interface Consolidation
-- **Unified ICombatInterface**: Merged IBlockable and IStaggerable into ICombatInterface
-- **Removed Redundant Interfaces**: Deleted IBlockable.h and IStaggerable.h files
-- **Organized Combat Functions**: Grouped by subsystem (State, Attack, Block, Vulnerability, Poise, Damage)
-- **Clean Architecture**: 4 core interfaces - ICombatInterface, IHealthInterface, IActionInterface, IInteractable
-
-## Previous Updates (2025-01-21)
-### Complete Legacy Code Removal
-- **Removed Abilities Folder**: Deleted all legacy ability classes (AbilityBase, CoolantSprayAbility, DebrisPullAbility, KineticPulseAbility, SystemHackAbility)
-- **Cleaned Data Structure**: Moved ActionDataAsset to Data/ folder for consistency
-- **Removed CoolantHazard**: Deleted actor that depended on old ability system
-- **Simplified ActionDataAsset**: Removed AbilityClass field and UAbilityBase references
-- **100% Unified System**: All 15 abilities now purely data-driven via UniversalAction
-
-### Previous Major Consolidation
-- **Unified Combat System**: Migrated all CombatComponent functionality to ActionManagerComponent
-- **Removed Legacy Components**: Deleted CombatComponent and DamageCalculator
-- **Cleaned DataAssets**: Removed old AbilityDataAsset and AttackDataAsset systems
-- **Simplified Damage**: Damage calculation now inline with clear multipliers (8x vulnerable, 0.6x blocked)
-
-### Previous Updates
-- **Input Blocking System**: Abilities now properly block all inputs during execution
-  - CombatStateNotify controls input enable/disable via animation
-  - No hardcoded timings - fully animation-driven
-  - Prevents ability spam and movement during attacks
-- **Code Cleanup**: Removed deprecated components and consolidated systems
-  - Deleted AnimationManagerComponent (replaced by notifies)
-  - Deleted HitboxComponent (replaced by AttackNotifyState)
-  - Consolidated 5 debug command files into single AtlasDebugCommands
-  - Removed all combat debug logs for cleaner output
-
-## Next Tasks
-- **PRIORITY**: Configure all 15 ability DataAssets in editor
-  - Set proper ActionType (MeleeAttack, etc)
-  - Configure damage/knockback/poise values
-  - Assign animation montages
-  - Set bCanBeInterrupted = false for attacks
-- Add safe interruption logic (combo windows, dash, block)
-- Implement P17-18 enemy archetypes
-- P21-22 Wife's Arm passive system
+## Console Commands
+```
+Atlas_AssignAction [Slot] [ActionTag]
+Atlas_ClearSlot [Slot]
+Atlas_SwapSlots [Slot1] [Slot2]
+Atlas_ListActions
+Atlas_ShowSlots
+```
 
 ## Debug Commands
 ```
 Atlas.DamageIntegrity [amount]
 Atlas.SetIntegrityPercent [percent]
 Atlas.ShowIntegrityStatus
-Atlas.ResetIntegrity
 Atlas.ToggleFocusMode
-Atlas.ShowFocusDebug
 ```
 
-## Documentation
-- `ARCHITECTURE_IMPROVEMENTS.md` - Latest refactoring details and testing checklist
-- `changelog.md` - Development history
+## DataAsset Configuration
+Required fields for each action:
+- `ActionType` - MeleeAttack, RangedAttack, etc.
+- `Damage/Knockback/Poise` - Combat values
+- `AnimationMontage` - Attack animation
+- `ActionDuration` - Total time
+- `bCanBeInterrupted` - Set false for attacks
+- `IntegrityCost` - Station damage
 
-## New DataAsset Fields (Must Configure)
-- `ActionDuration`: How long action takes
-- `MontagePlayRate`: Animation speed multiplier
-- `AttackWindupTime`: Time before damage
-- `AttackRecoveryTime`: Time after damage
-- `bCanBeInterrupted`: Can action be cancelled
-- `bAutoReleaseOnComplete`: Auto-end when timer expires
-- `bIsToggleAction`: Toggle on/off (e.g., Focus Mode)
-- `InputBufferWindow`: Action queueing window
+## Next Priority
+1. Configure all 15 DataAssets in editor
+2. Set proper damage/timing values
+3. Assign animation montages
+4. Test each ability
+
+## Rules
+- NO GAS - custom components only
+- Data-driven via DataAssets
+- Interface-based communication
+- No parry or camera lock
+
+## Documentation
+- `ARCHITECTURE_IMPROVEMENTS.md` - Technical details
+- `changelog.md` - Development history

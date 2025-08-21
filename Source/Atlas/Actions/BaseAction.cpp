@@ -66,7 +66,6 @@ void UBaseAction::OnActivate(AGameCharacterBase* Owner)
 	SetActionState(EActionState::Active);
 
 	// Cache component references for this activation
-	CachedCombatComponent = Owner->GetCombatComponent();
 	CachedHealthComponent = Owner->GetHealthComponent();
 	
 	// Safely get station integrity from game state
@@ -104,7 +103,6 @@ void UBaseAction::OnRelease()
 		SetActionState(EActionState::Idle);
 		
 		// Clear cached references
-		CachedCombatComponent = nullptr;
 		CachedHealthComponent = nullptr;
 		CachedStationIntegrity = nullptr;
 	}
@@ -123,7 +121,6 @@ void UBaseAction::OnInterrupted()
 		SetActionState(EActionState::Cooldown);
 		
 		// Clear cached references
-		CachedCombatComponent = nullptr;
 		CachedHealthComponent = nullptr;
 		CachedStationIntegrity = nullptr;
 	}
@@ -171,11 +168,6 @@ void UBaseAction::SetActionState(EActionState NewState)
 	}
 }
 
-UCombatComponent* UBaseAction::GetOwnerCombatComponent() const
-{
-	// DEPRECATED - use GetOwnerActionManagerComponent()
-	return nullptr;
-}
 
 UActionManagerComponent* UBaseAction::GetOwnerActionManagerComponent() const
 {

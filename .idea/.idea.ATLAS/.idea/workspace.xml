@@ -13,11 +13,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Interfaces/IBlockable.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Interfaces/ICombatInterface.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Interfaces/ICombatInterface.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Interfaces/IStaggerable.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,7 +35,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://2" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UnrealEditor/Inc/Atlas/UHT/ICombatInterface.gen.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -203,6 +207,7 @@
       <workItem from="1755775986125" duration="978000" />
       <workItem from="1755777000006" duration="1025000" />
       <workItem from="1755778062472" duration="536000" />
+      <workItem from="1755778835120" duration="1097000" />
     </task>
     <servers />
   </component>

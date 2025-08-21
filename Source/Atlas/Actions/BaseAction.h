@@ -72,9 +72,6 @@ protected:
 
 	// Helper functions for derived classes
 	UFUNCTION(BlueprintPure, Category = "Action")
-	class UCombatComponent* GetOwnerCombatComponent() const; // DEPRECATED
-	
-	UFUNCTION(BlueprintPure, Category = "Action")
 	class UActionManagerComponent* GetOwnerActionManagerComponent() const;
 
 	UFUNCTION(BlueprintPure, Category = "Action")

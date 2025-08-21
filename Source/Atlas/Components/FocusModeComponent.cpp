@@ -1,4 +1,5 @@
 #include "FocusModeComponent.h"
+#include "ActionManagerComponent.h"
 #include "../Interfaces/IInteractable.h"
 #include "../Core/AtlasGameplayTags.h"
 #include "../Characters/GameCharacterBase.h"
@@ -66,9 +67,9 @@ void UFocusModeComponent::StartFocusMode()
     bIsFocusModeActive = true;
     TimeSinceFocusStart = 0.0f;
     
-    if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+    if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        CombatComp->CombatStateTags.AddTag(FAtlasGameplayTags::Get().Action_FocusMode);
+        ActionManager->AddCombatStateTag(FAtlasGameplayTags::Get().Action_FocusMode);
     }
     
     OnFocusModeChanged.Broadcast(true);
@@ -88,9 +89,9 @@ void UFocusModeComponent::StopFocusMode()
     ClearFocusedTarget();
     PotentialTargets.Empty();
     
-    if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+    if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        CombatComp->CombatStateTags.RemoveTag(FAtlasGameplayTags::Get().Action_FocusMode);
+        ActionManager->RemoveCombatStateTag(FAtlasGameplayTags::Get().Action_FocusMode);
     }
     
     OnFocusModeChanged.Broadcast(false);

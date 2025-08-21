@@ -77,8 +77,4 @@ public:
 	virtual bool AssignActionToSlot_Implementation(FName SlotName, const FGameplayTag& ActionTag) override;
 	virtual void ClearActionSlot_Implementation(FName SlotName) override;
 	virtual UBaseAction* GetActionInSlot_Implementation(FName SlotName) const override;
-
-	protected:
-		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Actions, meta = (AllowPrivateAccess = "true"))
-		class UActionManagerComponent* ActionManagerComponent;
 };

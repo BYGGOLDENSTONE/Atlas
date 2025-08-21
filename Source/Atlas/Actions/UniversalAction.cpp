@@ -46,17 +46,9 @@ bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
 				if (ActionManager->IsAttacking())
 				{
 					// Check if we're in a combo window
-					if (UActionManagerComponent* ActionManager = Owner->FindComponentByClass<UActionManagerComponent>())
+					if (!ActionManager->IsComboWindowActive())
 					{
-						if (!ActionManager->IsComboWindowActive())
-						{
-							UE_LOG(LogTemp, Warning, TEXT("Cannot attack while already attacking (not in combo window)"));
-							return false;
-						}
-					}
-					else
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Cannot attack while already attacking"));
+						UE_LOG(LogTemp, Warning, TEXT("Cannot attack while already attacking (not in combo window)"));
 						return false;
 					}
 				}
@@ -64,7 +56,7 @@ bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
 		}
 		
 		// Also check if we're currently in any blocking state
-		if (UActionManagerComponent* ActionManager = Owner->GetCombatComponent())
+		if (UActionManagerComponent* ActionManager = Owner->GetActionManagerComponent())
 		{
 			// Can't start most actions while staggered
 			if (ActionManager->HasCombatStateTag(FGameplayTag::RequestGameplayTag("State.Staggered")))

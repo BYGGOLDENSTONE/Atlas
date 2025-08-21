@@ -1,5 +1,25 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-21 (Part 6) - Final CombatComponent Removal
+
+### Complete CombatComponent Elimination
+- **Removed All CombatComponent References**:
+  - Fixed compilation errors from UCombatComponent references
+  - Updated BaseAction to remove GetOwnerCombatComponent()
+  - Changed all component lookups to use ActionManagerComponent
+  - Fixed duplicate ActionManager variable declarations
+
+- **Component Updates**:
+  - VulnerabilityComponent: Uses ActionManagerComponent for state tags
+  - HealthComponent: Uses InterruptCurrentAction() instead of EndAttack()
+  - FocusModeComponent: Uses ActionManagerComponent for tag management
+  - UniversalAction: Fixed duplicate variable shadowing
+
+### Architecture Simplification
+- Single unified component (ActionManagerComponent) for all combat/actions
+- No more legacy component references
+- Clean interface-based communication throughout
+
 ## Session: 2025-01-21 (Part 5) - Interface Architecture Consolidation
 
 ### Interface System Cleanup

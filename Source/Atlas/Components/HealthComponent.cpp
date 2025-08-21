@@ -1,4 +1,5 @@
 #include "HealthComponent.h"
+#include "ActionManagerComponent.h"
 #include "GameFramework/Actor.h"
 #include "Engine/Engine.h"
 #include "TimerManager.h"
@@ -103,9 +104,9 @@ void UHealthComponent::ReviveWithHealth(float ReviveHealth)
     CurrentHealth = FMath::Clamp(ReviveHealth, 1.0f, MaxHealth);
     LastDamageInstigator = nullptr;
 
-    if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+    if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        CombatComp->CombatStateTags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dead")));
+        ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dead")));
     }
 
     OnRevived.Broadcast();
@@ -124,17 +125,15 @@ void UHealthComponent::HandleDeath(AActor* KilledBy)
     bIsDead = true;
     CurrentHealth = 0.0f;
 
-    if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+    if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        CombatComp->CombatStateTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dead")));
+        ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dead")));
         
-        if (CombatComp->IsBlocking())
+        // Interrupt any ongoing actions
+        ActionManager->InterruptCurrentAction();
+        if (ActionManager->IsBlocking())
         {
-            CombatComp->EndBlock();
-        }
-        if (CombatComp->IsAttacking())
-        {
-            CombatComp->EndAttack();
+            ActionManager->EndBlock();
         }
     }
 
@@ -191,17 +190,15 @@ void UHealthComponent::TakePoiseDamage(float PoiseDamage, AActor* DamageInstigat
         bIsStaggered = true;
         OnStaggered.Broadcast();
         
-        if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+        if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
         {
-            CombatComp->CombatStateTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
+            ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
             
-            if (CombatComp->IsAttacking())
+            // Interrupt any ongoing actions
+            ActionManager->InterruptCurrentAction();
+            if (ActionManager->IsBlocking())
             {
-                CombatComp->EndAttack();
-            }
-            if (CombatComp->IsBlocking())
-            {
-                CombatComp->EndBlock();
+                ActionManager->EndBlock();
             }
         }
         
@@ -298,9 +295,9 @@ void UHealthComponent::RecoverFromStagger()
 {
     bIsStaggered = false;
     
-    if (UCombatComponent* CombatComp = GetOwner()->FindComponentByClass<UCombatComponent>())
+    if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        CombatComp->CombatStateTags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
+        ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
     }
     
     OnStaggerRecovered.Broadcast();
