@@ -21,6 +21,8 @@ Atlas is a single-player, run-based dueling game on a decaying space station. Pl
 - **4 Core Interfaces**: ICombatInterface, IHealthInterface, IActionInterface, IInteractable
 - **Animation-Driven Combat**: Attack timing via notifies
 - **Basic Combat**: Attack, Block, Heavy Attack functional
+- **Parry System**: Perfect (0.2s) and late (0.1s) windows, counter-vulnerability
+- **Soul Attack**: 50 damage unblockable, bypasses station integrity
 - **Dash System**: 4-directional, 400 units, 2s cooldown, i-frames
 - **Vulnerability System**: 3-tier (Stunned 2x, Crippled 4x, Exposed 8x)
 - **Station Integrity**: Dual fail-state mechanic
@@ -28,10 +30,9 @@ Atlas is a single-player, run-based dueling game on a decaying space station. Pl
 - **Wall Impact**: Collision-based bonus damage
 - **Poise System**: 100 max, stagger at 0
 - **Data-Driven Design**: All values in ActionDataAssets
+- **Reward System Architecture**: RewardDataAsset, SlotManagerComponent, RoomDataAsset
 
 ### ⚠️ Needs Implementation (Per GDD)
-- **Parry System**: Was removed, GDD requires re-implementation
-- **Soul Attack**: Unblockable, no station damage
 - **Reward System**: 5 categories (Defense, Offense, Passives, Abilities, Interactables)
 - **Slot Management**: Limited slots, enhancement stacking
 - **Run Structure**: 5 rooms, randomized order
@@ -54,10 +55,10 @@ GameCharacterBase
 |--------|---------|------------|
 | Basic Attack | 5 damage | ✅ Correct |
 | Heavy Attack | 15 damage, 500 knockback | ✅ Correct |
-| Soul Attack | Not implemented | 50 damage, unblockable |
+| Soul Attack | 50 damage, unblockable | ✅ Correct |
 | Block | 40% reduction | ✅ Correct |
-| Parry | Removed | Needs re-implementation |
-| Vulnerability | 8x multiplier | ✅ Correct |
+| Parry | 100% (perfect), 50% (late) | ✅ Correct |
+| Vulnerability | 2x/4x/8x multiplier | ✅ Correct |
 | Poise | 100 max, 2s stagger | ✅ Correct |
 | Dash | 400 units, 2s cooldown | ✅ Correct |
 
@@ -78,11 +79,12 @@ Atlas.ToggleFocusMode
 ```
 
 ## Next Implementation Phase
-**Phase 1: Core Combat Polish & Parry System**
-1. Re-implement parry mechanic (required by GDD)
-2. Create Soul Attack ability
-3. Tune combat values to match GDD
-4. Begin reward system architecture
+**Phase 2: Complete Reward System & Run Structure**
+1. Implement reward equipping and slot management UI
+2. Create room progression system (5 rooms per run)
+3. Implement enemy AI scaling based on equipped slots
+4. Add reward persistence between runs
+5. Create initial reward pool with 10-15 rewards per category
 
 ## Technical Rules
 - **NO GAS**: Custom component system only

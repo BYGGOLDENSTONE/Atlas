@@ -190,6 +190,18 @@ public:
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "9. Special",
         meta = (EditCondition = "ActionType == EActionType::Special", EditConditionHides))
+    bool bBypassesStationDamage = false;  // Soul Attack doesn't damage station integrity
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "9. Special",
+        meta = (EditCondition = "ActionType == EActionType::Special", EditConditionHides))
+    bool bDrainsPlayerResource = false;  // Whether this action consumes a special resource
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "9. Special",
+        meta = (EditCondition = "ActionType == EActionType::Special && bDrainsPlayerResource", EditConditionHides, ClampMin = 0.0))
+    float ResourceCost = 0.0f;  // Amount of resource consumed
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "9. Special",
+        meta = (EditCondition = "ActionType == EActionType::Special", EditConditionHides))
     TMap<FName, float> CustomFloatParameters;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "9. Special",

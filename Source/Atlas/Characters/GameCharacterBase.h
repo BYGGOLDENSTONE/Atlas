@@ -58,6 +58,11 @@ public:
 	virtual void EndAttack_Implementation() override;
 	virtual bool StartBlock_Implementation() override;
 	virtual void EndBlock_Implementation() override;
+	virtual void SetParryState_Implementation(bool bParrying) override;
+	virtual bool IsParrying_Implementation() const override;
+	virtual void OnParrySuccess_Implementation(AActor* Attacker, bool bPerfectParry) override;
+	virtual bool IsInParryWindow_Implementation(bool& bIsPerfectWindow, bool& bIsLateWindow) const override;
+	virtual float GetParryDamageReduction_Implementation(bool bPerfectParry) const override;
 	
 	// IHealthInterface implementation
 	virtual float GetCurrentHealth_Implementation() const override;

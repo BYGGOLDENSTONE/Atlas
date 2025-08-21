@@ -30,7 +30,9 @@ protected:
 	// Action execution functions
 	void ExecuteDash();
 	void ExecuteBlock();
+	void ExecuteParry();
 	void ExecuteMeleeAttack();
+	void ExecuteSoulAttack();
 	void ExecuteGenericAbility();
 	void ExecuteFocusMode();
 	void ExecuteAreaEffect();
@@ -42,8 +44,10 @@ protected:
 
 	// State for different action types
 	bool bIsBlocking;
+	bool bIsParrying;
 	bool bIsDashing;
 	bool bIsAttacking;
+	bool bIsExecutingSoulAttack;
 	bool bIsChanneling;
 	
 	float ActionTimer;  // Universal timer for any timed actions

@@ -16,8 +16,10 @@
 UUniversalAction::UUniversalAction()
 {
 	bIsBlocking = false;
+	bIsParrying = false;
 	bIsDashing = false;
 	bIsAttacking = false;
+	bIsExecutingSoulAttack = false;
 	bIsChanneling = false;
 	ActionTimer = 0.0f;
 	ChannelProgress = 0.0f;
@@ -151,6 +153,26 @@ void UUniversalAction::OnRelease()
 		bIsBlocking = false;
 	}
 	
+	// Clean up parry state if still active
+	if (bIsParrying)
+	{
+		bIsParrying = false;
+		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
+		{
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Action.Parry"));
+		}
+	}
+	
+	// Clean up soul attack state if still active
+	if (bIsExecutingSoulAttack)
+	{
+		bIsExecutingSoulAttack = false;
+		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
+		{
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.SoulAttacking"));
+		}
+	}
+	
 	// Clean up attack state if still active
 	if (bIsAttacking)
 	{
@@ -213,8 +235,10 @@ void UUniversalAction::OnInterrupted()
 	}
 	
 	bIsBlocking = false;
+	bIsParrying = false;
 	bIsDashing = false;
 	bIsAttacking = false;
+	bIsExecutingSoulAttack = false;
 	bIsChanneling = false;
 	ActionTimer = 0.0f;
 	ChannelProgress = 0.0f;
@@ -267,6 +291,112 @@ void UUniversalAction::ExecuteBlock()
 			bIsBlocking = true;
 			UE_LOG(LogTemp, Log, TEXT("Started Blocking"));
 		}
+	}
+}
+
+void UUniversalAction::ExecuteParry()
+{
+	if (!ActionData || !CurrentOwner)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ExecuteParry: Missing ActionData or Owner"));
+		return;
+	}
+	
+	// Check if we can parry
+	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
+	{
+		if (UHealthComponent* HealthComp = GetOwnerHealthComponent())
+		{
+			if (HealthComp->IsStaggered())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ExecuteParry blocked: Staggered"));
+				return;
+			}
+		}
+		
+		// Set parry state IMMEDIATELY
+		bIsParrying = true;
+		
+		// The ParryNotifyState in the animation will handle the actual parry window timing
+		// and vulnerability application on successful parry
+		
+		// Play parry animation montage
+		if (ActionData->ActionMontage)
+		{
+			if (ACharacter* Character = Cast<ACharacter>(CurrentOwner))
+			{
+				float PlayRate = ActionData->MontagePlayRate > 0.0f ? ActionData->MontagePlayRate : 1.0f;
+				Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate);
+				UE_LOG(LogTemp, Log, TEXT("Started Parry"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No ActionMontage configured for Parry"));
+		}
+		
+		// Set safety timer for parry duration
+		ActionTimer = ActionData->ActionDuration > 0.0f ? ActionData->ActionDuration : 0.5f;
+	}
+}
+
+void UUniversalAction::ExecuteSoulAttack()
+{
+	if (!ActionData || !CurrentOwner)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ExecuteSoulAttack: Missing ActionData or Owner"));
+		return;
+	}
+	
+	// Soul attacks should not be interruptible
+	if (ActionData->bCanBeInterrupted)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("WARNING: Soul attack is marked as interruptible!"));
+	}
+	
+	// Check if we can perform soul attack
+	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
+	{
+		if (ActionManager->IsAttacking())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ExecuteSoulAttack blocked: Already attacking"));
+			return;
+		}
+		
+		if (UHealthComponent* HealthComp = GetOwnerHealthComponent())
+		{
+			if (HealthComp->IsStaggered())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ExecuteSoulAttack blocked: Staggered"));
+				return;
+			}
+		}
+		
+		// Set soul attack state
+		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.SoulAttacking"));
+		bIsExecutingSoulAttack = true;
+		bIsAttacking = true;
+		
+		// Store action data for damage processing
+		ActionManager->SetCurrentActionData(ActionData);
+		
+		// Play soul attack animation montage
+		if (ActionData->ActionMontage)
+		{
+			if (ACharacter* Character = Cast<ACharacter>(CurrentOwner))
+			{
+				float PlayRate = ActionData->MontagePlayRate > 0.0f ? ActionData->MontagePlayRate : 1.0f;
+				Character->PlayAnimMontage(ActionData->ActionMontage, PlayRate);
+				UE_LOG(LogTemp, Log, TEXT("Started Soul Attack - 50 unblockable damage"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No ActionMontage configured for Soul Attack"));
+		}
+		
+		// Set timer for soul attack duration
+		ActionTimer = ActionData->ActionDuration > 0.0f ? ActionData->ActionDuration : 1.5f;
 	}
 }
 
@@ -513,28 +643,33 @@ void UUniversalAction::ExecuteUtility()
 
 void UUniversalAction::InitializeExecutorMap()
 {
-	// Map action tags to their execution functions - using correct tag names
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Dash"), &UUniversalAction::ExecuteDash);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.Block"), &UUniversalAction::ExecuteBlock);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.BasicAttack"), &UUniversalAction::ExecuteMeleeAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.HeavyAttack"), &UUniversalAction::ExecuteMeleeAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.FocusMode"), &UUniversalAction::ExecuteFocusMode);
+	// Map action tags to their execution functions - using FName for safety
+	// Core actions that should exist
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Dash")), &UUniversalAction::ExecuteDash);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Block")), &UUniversalAction::ExecuteBlock);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.BasicAttack")), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.HeavyAttack")), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.FocusMode")), &UUniversalAction::ExecuteFocusMode);
 	
-	// Map area effect abilities
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.KineticPulse"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.SeismicStamp"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.LocalizedEMP"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.FloorDestabilizer"), &UUniversalAction::ExecuteAreaEffect);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.AirlockBreach"), &UUniversalAction::ExecuteAreaEffect);
+	// New actions - tags are now registered in AtlasGameplayTags
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Parry")), &UUniversalAction::ExecuteParry);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.SoulAttack")), &UUniversalAction::ExecuteSoulAttack);
 	
-	// Map ranged abilities
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.DebrisPull"), &UUniversalAction::ExecuteRangedAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.ImpactGauntlet"), &UUniversalAction::ExecuteRangedAttack);
+	// Map area effect abilities - using FName for safety
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.KineticPulse")), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.SeismicStamp")), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.LocalizedEMP")), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.FloorDestabilizer")), &UUniversalAction::ExecuteAreaEffect);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.AirlockBreach")), &UUniversalAction::ExecuteAreaEffect);
 	
-	// Map utility abilities
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.CoolantSpray"), &UUniversalAction::ExecuteUtility);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.SystemHack"), &UUniversalAction::ExecuteUtility);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag("Action.GravityAnchor"), &UUniversalAction::ExecuteUtility);
+	// Map ranged abilities - using FName for safety
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.DebrisPull")), &UUniversalAction::ExecuteRangedAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.ImpactGauntlet")), &UUniversalAction::ExecuteRangedAttack);
+	
+	// Map utility abilities - using FName for safety
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.CoolantSpray")), &UUniversalAction::ExecuteUtility);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.SystemHack")), &UUniversalAction::ExecuteUtility);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.GravityAnchor")), &UUniversalAction::ExecuteUtility);
 }
 
 void UUniversalAction::ExecuteActionByType()

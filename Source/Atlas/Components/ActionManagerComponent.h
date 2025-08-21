@@ -186,6 +186,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void EndBlock();
 	
+	// Parry System
+	UFUNCTION(BlueprintCallable, Category = "Combat|Parry")
+	void SetParryState(bool bParrying);
+	
+	UFUNCTION(BlueprintPure, Category = "Combat|Parry")
+	bool IsParrying() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Combat|Parry")
+	void OnParrySuccess(AActor* Attacker, bool bPerfectParry);
+	
+	UFUNCTION(BlueprintPure, Category = "Combat|Parry")
+	bool IsInParryWindow(bool& bIsPerfectWindow, bool& bIsLateWindow) const;
+	
+	UFUNCTION(BlueprintPure, Category = "Combat|Parry")
+	float GetParryDamageReduction(bool bPerfectParry) const;
+	
 	// Vulnerability
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyVulnerabilityWithIFrames(int32 Charges = 1, bool bGrantIFrames = false);
@@ -251,6 +267,12 @@ protected:
 	
 	// Combat timing
 	float LastCombatActionTime = 0.0f;
+	
+	// Parry state tracking
+	bool bIsParrying = false;
+	float ParryStartTime = 0.0f;
+	float PerfectParryWindow = 0.2f;  // Perfect parry window duration
+	float LateParryWindow = 0.1f;     // Late parry window after perfect
 	
 	// Component references
 	UPROPERTY()

@@ -153,6 +153,37 @@ void AGameCharacterBase::EndBlock_Implementation()
 	}
 }
 
+void AGameCharacterBase::SetParryState_Implementation(bool bParrying)
+{
+	if (ActionManagerComponent)
+	{
+		ActionManagerComponent->SetParryState(bParrying);
+	}
+}
+
+bool AGameCharacterBase::IsParrying_Implementation() const
+{
+	return ActionManagerComponent ? ActionManagerComponent->IsParrying() : false;
+}
+
+void AGameCharacterBase::OnParrySuccess_Implementation(AActor* Attacker, bool bPerfectParry)
+{
+	if (ActionManagerComponent)
+	{
+		ActionManagerComponent->OnParrySuccess(Attacker, bPerfectParry);
+	}
+}
+
+bool AGameCharacterBase::IsInParryWindow_Implementation(bool& bIsPerfectWindow, bool& bIsLateWindow) const
+{
+	return ActionManagerComponent ? ActionManagerComponent->IsInParryWindow(bIsPerfectWindow, bIsLateWindow) : false;
+}
+
+float AGameCharacterBase::GetParryDamageReduction_Implementation(bool bPerfectParry) const
+{
+	return ActionManagerComponent ? ActionManagerComponent->GetParryDamageReduction(bPerfectParry) : 0.0f;
+}
+
 // IHealthInterface Implementation
 float AGameCharacterBase::GetCurrentHealth_Implementation() const
 {

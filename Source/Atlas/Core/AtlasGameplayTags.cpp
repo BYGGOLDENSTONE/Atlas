@@ -7,10 +7,12 @@ void FAtlasGameplayTags::InitializeNativeTags()
 {
     UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
 
-    // ===== ACTIONS (15 abilities) =====
+    // ===== ACTIONS (17 abilities total with new ones) =====
     GameplayTags.Action_BasicAttack = Manager.AddNativeGameplayTag(FName("Action.BasicAttack"), FString("Basic Attack"));
     GameplayTags.Action_HeavyAttack = Manager.AddNativeGameplayTag(FName("Action.HeavyAttack"), FString("Heavy Attack"));
     GameplayTags.Action_Block = Manager.AddNativeGameplayTag(FName("Action.Block"), FString("Block"));
+    GameplayTags.Action_Parry = Manager.AddNativeGameplayTag(FName("Action.Parry"), FString("Parry - Perfect timing defense"));
+    GameplayTags.Action_SoulAttack = Manager.AddNativeGameplayTag(FName("Action.SoulAttack"), FString("Soul Attack - 50 unblockable damage"));
     GameplayTags.Action_Dash = Manager.AddNativeGameplayTag(FName("Action.Dash"), FString("Dash"));
     GameplayTags.Action_FocusMode = Manager.AddNativeGameplayTag(FName("Action.FocusMode"), FString("Focus Mode"));
     GameplayTags.Action_KineticPulse = Manager.AddNativeGameplayTag(FName("Action.KineticPulse"), FString("Kinetic Pulse"));
@@ -32,6 +34,9 @@ void FAtlasGameplayTags::InitializeNativeTags()
     GameplayTags.State_Staggered = Manager.AddNativeGameplayTag(FName("State.Staggered"), FString("Staggered"));
     GameplayTags.State_Dead = Manager.AddNativeGameplayTag(FName("State.Dead"), FString("Dead"));
     GameplayTags.State_IFrames = Manager.AddNativeGameplayTag(FName("State.IFrames"), FString("Invincible"));
+    
+    // Combat substates
+    GameplayTags.Combat_State_SoulAttacking = Manager.AddNativeGameplayTag(FName("Combat.State.SoulAttacking"), FString("Performing Soul Attack"));
 
     // ===== ANIMATION =====
     GameplayTags.Anim_HitLight = Manager.AddNativeGameplayTag(FName("Anim.HitLight"), FString("Light Hit Reaction"));

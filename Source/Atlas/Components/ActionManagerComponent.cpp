@@ -548,6 +548,77 @@ void UActionManagerComponent::EndBlock()
 	OnBlockEnded.Broadcast();
 }
 
+void UActionManagerComponent::SetParryState(bool bParrying)
+{
+	bIsParrying = bParrying;
+	
+	if (bParrying)
+	{
+		// Record parry start time for window tracking
+		ParryStartTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+		AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Action.Parry")));
+		UE_LOG(LogTemp, Log, TEXT("Parry state activated"));
+	}
+	else
+	{
+		RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Action.Parry")));
+		ParryStartTime = 0.0f;
+		UE_LOG(LogTemp, Log, TEXT("Parry state deactivated"));
+	}
+}
+
+bool UActionManagerComponent::IsParrying() const
+{
+	return bIsParrying;
+}
+
+void UActionManagerComponent::OnParrySuccess(AActor* Attacker, bool bPerfectParry)
+{
+	if (!Attacker)
+		return;
+	
+	if (bPerfectParry)
+	{
+		// Apply vulnerability to attacker on perfect parry
+		if (AGameCharacterBase* AttackerChar = Cast<AGameCharacterBase>(Attacker))
+		{
+			if (UVulnerabilityComponent* AttackerVuln = AttackerChar->FindComponentByClass<UVulnerabilityComponent>())
+			{
+				// Apply Stunned tier vulnerability
+				AttackerVuln->ApplyVulnerabilityTier(EVulnerabilityTier::Stunned);
+				UE_LOG(LogTemp, Log, TEXT("Perfect parry! Attacker stunned."));
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Late parry - 50%% damage reduction"));
+	}
+}
+
+bool UActionManagerComponent::IsInParryWindow(bool& bIsPerfectWindow, bool& bIsLateWindow) const
+{
+	if (!bIsParrying || ParryStartTime <= 0.0f)
+	{
+		bIsPerfectWindow = false;
+		bIsLateWindow = false;
+		return false;
+	}
+	
+	float CurrentTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	float TimeInParry = CurrentTime - ParryStartTime;
+	
+	bIsPerfectWindow = TimeInParry <= PerfectParryWindow;
+	bIsLateWindow = !bIsPerfectWindow && TimeInParry <= (PerfectParryWindow + LateParryWindow);
+	
+	return bIsPerfectWindow || bIsLateWindow;
+}
+
+float UActionManagerComponent::GetParryDamageReduction(bool bPerfectParry) const
+{
+	return bPerfectParry ? 1.0f : 0.5f;  // 100% reduction for perfect, 50% for late
+}
+
 void UActionManagerComponent::ApplyVulnerabilityWithIFrames(int32 Charges, bool bGrantIFrames)
 {
 	if (VulnerabilityComponent)
@@ -583,15 +654,47 @@ void UActionManagerComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCha
 		// Check target's state for damage modifiers
 		bool bIsTargetBlocking = false;
 		bool bIsTargetVulnerable = false;
+		bool bIsTargetParrying = false;
+		bool bIsPerfectParry = false;
+		bool bIsLateParry = false;
 		
 		if (UActionManagerComponent* TargetActionManager = HitCharacter->FindComponentByClass<UActionManagerComponent>())
 		{
 			bIsTargetBlocking = TargetActionManager->IsBlocking();
 			bIsTargetVulnerable = TargetActionManager->IsVulnerable();
+			bIsTargetParrying = TargetActionManager->IsParrying();
+			
+			// Check parry window timing
+			if (bIsTargetParrying)
+			{
+				TargetActionManager->IsInParryWindow(bIsPerfectParry, bIsLateParry);
+				
+				if (bIsPerfectParry || bIsLateParry)
+				{
+					// Successful parry - trigger parry success event
+					TargetActionManager->OnParrySuccess(GetOwner(), bIsPerfectParry);
+				}
+			}
 		}
 		
-		// Calculate and apply damage
+		// Calculate damage
 		float FinalDamage = CalculateFinalDamage(CurrentActionData->MeleeDamage, bIsTargetBlocking, bIsTargetVulnerable);
+		
+		// Apply parry damage reduction if parrying
+		if (bIsTargetParrying && (bIsPerfectParry || bIsLateParry))
+		{
+			float ParryReduction = bIsPerfectParry ? 1.0f : 0.5f;  // 100% or 50% reduction
+			FinalDamage *= (1.0f - ParryReduction);
+			
+			// Check if attack is unblockable (Soul Attack)
+			if (CurrentActionData && CurrentActionData->bIsUnblockable)
+			{
+				// Unblockable attacks bypass parry
+				FinalDamage = CurrentActionData->MeleeDamage;
+				UE_LOG(LogTemp, Warning, TEXT("Unblockable attack bypasses parry!"));
+			}
+		}
+		
 		TargetHealth->TakeDamage(FinalDamage, GetOwner());
 		
 		// Apply poise damage
@@ -608,8 +711,16 @@ void UActionManagerComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCha
 		}
 		
 		// Apply station integrity cost for high-risk abilities
+		// Check if this is a soul attack that bypasses station damage
+		bool bShouldDamageStation = true;
+		if (CurrentActionData->ActionType == EActionType::Special && CurrentActionData->bBypassesStationDamage)
+		{
+			bShouldDamageStation = false;
+			UE_LOG(LogTemp, Log, TEXT("Soul Attack bypasses station integrity damage"));
+		}
+		
 		AAtlasGameState* GameState = AAtlasGameState::GetAtlasGameState(GetWorld());
-		if (GameState && GameState->StationIntegrityComponent && CurrentActionData->IntegrityCost > 0.0f)
+		if (bShouldDamageStation && GameState && GameState->StationIntegrityComponent && CurrentActionData->IntegrityCost > 0.0f)
 		{
 			UStationIntegrityComponent* IntegrityComp = GameState->StationIntegrityComponent;
 			IntegrityComp->ApplyAbilityIntegrityCost(CurrentActionData->ActionTag, GetOwner());

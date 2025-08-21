@@ -89,6 +89,27 @@ public:
 	void OnBlockedAttack(const FGameplayTag& AttackTag, float DamageBlocked, AActor* Attacker);
 	virtual void OnBlockedAttack_Implementation(const FGameplayTag& AttackTag, float DamageBlocked, AActor* Attacker) {}
 	
+	// ========== Parry System ==========
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat|Parry")
+	void SetParryState(bool bParrying);
+	virtual void SetParryState_Implementation(bool bParrying) {}
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat|Parry")
+	bool IsParrying() const;
+	virtual bool IsParrying_Implementation() const { return false; }
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat|Parry")
+	void OnParrySuccess(AActor* Attacker, bool bPerfectParry);
+	virtual void OnParrySuccess_Implementation(AActor* Attacker, bool bPerfectParry) {}
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat|Parry")
+	bool IsInParryWindow(bool& bIsPerfectWindow, bool& bIsLateWindow) const;
+	virtual bool IsInParryWindow_Implementation(bool& bIsPerfectWindow, bool& bIsLateWindow) const { return false; }
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat|Parry")
+	float GetParryDamageReduction(bool bPerfectParry) const;
+	virtual float GetParryDamageReduction_Implementation(bool bPerfectParry) const { return bPerfectParry ? 1.0f : 0.5f; }
+	
 	// ========== Vulnerability System ==========
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat|Vulnerability")
 	void ApplyVulnerability(int32 Charges, float Duration);

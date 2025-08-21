@@ -24,10 +24,12 @@ public:
     // All assignable to slots except FocusMode (Q key only)
     // ========================================
     
-    // Core Combat (3)
+    // Core Combat (5)
     FGameplayTag Action_BasicAttack;      // Light attack - low damage, fast
     FGameplayTag Action_HeavyAttack;      // Heavy attack - high damage, slow  
     FGameplayTag Action_Block;            // Defensive stance - reduces damage
+    FGameplayTag Action_Parry;            // Perfect timing defense - counters attacks
+    FGameplayTag Action_SoulAttack;       // Unblockable special - 50 damage, no station damage
     
     // Movement (1)
     FGameplayTag Action_Dash;             // Quick dodge with i-frames
@@ -58,6 +60,9 @@ public:
     FGameplayTag State_Staggered;         // Poise broken, stunned
     FGameplayTag State_Dead;              // Character defeated
     FGameplayTag State_IFrames;           // Invincibility frames
+    
+    // Combat substates
+    FGameplayTag Combat_State_SoulAttacking; // Performing soul attack
 
     // ========================================
     // ANIMATION EVENTS
