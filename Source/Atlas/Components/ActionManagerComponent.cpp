@@ -1,6 +1,6 @@
 #include "ActionManagerComponent.h"
 #include "../Actions/BaseAction.h"
-#include "../DataAssets/ActionDataAsset.h"
+#include "../Data/ActionDataAsset.h"
 #include "../Characters/GameCharacterBase.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Components/HealthComponent.h"

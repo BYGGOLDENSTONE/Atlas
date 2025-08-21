@@ -6,7 +6,6 @@
 #include "ActionDataAsset.generated.h"
 
 class UBaseAction;
-class UAbilityBase;
 
 UENUM(BlueprintType)
 enum class EActionType : uint8
@@ -189,10 +188,6 @@ public:
     // SPECIAL CONFIG (Visible when ActionType = Special)
     // ========================================
     
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "9. Special",
-        meta = (EditCondition = "ActionType == EActionType::Special", EditConditionHides))
-    TSubclassOf<UAbilityBase> AbilityClass;
-
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "9. Special",
         meta = (EditCondition = "ActionType == EActionType::Special", EditConditionHides))
     TMap<FName, float> CustomFloatParameters;

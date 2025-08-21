@@ -94,7 +94,14 @@ Atlas_ResetSlots                       # Reset to defaults
 **IMPORTANT**: Set `bCanBeInterrupted = false` in attack DataAssets to prevent spam
 
 ## Recent Updates (2025-01-21)
-### Major Consolidation
+### Complete Legacy Code Removal
+- **Removed Abilities Folder**: Deleted all legacy ability classes (AbilityBase, CoolantSprayAbility, DebrisPullAbility, KineticPulseAbility, SystemHackAbility)
+- **Cleaned Data Structure**: Moved ActionDataAsset to Data/ folder for consistency
+- **Removed CoolantHazard**: Deleted actor that depended on old ability system
+- **Simplified ActionDataAsset**: Removed AbilityClass field and UAbilityBase references
+- **100% Unified System**: All 15 abilities now purely data-driven via UniversalAction
+
+### Previous Major Consolidation
 - **Unified Combat System**: Migrated all CombatComponent functionality to ActionManagerComponent
 - **Removed Legacy Components**: Deleted CombatComponent and DamageCalculator
 - **Cleaned DataAssets**: Removed old AbilityDataAsset and AttackDataAsset systems

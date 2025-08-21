@@ -5,7 +5,7 @@
 #include "../Components/ActionManagerComponent.h"
 #include "../Components/StationIntegrityComponent.h"
 #include "../Core/AtlasGameplayTags.h"
-#include "../DataAssets/ActionDataAsset.h"
+#include "../Data/ActionDataAsset.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"

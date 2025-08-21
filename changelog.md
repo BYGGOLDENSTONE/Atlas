@@ -1,5 +1,39 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-21 (Part 4) - Complete Legacy Ability System Removal
+
+### Major Cleanup
+- **Removed Entire Legacy Ability System**:
+  - Deleted Abilities/ folder containing all legacy classes
+  - Removed AbilityBase base class
+  - Deleted CoolantSprayAbility, DebrisPullAbility, KineticPulseAbility, SystemHackAbility
+  - Removed CoolantHazard actor (only used by old ability system)
+
+- **Cleaned Project Structure**:
+  - Moved ActionDataAsset from DataAssets/ to Data/ folder
+  - Removed duplicate DataAssets folder
+  - All data assets now consolidated in Data/ folder
+  - Updated all #include paths
+
+- **Simplified ActionDataAsset**:
+  - Removed UAbilityBase forward declaration
+  - Deleted AbilityClass field (was for legacy Special type)
+  - Pure data-driven configuration remains
+
+### Files Deleted (12 total)
+- Abilities/AbilityBase.h/cpp
+- Abilities/CoolantSprayAbility.h/cpp  
+- Abilities/DebrisPullAbility.h/cpp
+- Abilities/KineticPulseAbility.h/cpp
+- Abilities/SystemHackAbility.h/cpp
+- Actors/CoolantHazard.h/cpp
+- DataAssets/ folder (duplicate)
+
+### Result
+- **100% Unified System**: All 15 abilities handled by UniversalAction
+- **Cleaner codebase**: No more legacy components or unused classes
+- **Better organization**: Consistent folder structure
+
 ## Session: 2025-01-21 (Part 3) - Component Consolidation & Legacy Cleanup
 
 ### Major Architectural Changes

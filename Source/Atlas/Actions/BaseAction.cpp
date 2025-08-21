@@ -3,7 +3,7 @@
 #include "../Components/ActionManagerComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/StationIntegrityComponent.h"
-#include "../DataAssets/ActionDataAsset.h"
+#include "../Data/ActionDataAsset.h"
 #include "../Interfaces/ICombatInterface.h"
 #include "../Interfaces/IHealthInterface.h"
 #include "GameFramework/GameStateBase.h"
