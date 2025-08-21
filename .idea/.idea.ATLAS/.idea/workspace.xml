@@ -12,20 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/ActionDataAsset.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/ActionDataAsset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Interfaces/ICombatInterface.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Interfaces/ICombatInterface.h" afterDir="false" />
-    </list>
+    <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -250,7 +237,7 @@
       <workItem from="1755777000006" duration="1025000" />
       <workItem from="1755778062472" duration="536000" />
       <workItem from="1755778835120" duration="1667000" />
-      <workItem from="1755790077162" duration="1381000" />
+      <workItem from="1755790077162" duration="1778000" />
     </task>
     <servers />
   </component>
