@@ -8,7 +8,6 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
-#include "CombatComponent.h"
 #include "Engine/OverlapResult.h"
 
 UFocusModeComponent::UFocusModeComponent()

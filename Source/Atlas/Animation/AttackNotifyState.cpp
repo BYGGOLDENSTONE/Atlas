@@ -1,6 +1,6 @@
 #include "AttackNotifyState.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "../Components/CombatComponent.h"
+#include "../Components/ActionManagerComponent.h"
 #include "../Characters/GameCharacterBase.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
@@ -59,8 +59,8 @@ void UAttackNotifyState::PerformHitDetection(USkeletalMeshComponent* MeshComp)
         return;
     }
 
-    UCombatComponent* CombatComp = Character->GetCombatComponent();
-    if (!CombatComp)
+    UActionManagerComponent* ActionManager = Character->GetActionManagerComponent();
+    if (!ActionManager)
     {
         return;
     }
@@ -101,7 +101,7 @@ void UAttackNotifyState::PerformHitDetection(USkeletalMeshComponent* MeshComp)
                         if (HitCharacter != Character)
                         {
                             AlreadyHitActors.AddUnique(HitActor);
-                            CombatComp->ProcessHitFromAnimation(HitCharacter);
+                            ActionManager->ProcessHitFromAnimation(HitCharacter);
                         }
                     }
                 }

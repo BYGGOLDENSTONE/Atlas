@@ -3,7 +3,6 @@
 #include "../Characters/EnemyCharacter.h"
 #include "../Characters/GameCharacterBase.h"
 #include "../Characters/PlayerCharacter.h"
-#include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"

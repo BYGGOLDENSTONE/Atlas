@@ -1,6 +1,6 @@
 #include "BaseAction.h"
 #include "../Characters/GameCharacterBase.h"
-#include "../Components/CombatComponent.h"
+#include "../Components/ActionManagerComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/StationIntegrityComponent.h"
 #include "../DataAssets/ActionDataAsset.h"
@@ -16,7 +16,6 @@ UBaseAction::UBaseAction()
 	CurrentState = EActionState::Idle;
 	CurrentOwner = nullptr;
 	ActionData = nullptr;
-	CachedCombatComponent = nullptr;
 	CachedHealthComponent = nullptr;
 	CachedStationIntegrity = nullptr;
 }
@@ -174,14 +173,15 @@ void UBaseAction::SetActionState(EActionState NewState)
 
 UCombatComponent* UBaseAction::GetOwnerCombatComponent() const
 {
-	// Try cached reference first, then get from owner
-	if (CachedCombatComponent)
-	{
-		return CachedCombatComponent;
-	}
+	// DEPRECATED - use GetOwnerActionManagerComponent()
+	return nullptr;
+}
+
+UActionManagerComponent* UBaseAction::GetOwnerActionManagerComponent() const
+{
 	if (CurrentOwner)
 	{
-		return CurrentOwner->GetCombatComponent();
+		return CurrentOwner->GetActionManagerComponent();
 	}
 	return nullptr;
 }

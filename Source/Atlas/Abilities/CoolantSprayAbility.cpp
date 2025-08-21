@@ -2,7 +2,7 @@
 #include "GameFramework/Character.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
-#include "../Data/CoolantSprayDataAsset.h"
+// CoolantSprayDataAsset removed - use ActionDataAsset
 #include "../Actors/CoolantHazard.h"
 #include "Kismet/GameplayStatics.h"
 

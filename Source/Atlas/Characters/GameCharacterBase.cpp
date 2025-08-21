@@ -3,7 +3,6 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/ActionManagerComponent.h"
 #include "../Actions/BaseAction.h"
@@ -36,7 +35,6 @@ AGameCharacterBase::AGameCharacterBase()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	ActionManagerComponent = CreateDefaultSubobject<UActionManagerComponent>(TEXT("ActionManagerComponent"));
 }
@@ -59,105 +57,99 @@ void AGameCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 // ICombatInterface Implementation
 bool AGameCharacterBase::IsInCombat_Implementation() const
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		return CombatComponent->IsInCombat();
+		return ActionManagerComponent->IsInCombat();
 	}
 	return false;
 }
 
 bool AGameCharacterBase::IsAttacking_Implementation() const
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		return CombatComponent->IsAttacking();
+		return ActionManagerComponent->IsAttacking();
 	}
 	return false;
 }
 
 bool AGameCharacterBase::IsBlocking_Implementation() const
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		return CombatComponent->IsBlocking();
+		return ActionManagerComponent->IsBlocking();
 	}
 	return false;
 }
 
 bool AGameCharacterBase::IsVulnerable_Implementation() const
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		return CombatComponent->IsVulnerable();
+		return ActionManagerComponent->IsVulnerable();
 	}
 	return false;
 }
 
 bool AGameCharacterBase::HasIFrames_Implementation() const
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		return CombatComponent->HasIFrames();
+		return ActionManagerComponent->HasIFrames();
 	}
 	return false;
 }
 
 void AGameCharacterBase::AddCombatStateTag_Implementation(const FGameplayTag& Tag)
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		CombatComponent->AddCombatStateTag(Tag);
+		ActionManagerComponent->AddCombatStateTag(Tag);
 	}
 }
 
 void AGameCharacterBase::RemoveCombatStateTag_Implementation(const FGameplayTag& Tag)
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		CombatComponent->RemoveCombatStateTag(Tag);
+		ActionManagerComponent->RemoveCombatStateTag(Tag);
 	}
 }
 
 bool AGameCharacterBase::HasCombatStateTag_Implementation(const FGameplayTag& Tag) const
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		return CombatComponent->HasCombatStateTag(Tag);
+		return ActionManagerComponent->HasCombatStateTag(Tag);
 	}
 	return false;
 }
 
 bool AGameCharacterBase::StartAttack_Implementation(const FGameplayTag& AttackTag)
 {
-	if (CombatComponent)
-	{
-		return CombatComponent->StartAttack(AttackTag);
-	}
+	// Deprecated - attacks are handled through action slots now
 	return false;
 }
 
 void AGameCharacterBase::EndAttack_Implementation()
 {
-	if (CombatComponent)
-	{
-		CombatComponent->EndAttack();
-	}
+	// Deprecated - attacks are handled through action slots now
 }
 
 bool AGameCharacterBase::StartBlock_Implementation()
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		return CombatComponent->StartBlock();
+		return ActionManagerComponent->StartBlock();
 	}
 	return false;
 }
 
 void AGameCharacterBase::EndBlock_Implementation()
 {
-	if (CombatComponent)
+	if (ActionManagerComponent)
 	{
-		CombatComponent->EndBlock();
+		ActionManagerComponent->EndBlock();
 	}
 }
 

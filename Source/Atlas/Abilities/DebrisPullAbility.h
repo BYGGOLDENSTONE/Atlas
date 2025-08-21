@@ -71,8 +71,7 @@ private:
 	bool IsValidDebrisObject(AActor* Actor, UPrimitiveComponent* Component) const;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debris Pull")
-	class UDebrisPullDataAsset* PullDataAsset;
+	// DataAsset removed - use ActionDataAsset system instead
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debris Pull", meta = (EditCondition = "!PullDataAsset"))
 	FDebrisPullConfig DefaultConfig;

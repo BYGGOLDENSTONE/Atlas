@@ -1,6 +1,5 @@
 #include "ComboWindowNotifyState.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "../Components/CombatComponent.h"
 #include "../Components/ActionManagerComponent.h"
 #include "../Characters/GameCharacterBase.h"
 

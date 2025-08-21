@@ -51,8 +51,7 @@ private:
 	void SpawnHazardZone(const FVector& Location);
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Coolant Spray")
-	class UCoolantSprayDataAsset* SprayDataAsset;
+	// DataAsset removed - use ActionDataAsset system instead
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Coolant Spray", meta = (EditCondition = "!SprayDataAsset"))
 	FCoolantSprayConfig DefaultConfig;

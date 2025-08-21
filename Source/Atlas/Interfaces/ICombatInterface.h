@@ -6,8 +6,6 @@
 #include "ICombatInterface.generated.h"
 
 // Forward declarations
-struct FDamageInfo;
-class UAttackDataAsset;
 
 UINTERFACE(MinimalAPI, Blueprintable)
 class UCombatInterface : public UInterface

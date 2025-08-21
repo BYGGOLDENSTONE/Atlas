@@ -14,34 +14,46 @@
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_BasicAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_BasicAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Heavy_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Heavy_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/animation/AM_Jab_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/enemy/BY_EnemyCombat.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/enemy/BY_EnemyCombat.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_CatchSpecial.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_CatchSpecial.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_DefendBlock.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_MeleeAttack.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_MeleeAttack.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SimpleAttack.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SimpleAttack.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AI/Tasks/BTTask_SoulAttack.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/CoolantSprayAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/CoolantSprayAbility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/CoolantSprayAbility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/CoolantSprayAbility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/DebrisPullAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/DebrisPullAbility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/DebrisPullAbility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/DebrisPullAbility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/KineticPulseAbility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Abilities/SystemHackAbility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/AttackNotify.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/AttackNotify.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/AttackNotifyState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/AttackNotifyState.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/CombatStateNotify.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/CombatStateNotify.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/ComboWindowNotifyState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/ComboWindowNotifyState.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Atlas.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Atlas.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/AnimationManagerComponent.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/AnimationManagerComponent.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HitboxComponent.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HitboxComponent.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/DebugCommandsDataAsset.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/DebugCommandsDataAsset.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/FocusModeDebugCommands.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/StationIntegrityDebugCommands.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/StationIntegrityDebugCommands.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/VulnerabilityDebugCommands.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/VulnerabilityDebugCommands.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/CombatComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/DamageCalculator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/AbilityDataAsset.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/AttackDataAsset.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/AttackDataAsset.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/CoolantSprayDataAsset.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/DebrisPullDataAsset.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/KineticPulseDataAsset.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/SystemHackDataAsset.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Interfaces/ICombatInterface.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Interfaces/ICombatInterface.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -223,6 +235,7 @@
       <workItem from="1755721371106" duration="4694000" />
       <workItem from="1755765399499" duration="4433000" />
       <workItem from="1755770461947" duration="2408000" />
+      <workItem from="1755773608444" duration="1982000" />
     </task>
     <servers />
   </component>

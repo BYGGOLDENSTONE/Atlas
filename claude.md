@@ -38,20 +38,21 @@ Atlas_ResetSlots                       # Reset to defaults
 - **Knockback**: Direction-based with wall/floor impact detection
 
 ## Key Components
+- `ActionManagerComponent`: Unified component managing all actions, combat states, and damage calculation
 - `UniversalAction`: Handles all action types via function map routing (O(1) lookup)
-- `ActionManagerComponent`: Manages 5 action slots
 - `ActionDataAsset`: Fully data-driven config (timing, behavior, interrupts)
 - `HealthComponent`: Health + poise management
-- `CombatComponent`: Legacy combat (migrate remaining to UniversalAction)
-- `DamageCalculator`: Centralized damage math
 - `StationIntegrityComponent`: Station health tracking
+- `VulnerabilityComponent`: Manages vulnerability tiers and i-frames
 
-## Architecture (Latest Refactor)
+## Architecture (Latest Refactor - 2025-01-21)
+- **Unified Component System**: ActionManagerComponent handles all combat/action logic
 - **Function Map Routing**: Replaced if/else chains with efficient map lookup
 - **Interface Layer**: ICombatInterface, IHealthInterface, IActionInterface
 - **No Circular Dependencies**: Components communicate via interfaces
 - **Data-Driven Everything**: All timings, durations, behaviors in DataAssets
-- **Unified Timer**: Single ActionTimer replaces multiple timer variables
+- **Simplified Damage Calculation**: Inline damage/knockback logic (no separate calculator)
+- **Removed Legacy Systems**: CombatComponent and DamageCalculator deleted
 
 ## Required DataAssets (20 Total)
 ### Actions (15) - in Content/Data/Actions/
@@ -60,8 +61,8 @@ Atlas_ResetSlots                       # Reset to defaults
 - FloorDestabilizer, ImpactGauntlet, LocalizedEMP
 - SeismicStamp, GravityAnchor, AirlockBreach
 
-### System (5) - Various locations
-- CombatRules, AttackData_Jab/Heavy (AI), StationIntegrity, DebugCommands
+### System (3) - Various locations
+- CombatRules, StationIntegrity, DebugCommands
 
 ## Development Rules
 - NO GAS - custom component system
@@ -93,6 +94,13 @@ Atlas_ResetSlots                       # Reset to defaults
 **IMPORTANT**: Set `bCanBeInterrupted = false` in attack DataAssets to prevent spam
 
 ## Recent Updates (2025-01-21)
+### Major Consolidation
+- **Unified Combat System**: Migrated all CombatComponent functionality to ActionManagerComponent
+- **Removed Legacy Components**: Deleted CombatComponent and DamageCalculator
+- **Cleaned DataAssets**: Removed old AbilityDataAsset and AttackDataAsset systems
+- **Simplified Damage**: Damage calculation now inline with clear multipliers (8x vulnerable, 0.6x blocked)
+
+### Previous Updates
 - **Input Blocking System**: Abilities now properly block all inputs during execution
   - CombatStateNotify controls input enable/disable via animation
   - No hardcoded timings - fully animation-driven

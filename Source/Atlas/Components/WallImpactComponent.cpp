@@ -1,5 +1,4 @@
 #include "WallImpactComponent.h"
-#include "CombatComponent.h"
 #include "HealthComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"

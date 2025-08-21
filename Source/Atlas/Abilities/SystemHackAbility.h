@@ -58,8 +58,7 @@ private:
 	void CancelHack();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "System Hack")
-	class USystemHackDataAsset* HackDataAsset;
+	// DataAsset removed - use ActionDataAsset system instead
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "System Hack", meta = (EditCondition = "!HackDataAsset"))
 	FSystemHackConfig DefaultConfig;

@@ -6,9 +6,7 @@
 #include "Engine/OverlapResult.h"
 #include "DrawDebugHelpers.h"
 #include "../Components/HealthComponent.h"
-#include "../Components/CombatComponent.h"
-#include "../Components/DamageCalculator.h"
-#include "../Data/KineticPulseDataAsset.h"
+// KineticPulseDataAsset removed - use ActionDataAsset
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -25,9 +23,6 @@ UKineticPulseAbility::UKineticPulseAbility()
 void UKineticPulseAbility::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Create our own DamageCalculator instance
-	DamageCalculator = NewObject<UDamageCalculator>(this);
 }
 
 void UKineticPulseAbility::ExecuteAbility()
@@ -116,7 +111,7 @@ bool UKineticPulseAbility::CheckAbilitySpecificConditions() const
 
 void UKineticPulseAbility::ApplyPulseToActor(AActor* Target, const FVector& PulseOrigin)
 {
-	if (!Target || !DamageCalculator)
+	if (!Target)
 	{
 		return;
 	}

@@ -50,15 +50,11 @@ private:
 	FVector CalculatePulseDirection(const FVector& TargetLocation, const FVector& PulseOrigin) const;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kinetic Pulse")
-	class UKineticPulseDataAsset* PulseDataAsset;
+	// DataAsset removed - use ActionDataAsset system instead
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kinetic Pulse", meta = (EditCondition = "!PulseDataAsset"))
 	FKineticPulseConfig DefaultConfig;
 
 private:
 	FKineticPulseConfig GetPulseConfig() const;
-
-	UPROPERTY()
-	class UDamageCalculator* DamageCalculator;
 };

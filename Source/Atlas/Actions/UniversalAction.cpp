@@ -1,6 +1,6 @@
 #include "UniversalAction.h"
 #include "../Characters/GameCharacterBase.h"
-#include "../Components/CombatComponent.h"
+#include "../Components/ActionManagerComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/ActionManagerComponent.h"
 #include "../Components/StationIntegrityComponent.h"
@@ -41,9 +41,9 @@ bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
 		    ActionData->ActionType == EActionType::RangedAttack)
 		{
 			// Don't allow attack if already attacking (unless in combo window)
-			if (UCombatComponent* CombatComp = Owner->GetCombatComponent())
+			if (UActionManagerComponent* ActionManager = Owner->GetActionManagerComponent())
 			{
-				if (CombatComp->IsAttacking())
+				if (ActionManager->IsAttacking())
 				{
 					// Check if we're in a combo window
 					if (UActionManagerComponent* ActionManager = Owner->FindComponentByClass<UActionManagerComponent>())
@@ -64,10 +64,10 @@ bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
 		}
 		
 		// Also check if we're currently in any blocking state
-		if (UCombatComponent* CombatComp = Owner->GetCombatComponent())
+		if (UActionManagerComponent* ActionManager = Owner->GetCombatComponent())
 		{
 			// Can't start most actions while staggered
-			if (CombatComp->HasCombatStateTag(FGameplayTag::RequestGameplayTag("State.Staggered")))
+			if (ActionManager->HasCombatStateTag(FGameplayTag::RequestGameplayTag("State.Staggered")))
 			{
 				return false;
 			}
@@ -114,17 +114,17 @@ void UUniversalAction::OnTick(float DeltaTime)
 			if (bIsDashing)
 			{
 				bIsDashing = false;
-				if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+				if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 				{
-					CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+					ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
 				}
 			}
 			if (bIsAttacking)
 			{
 				bIsAttacking = false;
-				if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+				if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 				{
-					CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+					ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
 				}
 			}
 			if (bIsChanneling)
@@ -152,9 +152,9 @@ void UUniversalAction::OnRelease()
 	// Handle release for hold actions (like block)
 	if (bIsBlocking)
 	{
-		if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 		{
-			CombatComp->EndBlock();
+			ActionManager->EndBlock();
 		}
 		bIsBlocking = false;
 	}
@@ -163,9 +163,9 @@ void UUniversalAction::OnRelease()
 	if (bIsAttacking)
 	{
 		bIsAttacking = false;
-		if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 		{
-			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
 		}
 	}
 	
@@ -173,9 +173,9 @@ void UUniversalAction::OnRelease()
 	if (bIsDashing)
 	{
 		bIsDashing = false;
-		if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 		{
-			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
 		}
 	}
 	
@@ -203,20 +203,20 @@ void UUniversalAction::OnInterrupted()
 	UE_LOG(LogTemp, Warning, TEXT("Action interrupted: %s"), *ActionTag.ToString());
 	
 	// Clean up combat states properly
-	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 	{
 		if (bIsAttacking)
 		{
-			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
-			CombatComp->SetCurrentActionData(nullptr);
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+			ActionManager->SetCurrentActionData(nullptr);
 		}
 		if (bIsBlocking)
 		{
-			CombatComp->EndBlock();
+			ActionManager->EndBlock();
 		}
 		if (bIsDashing)
 		{
-			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
 		}
 	}
 	
@@ -258,9 +258,9 @@ void UUniversalAction::ExecuteDash()
 	ActionTimer = ActionData ? ActionData->DashDuration : 0.3f;
 	
 	// Add invincibility frames if needed
-	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 	{
-		CombatComp->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("Executed Dash"));
@@ -268,9 +268,9 @@ void UUniversalAction::ExecuteDash()
 
 void UUniversalAction::ExecuteBlock()
 {
-	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 	{
-		if (CombatComp->StartBlock())
+		if (ActionManager->StartBlock())
 		{
 			bIsBlocking = true;
 			UE_LOG(LogTemp, Log, TEXT("Started Blocking"));
@@ -294,10 +294,10 @@ void UUniversalAction::ExecuteMeleeAttack()
 	}
 
 	// Check if we can attack
-	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 	{
 		// First check if already attacking - this should have been caught earlier but double check
-		bool bIsCurrentlyAttacking = CombatComp->IsAttacking();
+		bool bIsCurrentlyAttacking = ActionManager->IsAttacking();
 		UE_LOG(LogTemp, Warning, TEXT("ExecuteMeleeAttack - IsAttacking: %s"), 
 			bIsCurrentlyAttacking ? TEXT("TRUE") : TEXT("FALSE"));
 			
@@ -319,7 +319,7 @@ void UUniversalAction::ExecuteMeleeAttack()
 		// Set attacking state IMMEDIATELY to prevent spam
 		// The animation's CombatStateNotify at frame 0 will re-set this (harmless)
 		// The animation's CombatStateNotify at end will clear it
-		CombatComp->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
 		bIsAttacking = true;
 		
 		// ActionTimer is only used as a safety timeout, animation controls actual duration
@@ -327,7 +327,7 @@ void UUniversalAction::ExecuteMeleeAttack()
 		
 		// Store attack data in CombatComponent so ProcessHitFromAnimation can use it
 		// This allows the animation notifies to access damage values
-		CombatComp->SetCurrentActionData(ActionData);
+		ActionManager->SetCurrentActionData(ActionData);
 		
 		// Play animation montage - the montage should have AttackNotifyState 
 		// which will handle hit detection timing automatically
@@ -386,17 +386,17 @@ void UUniversalAction::ExecuteFocusMode()
 		return;
 		
 	// Toggle focus mode through a component or state
-	if (UCombatComponent* CombatComp = GetOwnerCombatComponent())
+	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 	{
 		FGameplayTag FocusTag = FGameplayTag::RequestGameplayTag("Combat.State.FocusMode");
-		if (CombatComp->HasCombatStateTag(FocusTag))
+		if (ActionManager->HasCombatStateTag(FocusTag))
 		{
-			CombatComp->RemoveCombatStateTag(FocusTag);
+			ActionManager->RemoveCombatStateTag(FocusTag);
 			UE_LOG(LogTemp, Log, TEXT("Exited Focus Mode"));
 		}
 		else
 		{
-			CombatComp->AddCombatStateTag(FocusTag);
+			ActionManager->AddCombatStateTag(FocusTag);
 			UE_LOG(LogTemp, Log, TEXT("Entered Focus Mode"));
 		}
 	}

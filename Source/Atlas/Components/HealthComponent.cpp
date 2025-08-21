@@ -1,5 +1,4 @@
 #include "HealthComponent.h"
-#include "CombatComponent.h"
 #include "GameFramework/Actor.h"
 #include "Engine/Engine.h"
 #include "TimerManager.h"

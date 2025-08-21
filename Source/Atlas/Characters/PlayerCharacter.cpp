@@ -7,7 +7,6 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/LocalPlayer.h"
-#include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/FocusModeComponent.h"
 #include "../Components/ActionManagerComponent.h"

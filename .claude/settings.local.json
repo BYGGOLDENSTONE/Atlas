@@ -17,7 +17,8 @@
       "Bash(findstr:*)",
       "Bash(cmd /c del:*)",
       "Bash(cmd /c mkdir:*)",
-      "Bash(cmd /c move:*)"
+      "Bash(cmd /c move:*)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "ask": []

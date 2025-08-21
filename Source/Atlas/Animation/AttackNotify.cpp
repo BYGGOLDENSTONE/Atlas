@@ -1,6 +1,6 @@
 #include "AttackNotify.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "../Components/CombatComponent.h"
+#include "../Components/ActionManagerComponent.h"
 #include "../Characters/GameCharacterBase.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
@@ -26,8 +26,8 @@ void UAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* 
         return;
     }
 
-    UCombatComponent* CombatComp = Character->GetCombatComponent();
-    if (!CombatComp)
+    UActionManagerComponent* ActionManager = Character->GetActionManagerComponent();
+    if (!ActionManager)
     {
         return;
     }
@@ -70,7 +70,7 @@ void UAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* 
                         if (HitCharacter != Character)
                         {
                             UE_LOG(LogTemp, Warning, TEXT("Hit detected on: %s"), *HitCharacter->GetName());
-                            CombatComp->ProcessHitFromAnimation(HitCharacter);
+                            ActionManager->ProcessHitFromAnimation(HitCharacter);
                         }
                     }
                 }

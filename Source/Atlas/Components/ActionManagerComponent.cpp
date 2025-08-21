@@ -3,15 +3,23 @@
 #include "../DataAssets/ActionDataAsset.h"
 #include "../Characters/GameCharacterBase.h"
 #include "../Characters/PlayerCharacter.h"
-#include "../Components/CombatComponent.h"
+#include "../Components/HealthComponent.h"
+#include "../Components/VulnerabilityComponent.h"
+#include "../Components/StationIntegrityComponent.h"
+#include "../Data/CombatRulesDataAsset.h"
+#include "../Data/StationIntegrityDataAsset.h"
+#include "../Core/AtlasGameState.h"
+#include "GameFramework/Character.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "TimerManager.h"
 
 UActionManagerComponent::UActionManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	CurrentAction = nullptr;
 	OwnerCharacter = nullptr;
+	CurrentActionData = nullptr;
 
 	// Initialize default slot names
 	InitializeSlots();
@@ -22,6 +30,17 @@ void UActionManagerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerCharacter = Cast<AGameCharacterBase>(GetOwner());
+	
+	// Cache component references
+	HealthComponent = GetOwner()->FindComponentByClass<UHealthComponent>();
+	ensure(HealthComponent); // Warn if missing but don't crash
+	
+	VulnerabilityComponent = GetOwner()->FindComponentByClass<UVulnerabilityComponent>();
+	if (!VulnerabilityComponent)
+	{
+		VulnerabilityComponent = NewObject<UVulnerabilityComponent>(GetOwner(), UVulnerabilityComponent::StaticClass(), TEXT("VulnerabilityComponent"));
+		VulnerabilityComponent->RegisterComponent();
+	}
 	
 	// Load available actions
 	LoadAvailableActions();
@@ -426,5 +445,237 @@ void UActionManagerComponent::ExecuteShowSlotsCommand()
 		{
 			UE_LOG(LogTemp, Log, TEXT("  %s: [Empty]"), *Slot.Key.ToString());
 		}
+	}
+}
+
+void UActionManagerComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	// Clean up actions
+	for (auto& Slot : ActionSlots)
+	{
+		if (Slot.Value)
+		{
+			Slot.Value->ConditionalBeginDestroy();
+		}
+	}
+	ActionSlots.Empty();
+	
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+}
+
+// ========================================
+// COMBAT STATE MANAGEMENT
+// ========================================
+
+bool UActionManagerComponent::IsInCombat() const
+{
+	// Check if we're actively attacking, blocking, or recently damaged
+	if (IsAttacking() || IsBlocking() || (HealthComponent && HealthComponent->IsStaggered()))
+	{
+		return true;
+	}
+	
+	// Check if we've been in combat within the last 3 seconds
+	float TimeSinceLastAction = GetTimeSinceLastCombatAction();
+	return TimeSinceLastAction < 3.0f;
+}
+
+bool UActionManagerComponent::IsAttacking() const
+{
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
+}
+
+bool UActionManagerComponent::IsBlocking() const
+{
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+}
+
+bool UActionManagerComponent::IsVulnerable() const
+{
+	if (VulnerabilityComponent)
+	{
+		return VulnerabilityComponent->IsVulnerable();
+	}
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
+}
+
+bool UActionManagerComponent::HasIFrames() const
+{
+	if (VulnerabilityComponent)
+	{
+		return VulnerabilityComponent->HasIFrames();
+	}
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.IFrames")));
+}
+
+float UActionManagerComponent::GetTimeSinceLastCombatAction() const
+{
+	if (LastCombatActionTime <= 0.0f)
+	{
+		return 999.0f; // Never been in combat
+	}
+	
+	return GetWorld() ? GetWorld()->GetTimeSeconds() - LastCombatActionTime : 999.0f;
+}
+
+void UActionManagerComponent::AddCombatStateTag(const FGameplayTag& Tag)
+{
+	CombatStateTags.AddTag(Tag);
+	LastCombatActionTime = GetWorld()->GetTimeSeconds();
+}
+
+void UActionManagerComponent::RemoveCombatStateTag(const FGameplayTag& Tag)
+{
+	CombatStateTags.RemoveTag(Tag);
+}
+
+bool UActionManagerComponent::HasCombatStateTag(const FGameplayTag& Tag) const
+{
+	return CombatStateTags.HasTag(Tag);
+}
+
+bool UActionManagerComponent::StartBlock()
+{
+	if ((HealthComponent && HealthComponent->IsStaggered()) || IsAttacking())
+	{
+		return false;
+	}
+
+	AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+	OnBlockStarted.Broadcast(true);
+	return true;
+}
+
+void UActionManagerComponent::EndBlock()
+{
+	RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+	OnBlockEnded.Broadcast();
+}
+
+void UActionManagerComponent::ApplyVulnerabilityWithIFrames(int32 Charges, bool bGrantIFrames)
+{
+	if (VulnerabilityComponent)
+	{
+		float Duration = CombatRules ? CombatRules->CombatRules.VulnerabilityDuration : 1.0f;
+		VulnerabilityComponent->ApplyVulnerability(Charges, Duration);
+		
+		if (bGrantIFrames && VulnerabilityComponent->bEnableIFrames)
+		{
+			VulnerabilityComponent->StartIFrames();
+		}
+		
+		OnVulnerabilityApplied.Broadcast();
+	}
+}
+
+void UActionManagerComponent::SetCurrentActionData(UActionDataAsset* ActionData)
+{
+	CurrentActionData = ActionData;
+}
+
+void UActionManagerComponent::ProcessHitFromAnimation(AGameCharacterBase* HitCharacter)
+{
+	// This is called by animation notifies when a hit is detected
+	if (!HitCharacter || !CurrentActionData)
+	{
+		return;
+	}
+	
+	// Use ActionDataAsset for damage calculation
+	if (UHealthComponent* TargetHealth = HitCharacter->FindComponentByClass<UHealthComponent>())
+	{
+		// Check target's state for damage modifiers
+		bool bIsTargetBlocking = false;
+		bool bIsTargetVulnerable = false;
+		
+		if (UActionManagerComponent* TargetActionManager = HitCharacter->FindComponentByClass<UActionManagerComponent>())
+		{
+			bIsTargetBlocking = TargetActionManager->IsBlocking();
+			bIsTargetVulnerable = TargetActionManager->IsVulnerable();
+		}
+		
+		// Calculate and apply damage
+		float FinalDamage = CalculateFinalDamage(CurrentActionData->MeleeDamage, bIsTargetBlocking, bIsTargetVulnerable);
+		TargetHealth->TakeDamage(FinalDamage, GetOwner());
+		
+		// Apply poise damage
+		if (CurrentActionData->PoiseDamage > 0.0f)
+		{
+			TargetHealth->TakePoiseDamage(CurrentActionData->PoiseDamage);
+		}
+		
+		// Apply knockback
+		if (CurrentActionData->KnockbackForce > 0.0f)
+		{
+			FVector KnockbackDirection = (HitCharacter->GetActorLocation() - GetOwner()->GetActorLocation()).GetSafeNormal();
+			ApplyKnockback(HitCharacter, KnockbackDirection, CurrentActionData->KnockbackForce, CurrentActionData->bCausesRagdoll);
+		}
+		
+		// Apply station integrity cost for high-risk abilities
+		AAtlasGameState* GameState = AAtlasGameState::GetAtlasGameState(GetWorld());
+		if (GameState && GameState->StationIntegrityComponent && CurrentActionData->IntegrityCost > 0.0f)
+		{
+			UStationIntegrityComponent* IntegrityComp = GameState->StationIntegrityComponent;
+			IntegrityComp->ApplyAbilityIntegrityCost(CurrentActionData->ActionTag, GetOwner());
+			
+			if (IntegrityComp->GetIntegrityPercent() <= 50.0f)
+			{
+				UE_LOG(LogTemp, Error, TEXT("WARNING: Station integrity critical!"));
+			}
+		}
+	}
+}
+
+float UActionManagerComponent::CalculateFinalDamage(float BaseDamage, bool bIsBlocking, bool bIsVulnerable) const
+{
+	float FinalDamage = BaseDamage;
+	
+	// Apply vulnerability multiplier (8x damage as per CLAUDE.md)
+	if (bIsVulnerable)
+	{
+		FinalDamage *= 8.0f;
+	}
+	
+	// Apply block damage reduction (40% reduction as per CLAUDE.md)
+	if (bIsBlocking)
+	{
+		FinalDamage *= 0.6f; // 60% damage goes through (40% reduction)
+	}
+	
+	return FinalDamage;
+}
+
+void UActionManagerComponent::ApplyKnockback(AGameCharacterBase* Target, const FVector& Direction, float Force, bool bCauseRagdoll)
+{
+	if (!Target)
+	{
+		return;
+	}
+	
+	ACharacter* TargetCharacter = Cast<ACharacter>(Target);
+	if (!TargetCharacter)
+	{
+		return;
+	}
+	
+	// Add slight upward force for better knockback feel
+	FVector KnockbackDir = Direction;
+	KnockbackDir.Z = 0.3f;
+	KnockbackDir.Normalize();
+	
+	if (bCauseRagdoll)
+	{
+		// Apply ragdoll physics
+		if (USkeletalMeshComponent* Mesh = TargetCharacter->GetMesh())
+		{
+			Mesh->SetSimulatePhysics(true);
+			Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			Mesh->AddImpulse(KnockbackDir * Force * 100.0f); // Scale for physics impulse
+		}
+	}
+	else
+	{
+		// Standard knockback using character movement
+		TargetCharacter->LaunchCharacter(KnockbackDir * Force, true, true);
 	}
 }

@@ -5,7 +5,6 @@
 #include "../Characters/GameCharacterBase.h"
 #include "../Components/VulnerabilityComponent.h"
 #include "../Components/StationIntegrityComponent.h"
-#include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/FocusModeComponent.h"
 #include "../Components/ActionManagerComponent.h"
@@ -356,15 +355,6 @@ UStationIntegrityComponent* FAtlasDebugCommands::GetStationIntegrity()
                 return GameState->StationIntegrityComponent;
             }
         }
-    }
-    return nullptr;
-}
-
-UCombatComponent* FAtlasDebugCommands::GetCombatComponent()
-{
-    if (AGameCharacterBase* Character = GetTargetCharacter())
-    {
-        return Character->FindComponentByClass<UCombatComponent>();
     }
     return nullptr;
 }

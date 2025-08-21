@@ -1,5 +1,50 @@
 # Atlas Development Changelog
 
+## Session: 2025-01-21 (Part 3) - Component Consolidation & Legacy Cleanup
+
+### Major Architectural Changes
+- **Unified Combat System**:
+  - Consolidated all combat logic into ActionManagerComponent
+  - Deleted CombatComponent (functionality migrated)
+  - Deleted DamageCalculator (simplified and integrated)
+  - ActionManagerComponent now handles: actions, combat states, damage, knockback, vulnerability
+  
+- **Legacy DataAsset Cleanup**:
+  - Removed AbilityDataAsset and all child classes (SystemHack, CoolantSpray, DebrisPull, KineticPulse)
+  - Removed AttackDataAsset system
+  - Deleted old AI tasks folder (will remake AI with new system)
+  - Single unified ActionDataAsset system remains
+
+- **Simplified Damage System**:
+  - Damage calculation now inline in ActionManagerComponent
+  - Simple multipliers: 8x damage when vulnerable, 0.6x when blocking
+  - Knockback simplified to single helper function
+  - Removed complex FDamageInfo struct and unnecessary abstractions
+
+### Files Deleted (11 total)
+- CombatComponent.h/cpp
+- DamageCalculator.h/cpp
+- AbilityDataAsset.h
+- AttackDataAsset.h/cpp
+- SystemHackDataAsset.h
+- CoolantSprayDataAsset.h
+- DebrisPullDataAsset.h
+- KineticPulseDataAsset.h
+- AI/Tasks folder (all old AI tasks)
+
+### Technical Improvements
+- Animation notifies updated to use ActionManagerComponent
+- GameCharacterBase ICombatInterface delegates to ActionManagerComponent
+- UniversalAction uses GetOwnerActionManagerComponent()
+- All #include statements cleaned up
+- No more circular dependencies
+
+### Results
+- **Cleaner architecture** - single component for all combat/action logic
+- **Reduced complexity** - removed 3 overlapping systems
+- **Better performance** - less component communication overhead
+- **Easier maintenance** - all logic in one place
+
 ## Session: 2025-01-21 (Part 2) - Input Blocking & Major Code Cleanup
 
 ### Major Changes

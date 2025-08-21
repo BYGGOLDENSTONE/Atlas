@@ -2,7 +2,7 @@
 #include "GameFramework/Character.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
-#include "../Data/SystemHackDataAsset.h"
+// SystemHackDataAsset removed - use ActionDataAsset
 #include "../Interfaces/IInteractable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"

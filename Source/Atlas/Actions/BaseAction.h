@@ -72,7 +72,10 @@ protected:
 
 	// Helper functions for derived classes
 	UFUNCTION(BlueprintPure, Category = "Action")
-	class UCombatComponent* GetOwnerCombatComponent() const;
+	class UCombatComponent* GetOwnerCombatComponent() const; // DEPRECATED
+	
+	UFUNCTION(BlueprintPure, Category = "Action")
+	class UActionManagerComponent* GetOwnerActionManagerComponent() const;
 
 	UFUNCTION(BlueprintPure, Category = "Action")
 	class UHealthComponent* GetOwnerHealthComponent() const;
@@ -110,9 +113,6 @@ protected:
 	UActionDataAsset* ActionData;
 
 	// Cached component references (set during activation)
-	UPROPERTY()
-	class UCombatComponent* CachedCombatComponent;
-
 	UPROPERTY()
 	class UHealthComponent* CachedHealthComponent;
 

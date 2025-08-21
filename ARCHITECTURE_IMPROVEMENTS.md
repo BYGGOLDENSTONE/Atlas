@@ -3,6 +3,37 @@
 ## Summary of Refactoring
 This document outlines the architectural improvements made to the Atlas codebase to address identified issues and improve maintainability.
 
+## Latest Updates (2025-01-21)
+
+### Component Consolidation ✅
+**Problem**: Multiple overlapping components (CombatComponent, ActionManagerComponent, DamageCalculator) created confusion and complexity.
+
+**Solution**: Unified all combat and action logic into ActionManagerComponent
+- Migrated all CombatComponent functionality (state tags, blocking, vulnerability)
+- Integrated simplified damage calculation directly (no separate calculator)
+- Removed deprecated components entirely
+- Animation notifies now use ActionManagerComponent exclusively
+
+**Benefits**:
+- Single source of truth for all combat/action logic
+- Simpler component hierarchy
+- Reduced file count and complexity
+- Natural coupling of actions and combat states
+
+### Legacy System Cleanup ✅
+**Problem**: Old DataAsset systems (AbilityDataAsset, AttackDataAsset) still present alongside new ActionDataAsset.
+
+**Solution**: Removed all legacy DataAsset types
+- Deleted AbilityDataAsset and its child classes
+- Deleted AttackDataAsset system
+- Removed old AI tasks that depended on these
+- Updated all references to use ActionDataAsset
+
+**Benefits**:
+- Single, unified DataAsset system
+- No confusion about which system to use
+- Cleaner codebase without deprecated code
+
 ## 1. UniversalAction Routing Refactor ✅
 **Problem**: Large if/else chain for action type routing was difficult to maintain and extend.
 

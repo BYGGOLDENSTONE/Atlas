@@ -4,7 +4,7 @@
 #include "Engine/World.h"
 #include "Engine/OverlapResult.h"
 #include "DrawDebugHelpers.h"
-#include "../Data/DebrisPullDataAsset.h"
+// DebrisPullDataAsset removed - use ActionDataAsset
 #include "Kismet/GameplayStatics.h"
 
 UDebrisPullAbility::UDebrisPullAbility()

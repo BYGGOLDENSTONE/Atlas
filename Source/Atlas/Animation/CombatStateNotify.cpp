@@ -1,6 +1,6 @@
 #include "CombatStateNotify.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "../Components/CombatComponent.h"
+#include "../Components/ActionManagerComponent.h"
 #include "../Characters/GameCharacterBase.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Core/AtlasGameplayTags.h"
@@ -27,8 +27,8 @@ void UCombatStateNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 		return;
 	}
 
-	UCombatComponent* CombatComp = Character->GetCombatComponent();
-	if (!CombatComp)
+	UActionManagerComponent* ActionManager = Character->GetActionManagerComponent();
+	if (!ActionManager)
 	{
 		return;
 	}
@@ -41,13 +41,13 @@ void UCombatStateNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 		// Clear other attack states if requested
 		if (bClearOtherAttackStates)
 		{
-			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
-			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
-			CombatComp->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dashing")));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dashing")));
 		}
 		
 		// Add the new state
-		CombatComp->AddCombatStateTag(StateTag);
+		ActionManager->AddCombatStateTag(StateTag);
 		// Added combat state
 		
 		// If this is an ability state and we're on a player, disable inputs
@@ -67,7 +67,7 @@ void UCombatStateNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	else
 	{
 		// Remove the state
-		CombatComp->RemoveCombatStateTag(StateTag);
+		ActionManager->RemoveCombatStateTag(StateTag);
 		// Removed combat state
 		
 		// If we're ending an ability state on a player, re-enable inputs
@@ -84,7 +84,7 @@ void UCombatStateNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 				// Clear action data if it was an attack
 				if (StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")))
 				{
-					CombatComp->SetCurrentActionData(nullptr);
+					ActionManager->SetCurrentActionData(nullptr);
 				}
 			}
 		}

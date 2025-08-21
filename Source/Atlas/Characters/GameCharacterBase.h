@@ -9,8 +9,8 @@
 
 class USpringArmComponent;
 class UCameraComponent;
-class UCombatComponent;
 class UHealthComponent;
+class UActionManagerComponent;
 
 UCLASS(Abstract)
 class ATLAS_API AGameCharacterBase : public ACharacter, public ICombatInterface, public IHealthInterface, public IActionInterface
@@ -27,11 +27,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	UCombatComponent* CombatComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Actions, meta = (AllowPrivateAccess = "true"))
+	UActionManagerComponent* ActionManagerComponent;
 
 protected:
 	virtual void BeginPlay() override;
@@ -42,7 +42,7 @@ public:
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	FORCEINLINE class UCombatComponent* GetCombatComponent() const { return CombatComponent; }
+	FORCEINLINE class UActionManagerComponent* GetActionManagerComponent() const { return ActionManagerComponent; }
 	FORCEINLINE class UHealthComponent* GetHealthComponent() const { return HealthComponent; }
 	
 	// ICombatInterface implementation

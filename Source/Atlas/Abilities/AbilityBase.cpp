@@ -1,6 +1,5 @@
 #include "AbilityBase.h"
 #include "GameFramework/Character.h"
-#include "../Components/CombatComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/StationIntegrityComponent.h"
 #include "../Core/AtlasGameState.h"

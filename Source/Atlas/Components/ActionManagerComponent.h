@@ -9,13 +9,23 @@
 // Forward declarations
 class UActionDataAsset;
 class AGameCharacterBase;
+class UHealthComponent;
+class UVulnerabilityComponent;
+class UCombatRulesDataAsset;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionSlotChanged, FName, SlotName, UBaseAction*, NewAction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionActivated, FName, SlotName, UBaseAction*, Action);
 
+// Combat events
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttackStarted, const FGameplayTag&, AttackTag);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBlockStarted, bool, bSuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlockEnded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVulnerabilityApplied);
+
 /**
- * Component that manages the unified action system.
- * Handles 5 universal slots that can hold any action.
+ * Unified component that manages both the action system and combat state.
+ * Handles 5 universal action slots and all combat-related functionality.
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ATLAS_API UActionManagerComponent : public UActorComponent
@@ -24,6 +34,7 @@ class ATLAS_API UActionManagerComponent : public UActorComponent
 
 public:
 	UActionManagerComponent();
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -104,12 +115,28 @@ public:
 	UFUNCTION(Exec, Category = "Action Manager")
 	void ExecuteShowSlotsCommand();
 
-	// Events
+	// Action Events
 	UPROPERTY(BlueprintAssignable, Category = "Action Manager|Events")
 	FOnActionSlotChanged OnActionSlotChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "Action Manager|Events")
 	FOnActionActivated OnActionActivated;
+	
+	// Combat Events
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
+	FOnAttackStarted OnAttackStarted;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
+	FOnAttackEnded OnAttackEnded;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
+	FOnBlockStarted OnBlockStarted;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
+	FOnBlockEnded OnBlockEnded;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
+	FOnVulnerabilityApplied OnVulnerabilityApplied;
 	
 	// Combo System
 	UFUNCTION(BlueprintCallable, Category = "Action Manager|Combo")
@@ -120,6 +147,56 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Action Manager|Combo")
 	bool IsComboWindowActive() const { return bComboWindowActive; }
+
+	// === COMBAT STATE MANAGEMENT ===
+	
+	// State queries
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool IsInCombat() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool IsAttacking() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool IsBlocking() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool IsVulnerable() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool HasIFrames() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	float GetTimeSinceLastCombatAction() const;
+	
+	// State management
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void AddCombatStateTag(const FGameplayTag& Tag);
+	
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void RemoveCombatStateTag(const FGameplayTag& Tag);
+	
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool HasCombatStateTag(const FGameplayTag& Tag) const;
+	
+	// Combat actions
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	bool StartBlock();
+	
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void EndBlock();
+	
+	// Vulnerability
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ApplyVulnerabilityWithIFrames(int32 Charges = 1, bool bGrantIFrames = false);
+	
+	// Hit processing (called by animation notifies)
+	void ProcessHitFromAnimation(class AGameCharacterBase* HitCharacter);
+	void SetCurrentActionData(class UActionDataAsset* ActionData);
+	
+	// Damage calculation helpers
+	float CalculateFinalDamage(float BaseDamage, bool bIsBlocking, bool bIsVulnerable) const;
+	void ApplyKnockback(class AGameCharacterBase* Target, const FVector& Direction, float Force, bool bCauseRagdoll);
 
 protected:
 	// Helper functions
@@ -157,4 +234,28 @@ protected:
 	FName CurrentComboWindow = NAME_None;
 	FName BufferedSlot = NAME_None;
 	float BufferedInputTime = 0.0f;
+	
+	// === COMBAT STATE ===
+	
+	// Combat state tags
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	FGameplayTagContainer CombatStateTags;
+	
+	// Combat rules configuration
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UCombatRulesDataAsset* CombatRules;
+	
+	// Currently active action data (for hit processing)
+	UPROPERTY()
+	class UActionDataAsset* CurrentActionData;
+	
+	// Combat timing
+	float LastCombatActionTime = 0.0f;
+	
+	// Component references
+	UPROPERTY()
+	UHealthComponent* HealthComponent;
+	
+	UPROPERTY()
+	UVulnerabilityComponent* VulnerabilityComponent;
 };

@@ -71,7 +71,6 @@ private:
     static class AGameCharacterBase* GetTargetCharacter();
     static class UVulnerabilityComponent* GetVulnerabilityComponent();
     static class UStationIntegrityComponent* GetStationIntegrity();
-    static class UCombatComponent* GetCombatComponent();
     static class UActionManagerComponent* GetActionManager();
     
     // Debug flags
