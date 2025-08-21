@@ -14,14 +14,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/BaseAction.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -207,7 +199,7 @@
       <workItem from="1755775986125" duration="978000" />
       <workItem from="1755777000006" duration="1025000" />
       <workItem from="1755778062472" duration="536000" />
-      <workItem from="1755778835120" duration="1097000" />
+      <workItem from="1755778835120" duration="1667000" />
     </task>
     <servers />
   </component>

@@ -1,0 +1,90 @@
+Of course. Here is a comprehensive Game Design Document (GDD) based on all the information you have provided. It synthesizes the initial technical documents with your latest, detailed explanation of the gameplay loop, treating the latter as the current project scope.
+
+***
+
+# **Game Design Document: Atlas**
+
+## **1. Game Overview**
+
+* **Game Title:** Atlas
+* **Genre:** 1v1 Roguelite Dueler
+* **Core Concept:** Atlas is a single-player, run-based dueling game set on a decaying space station. Players progress through a series of unique rooms, fighting a distinct enemy in each. After every victory, the player chooses a new ability or passive upgrade from a themed pool of rewards to build out their character. The goal is to complete a full run of five rooms without dying or allowing the station's integrity to collapse. A key feature is the persistence and enhancement of abilities across runs, creating long-term strategic progression.
+
+## **2. Core Gameplay Loop**
+
+The gameplay is structured into "runs," with each run consisting of five levels.
+
+1.  **Start a Run:** The player begins at Level 1 in a randomly selected room (e.g., Room A).
+2.  **Engage the Enemy:** The player fights the unique enemy of that room (e.g., Enemy AE).
+3.  **Claim Your Reward:** Upon defeating the enemy, the player is presented with a choice between two rewards, randomly drawn from that room's specific reward pool (e.g., Room A offers Defense-type rewards).
+4.  **Equip & Progress:** The player must place the chosen reward into one of their limited ability slots. If no slots are free, they must replace an existing reward. They then proceed to the next level.
+5.  **Repeat:** This loop continues for all five rooms. The order of the rooms is randomized for every new run.
+6.  **End of Run:** A run concludes under two conditions:
+    * The player's health is depleted.
+    * The space station's integrity reaches zero.
+7.  **Persistent Progression:** Rewards equipped in the player's slots at the end of a run are carried over to the start of the next run, allowing for a stronger starting point.
+
+## **3. Core Mechanics**
+
+### **3.1. Combat System**
+
+The combat is designed to be animation-driven, tactical, and impactful.
+
+* **Basic Attacks:** Low-damage, fast attacks used to deal chip damage and reduce enemy poise.
+* **Heavy Attacks:** High-damage, slower attacks that inflict significant poise damage and can launch enemies, potentially causing them to hit walls and damage station integrity.
+* **Blocking:** A defensive stance that reduces incoming damage by 40%.
+* **Dashing:** A quick burst of movement that grants invincibility frames ("i-frames"), allowing players to dodge through attacks if timed correctly. It has a 2-second cooldown.
+* **Poise System:** All characters have a poise value of 100. Taking hits reduces poise. When it reaches zero, the character is staggered for 2 seconds, leaving them completely defenseless.
+* **Vulnerability System:** A critical combat mechanic where a character can be made "vulnerable," causing them to take an **8x damage multiplier** from all sources. The core combat strategy revolves around triggering this state.
+
+### **3.2. The Dual-Fail State**
+
+Victory is not just about defeating the enemy, but also preserving the arena.
+
+* **Player Health:** Managed by the `HealthComponent`. If it reaches zero, the run ends.
+* **Station Integrity:** Managed by the `StationIntegrityComponent`. The station is damaged by powerful player abilities and environmental collisions (e.g., an enemy being launched into a wall). If it reaches zero, the run ends.
+
+### **3.3. Player Progression & The Slot System**
+
+* **Limited Slots:** The player has a finite number of slots to equip rewards. Every active ability, passive buff, or interactable requires a slot.
+* **Reward Enhancement:** If a player finds a reward they already have equipped from a previous run, they can select it again to enhance its effect (e.g., a 20% speed boost becomes a 40% speed boost).
+* **Reward Scaling:** The quality and power of available rewards scale with the level of the run. Basic rewards are available at Level 1, while game-changing rewards (like increasing max station health) can only be found in later levels.
+
+## **4. Level & Enemy Design**
+
+* **Themed Rooms:** The game features 5 unique rooms (A, B, C, D, E), each with a unique enemy and a specific reward theme. The order of the rooms is randomized in each run.
+* **Dynamic Enemy AI:**
+    * **Shared Ability Pool:** Enemies pull their abilities from the same pool as the player. An enemy can use abilities like `Second Life` or `Heavy Attack`.
+    * **Reactive Scaling:** The number of abilities an enemy possesses is directly tied to the player's power, specifically `player filled slots + 1`.
+    * **Behavioral Priority:** While the ability pool is shared, each unique enemy has a different AI priority based on its room's theme. For example, the enemy in the "Interactables" room will prioritize hacking environmental objects to use against the player.
+
+## **5. Reward & Ability Library**
+
+There are five distinct categories of rewards the player can earn.
+
+1.  **Defense:** Abilities focused on damage mitigation and counter-attacks.
+    * *Examples:* `Block`, `Parry`, `Dodge`.
+2.  **Offense:** Active abilities focused on dealing damage.
+    * *Examples:* `Basic Attack`, `Heavy Attack`, `Soul Attack` (an unblockable attack that does not damage the station).
+3.  **Passive Stats:** Slot-based rewards that grant permanent statistical bonuses.
+    * *Examples:* `Movement & Attack Speed Boost`, `Increased Knockback Force`, `Max Health Increase`, `Max Station Health Increase`.
+4.  **Passive Abilities:** Powerful, game-altering passives that come with a significant cost or tradeoff.
+    * *Examples:* `Second Life` (upon death, the player is revived, but the reward is consumed and the slot is freed), abilities that may require two slots to equip.
+5.  **Interactables (Hacking):** Abilities that allow the player to trigger environmental objects. These are neutral and powerful, but can also harm the player if used carelessly.
+    * *Examples:* Trigger an `Exploding Valve` (staggers everyone nearby), activate a `Vent` (launches anyone in front of it, making them vulnerable on collision).
+
+## **6. Update Notes & Scope Changes**
+
+This section documents the evolution of the project design, noting how the current roguelite scope updates the initial technical framework.
+
+* **Ability System Overhaul:**
+    * **OLD:** The original design specified "15 abilities" that could be assigned via console commands. This implied a predefined loadout system.
+    * **NEW:** The "15 abilities" now represent the total **reward pool** the player discovers throughout runs. The system is no longer about pre-run loadouts, but about dynamic, in-run build crafting. The console commands are now likely for debug purposes only.
+
+* **Inclusion of a Parry Mechanic:**
+    * **OLD:** The initial documents explicitly stated "no parry" as a design rule.
+    * **NEW:** The current scope explicitly includes `Parry` as a potential reward in the Defense category. **This rule has been intentionally overridden.** The implementation of a parry system is now a required feature.
+
+* **Refined Ability Structure:**
+    * **OLD:** The design mentioned `ActionDataAssets` for abilities like attacks.
+    * **NEW:** This data-driven structure is still perfectly valid and should be expanded. All five reward types—including passive stat boosts and interactables—will need their own data asset configurations to define their function, cost, and enhancement progression. The `bCanBeInterrupted = false` flag is still relevant for attack-type abilities.
