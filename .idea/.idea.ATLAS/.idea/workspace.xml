@@ -14,14 +14,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IMPLEMENTATION_ROADMAP.md" beforeDir="false" afterPath="$PROJECT_DIR$/IMPLEMENTATION_ROADMAP.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/RewardDataAssetFactory.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/RewardDataAssetFactory.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/RoomDataAssetFactory.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/RoomDataAssetFactory.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/UI/RewardSelectionWidget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/UI/RewardSelectionWidget.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/UI/RunProgressWidget.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/UI/RunProgressWidget.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/UI/SlotManagerWidget.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/UI/SlotManagerWidget.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +29,6 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UnrealEditor/Inc/Atlas/UHT/ICombatInterface.gen.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -210,7 +203,8 @@
       <workItem from="1755778835120" duration="1667000" />
       <workItem from="1755790077162" duration="1778000" />
       <workItem from="1755793847945" duration="1942000" />
-      <workItem from="1755812894139" duration="2242000" />
+      <workItem from="1755812894139" duration="4415000" />
+      <workItem from="1755818026664" duration="4335000" />
     </task>
     <servers />
   </component>

@@ -30,42 +30,20 @@ This roadmap outlines the phased implementation plan for Atlas, a 1v1 roguelite 
 - 40+ console commands for testing
 - Comprehensive documentation for content creation
 
-## Current Phase: Phase 4
+### Phase 4: Environmental Systems & Interactables ✅
+**Status**: COMPLETE (2025-01-22)
+- IntegrityVisualizerComponent for station damage visuals
+- Environmental hazard system (Electrical, Toxic, LowGravity)
+- InteractableComponent base framework
+- DestructibleEnvironmentComponent with debris
+- StationDegradationSubsystem for progressive decay
+- EmergencyEventManager for dynamic events
+- 16+ console commands for testing
 
-### Phase 4: Environmental Systems & Interactables
-**Goal**: Transform static environments into dynamic, hazardous spaces
+## Current Phase: Phase 5 (Next)
 
-### Tasks:
-1. **Station Integrity Visualization**
-   - IntegrityVisualizerComponent with visual states
-   - Hull breach system with vacuum effects
-   - Emergency lighting and alarms
-   - Progressive damage manifestation
-
-2. **Environmental Hazards**
-   - Base hazard component framework
-   - Electrical surges with chain lightning
-   - Toxic leaks with DOT effects
-   - Low gravity zones
-   - System malfunctions
-
-3. **Interactable Systems**
-   - Explosive valves with timed detonation
-   - Gravity wells for crowd control
-   - Hackable turrets
-   - Emergency vents with knockback
-   - Power surge panels
-
-4. **Station Degradation**
-   - Time-based integrity loss
-   - Combat degradation multiplier
-   - Random emergency events
-   - Atmospheric audio system
-
-## Future Phases
-
-## Phase 5: Polish, Optimization & Balancing
-**Goal**: Final polish and optimization
+### Phase 5: Polish, Optimization & Balancing
+**Goal**: Refine gameplay and optimize performance
 
 ### Tasks:
 1. **Performance Optimization**
@@ -187,14 +165,14 @@ This roadmap outlines the phased implementation plan for Atlas, a 1v1 roguelite 
 
 ## Priority Notes
 - **Phase 1-3**: Core gameplay loop (COMPLETE) ✅
-- **Phase 4**: Environmental systems and interactables (CURRENT)
-- **Phase 5-6**: Polish, optimization and audio
+- **Phase 4**: Environmental systems and interactables (COMPLETE) ✅
+- **Phase 5-6**: Polish, optimization and audio (NEXT)
 - **Phase 7-8**: Meta progression and platform features
 - **Phase 9**: Final testing and release
 
-## Next Immediate Steps (Phase 4)
-1. Implement IntegrityVisualizerComponent for station damage visualization
-2. Create base hazard component framework
-3. Develop interactable systems (explosive valves, gravity wells, turrets)
-4. Implement station degradation mechanics
-5. Test environmental hazards with existing combat systems
+## Next Immediate Steps (Phase 5)
+1. Profile and identify performance bottlenecks
+2. Implement object pooling for frequently spawned objects
+3. Optimize particle systems and visual effects
+4. Balance damage values and reward power scaling
+5. Add final VFX passes and post-processing
