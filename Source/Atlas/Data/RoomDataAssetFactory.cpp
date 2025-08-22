@@ -61,7 +61,7 @@ URoomDataAsset* URoomDataAssetFactory::CreateEngineeringBayRoom()
 	Room->EnemyBasePower = 3;
 	Room->EnemyAIPreset = FGameplayTag::RequestGameplayTag("AI.Defensive");
 	Room->EnemyAbilities = {
-		FGameplayTag::RequestGameplayTag("Action.Block"),
+		FGameplayTag::RequestGameplayTag("Action.Combat.Block"),
 		FGameplayTag::RequestGameplayTag("Action.Shield.Deploy")
 	};
 	
@@ -197,7 +197,7 @@ URoomDataAsset* URoomDataAssetFactory::CreateWeaponsLabRoom()
 	Room->EnemyBasePower = 4;
 	Room->EnemyAIPreset = FGameplayTag::RequestGameplayTag("AI.Aggressive");
 	Room->EnemyAbilities = {
-		FGameplayTag::RequestGameplayTag("Action.Attack.Heavy"),
+		FGameplayTag::RequestGameplayTag("Action.Combat.HeavyAttack"),
 		FGameplayTag::RequestGameplayTag("Action.Combo.Triple")
 	};
 	
@@ -333,7 +333,7 @@ URoomDataAsset* URoomDataAssetFactory::CreateMaintenanceShaftRoom()
 	Room->EnemyBasePower = 3;
 	Room->EnemyAIPreset = FGameplayTag::RequestGameplayTag("AI.Tactical");
 	Room->EnemyAbilities = {
-		FGameplayTag::RequestGameplayTag("Action.Dash"),
+		FGameplayTag::RequestGameplayTag("Action.Combat.Dash"),
 		FGameplayTag::RequestGameplayTag("Action.Environment.Use")
 	};
 	

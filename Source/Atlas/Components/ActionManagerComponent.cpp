@@ -478,12 +478,12 @@ bool UActionManagerComponent::IsInCombat() const
 
 bool UActionManagerComponent::IsAttacking() const
 {
-	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Attacking")));
 }
 
 bool UActionManagerComponent::IsBlocking() const
 {
-	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Blocking")));
 }
 
 bool UActionManagerComponent::IsVulnerable() const
@@ -492,7 +492,7 @@ bool UActionManagerComponent::IsVulnerable() const
 	{
 		return VulnerabilityComponent->IsVulnerable();
 	}
-	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable")));
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Status.Vulnerable")));
 }
 
 bool UActionManagerComponent::HasIFrames() const
@@ -501,7 +501,7 @@ bool UActionManagerComponent::HasIFrames() const
 	{
 		return VulnerabilityComponent->HasIFrames();
 	}
-	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.IFrames")));
+	return HasCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Status.Invulnerable")));
 }
 
 float UActionManagerComponent::GetTimeSinceLastCombatAction() const
@@ -537,14 +537,14 @@ bool UActionManagerComponent::StartBlock()
 		return false;
 	}
 
-	AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+	AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Blocking")));
 	OnBlockStarted.Broadcast(true);
 	return true;
 }
 
 void UActionManagerComponent::EndBlock()
 {
-	RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
+	RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Blocking")));
 	OnBlockEnded.Broadcast();
 }
 
@@ -556,12 +556,12 @@ void UActionManagerComponent::SetParryState(bool bParrying)
 	{
 		// Record parry start time for window tracking
 		ParryStartTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
-		AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Action.Parry")));
+		AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Action.Combat.Parry")));
 		UE_LOG(LogTemp, Log, TEXT("Parry state activated"));
 	}
 	else
 	{
-		RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Action.Parry")));
+		RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Action.Combat.Parry")));
 		ParryStartTime = 0.0f;
 		UE_LOG(LogTemp, Log, TEXT("Parry state deactivated"));
 	}

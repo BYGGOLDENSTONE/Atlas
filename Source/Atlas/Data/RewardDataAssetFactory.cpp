@@ -66,7 +66,7 @@ URewardDataAsset* URewardDataAssetFactory::CreateImprovedBlockReward()
 	Reward->MaxStackLevel = 3;
 	Reward->StackMultipliers = {0.6f, 0.7f, 0.8f}; // 60%, 70%, 80% damage reduction
 	Reward->bReplacesExistingAbility = true;
-	Reward->ReplacesActionTag = FGameplayTag::RequestGameplayTag("Action.Block");
+	Reward->ReplacesActionTag = FGameplayTag::RequestGameplayTag("Action.Combat.Block");
 	
 	return Reward;
 }
@@ -165,7 +165,7 @@ URewardDataAsset* URewardDataAssetFactory::CreateHeavyImpactReward()
 	Reward->SlotCost = 2;
 	Reward->MaxStackLevel = 2;
 	Reward->bReplacesExistingAbility = true;
-	Reward->ReplacesActionTag = FGameplayTag::RequestGameplayTag("Action.Attack.Heavy");
+	Reward->ReplacesActionTag = FGameplayTag::RequestGameplayTag("Action.Combat.HeavyAttack");
 	
 	return Reward;
 }

@@ -7,8 +7,8 @@
 
 UCombatStateNotify::UCombatStateNotify()
 {
-	// Default to attacking state
-	StateTag = FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking"));
+	// Default to attacking state - using clean tag structure
+	StateTag = FGameplayTag::RequestGameplayTag(FName("State.Combat.Attacking"));
 	bAddState = true;
 }
 
@@ -41,9 +41,9 @@ void UCombatStateNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 		// Clear other attack states if requested
 		if (bClearOtherAttackStates)
 		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")));
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")));
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dashing")));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Attacking")));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Blocking")));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Dashing")));
 		}
 		
 		// Add the new state
@@ -54,9 +54,9 @@ void UCombatStateNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 		if (PlayerChar)
 		{
 			// Disable inputs for any ability that should block other inputs
-			if (StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")) ||
-				StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")) ||
-				StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Dashing")))
+			if (StateTag == FGameplayTag::RequestGameplayTag(FName("State.Combat.Attacking")) ||
+				StateTag == FGameplayTag::RequestGameplayTag(FName("State.Combat.Blocking")) ||
+				StateTag == FGameplayTag::RequestGameplayTag(FName("State.Combat.Dashing")))
 			{
 				PlayerChar->SetAbilityInputsEnabled(false);
 				PlayerChar->SetMovementInputEnabled(false);
@@ -73,16 +73,16 @@ void UCombatStateNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 		// If we're ending an ability state on a player, re-enable inputs
 		if (PlayerChar)
 		{
-			if (StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")) ||
-				StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking")) ||
-				StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Dashing")))
+			if (StateTag == FGameplayTag::RequestGameplayTag(FName("State.Combat.Attacking")) ||
+				StateTag == FGameplayTag::RequestGameplayTag(FName("State.Combat.Blocking")) ||
+				StateTag == FGameplayTag::RequestGameplayTag(FName("State.Combat.Dashing")))
 			{
 				PlayerChar->SetAbilityInputsEnabled(true);
 				PlayerChar->SetMovementInputEnabled(true);
 				// Re-enabled inputs after ability completion
 				
 				// Clear action data if it was an attack
-				if (StateTag == FGameplayTag::RequestGameplayTag(FName("Combat.State.Attacking")))
+				if (StateTag == FGameplayTag::RequestGameplayTag(FName("State.Combat.Attacking")))
 				{
 					ActionManager->SetCurrentActionData(nullptr);
 				}

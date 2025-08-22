@@ -53,7 +53,7 @@ void UParryNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeque
 	}
 
 	// Add parry gameplay tag - use FName to avoid tag request in constructor
-	FGameplayTag ParryTag = FGameplayTag::RequestGameplayTag(FName("Action.Parry"));
+	FGameplayTag ParryTag = FGameplayTag::RequestGameplayTag(FName("Action.Combat.Parry"));
 	ActionManager->AddCombatStateTag(ParryTag);
 
 	UE_LOG(LogTemp, Log, TEXT("Parry window started for %s"), *Character->GetName());
@@ -87,7 +87,7 @@ void UParryNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	}
 
 	// Remove parry gameplay tag - use FName to avoid tag request in constructor
-	FGameplayTag ParryTag = FGameplayTag::RequestGameplayTag(FName("Action.Parry"));
+	FGameplayTag ParryTag = FGameplayTag::RequestGameplayTag(FName("Action.Combat.Parry"));
 	ActionManager->RemoveCombatStateTag(ParryTag);
 
 	// Clear any active time dilation

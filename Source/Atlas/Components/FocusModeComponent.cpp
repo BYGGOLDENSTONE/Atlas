@@ -1,7 +1,7 @@
 #include "FocusModeComponent.h"
 #include "ActionManagerComponent.h"
 #include "../Interfaces/IInteractable.h"
-#include "../Core/AtlasGameplayTags.h"
+// #include "../Core/AtlasGameplayTags.h" // TODO: Fix AtlasGameplayTags compilation
 #include "../Characters/GameCharacterBase.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -69,7 +69,7 @@ void UFocusModeComponent::StartFocusMode()
     
     if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        ActionManager->AddCombatStateTag(FAtlasGameplayTags::Get().Action_FocusMode);
+        // ActionManager->AddCombatStateTag(FAtlasGameplayTags::Get().Action_FocusMode); // TODO: Fix AtlasGameplayTags compilation
     }
     
     OnFocusModeChanged.Broadcast(true);
@@ -91,7 +91,7 @@ void UFocusModeComponent::StopFocusMode()
     
     if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        ActionManager->RemoveCombatStateTag(FAtlasGameplayTags::Get().Action_FocusMode);
+        // ActionManager->RemoveCombatStateTag(FAtlasGameplayTags::Get().Action_FocusMode); // TODO: Fix AtlasGameplayTags compilation
     }
     
     OnFocusModeChanged.Broadcast(false);

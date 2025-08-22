@@ -106,7 +106,7 @@ void UHealthComponent::ReviveWithHealth(float ReviveHealth)
 
     if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dead")));
+        ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Status.Dead")));
     }
 
     OnRevived.Broadcast();
@@ -127,7 +127,7 @@ void UHealthComponent::HandleDeath(AActor* KilledBy)
 
     if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Dead")));
+        ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Status.Dead")));
         
         // Interrupt any ongoing actions
         ActionManager->InterruptCurrentAction();
@@ -192,7 +192,7 @@ void UHealthComponent::TakePoiseDamage(float PoiseDamage, AActor* DamageInstigat
         
         if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
         {
-            ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
+            ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Staggered")));
             
             // Interrupt any ongoing actions
             ActionManager->InterruptCurrentAction();
@@ -297,7 +297,7 @@ void UHealthComponent::RecoverFromStagger()
     
     if (UActionManagerComponent* ActionManager = GetOwner()->FindComponentByClass<UActionManagerComponent>())
     {
-        ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Staggered")));
+        ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Staggered")));
     }
     
     OnStaggerRecovered.Broadcast();

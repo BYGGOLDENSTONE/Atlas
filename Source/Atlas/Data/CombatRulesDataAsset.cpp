@@ -4,12 +4,12 @@ float UCombatRulesDataAsset::CalculateFinalDamage(float BaseDamage, const FGamep
 {
     float FinalDamage = BaseDamage;
 
-    if (DefenderTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Blocking"))))
+    if (DefenderTags.HasTag(FGameplayTag::RequestGameplayTag(FName("State.Combat.Blocking"))))
     {
         FinalDamage *= (1.0f - CombatRules.BlockDamageReduction);
     }
 
-    if (DefenderTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Combat.State.Vulnerable"))))
+    if (DefenderTags.HasTag(FGameplayTag::RequestGameplayTag(FName("State.Status.Vulnerable"))))
     {
         FinalDamage *= CombatRules.VulnerabilityMultiplier;
     }

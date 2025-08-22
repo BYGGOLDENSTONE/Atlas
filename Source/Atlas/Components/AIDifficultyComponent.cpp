@@ -267,8 +267,8 @@ FGameplayTag UAIDifficultyComponent::GetRecommendedAction()
 	{
 		// Always attack when berserking
 		return FMath::FRandRange(0.0f, 1.0f) < 0.3f ? 
-			FGameplayTag::RequestGameplayTag(TEXT("Action.Attack.Heavy")) :
-			FGameplayTag::RequestGameplayTag(TEXT("Action.Attack.Basic"));
+			FGameplayTag::RequestGameplayTag(TEXT("Action.Combat.HeavyAttack")) :
+			FGameplayTag::RequestGameplayTag(TEXT("Action.Combat.BasicAttack"));
 	}
 	
 	// Calculate action weights
@@ -293,11 +293,11 @@ FGameplayTag UAIDifficultyComponent::GetRecommendedAction()
 		// Choose attack type
 		if (FMath::FRandRange(0.0f, 1.0f) < ComboLikelihood)
 		{
-			return FGameplayTag::RequestGameplayTag(TEXT("Action.Attack.Heavy"));
+			return FGameplayTag::RequestGameplayTag(TEXT("Action.Combat.HeavyAttack"));
 		}
 		else
 		{
-			return FGameplayTag::RequestGameplayTag(TEXT("Action.Attack.Basic"));
+			return FGameplayTag::RequestGameplayTag(TEXT("Action.Combat.BasicAttack"));
 		}
 	}
 	else if (RandomValue < AttackWeight + DefenseWeight)
@@ -305,17 +305,17 @@ FGameplayTag UAIDifficultyComponent::GetRecommendedAction()
 		// Choose defense type
 		if (FMath::FRandRange(0.0f, 1.0f) < 0.5f)
 		{
-			return FGameplayTag::RequestGameplayTag(TEXT("Action.Block"));
+			return FGameplayTag::RequestGameplayTag(TEXT("Action.Combat.Block"));
 		}
 		else
 		{
-			return FGameplayTag::RequestGameplayTag(TEXT("Action.Dash"));
+			return FGameplayTag::RequestGameplayTag(TEXT("Action.Combat.Dash"));
 		}
 	}
 	else
 	{
 		// Use ability
-		return FGameplayTag::RequestGameplayTag(TEXT("Action.Ability.Soul"));
+		return FGameplayTag::RequestGameplayTag(TEXT("Action.Combat.SoulAttack"));
 	}
 }
 

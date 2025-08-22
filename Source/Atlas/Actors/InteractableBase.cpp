@@ -1,7 +1,7 @@
 #include "InteractableBase.h"
 #include "Components/StaticMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "../Core/AtlasGameplayTags.h"
+// #include "../Core/AtlasGameplayTags.h" // TODO: Fix AtlasGameplayTags compilation
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -23,7 +23,7 @@ void AInteractableBase::BeginPlay()
 {
     Super::BeginPlay();
     
-    StateTags.AddTag(FAtlasGameplayTags::Get().Interactable_State_Ready);
+    // StateTags.AddTag(FAtlasGameplayTags::Get().Interactable_State_Ready); // TODO: Fix AtlasGameplayTags compilation
     
     if (bStartOnCooldown)
     {
@@ -51,7 +51,7 @@ FGameplayTag AInteractableBase::GetInteractableType_Implementation() const
 
 bool AInteractableBase::CanInteract_Implementation(AActor* Interactor) const
 {
-    return !bIsOnCooldown && StateTags.HasTag(FAtlasGameplayTags::Get().Interactable_State_Ready);
+    return !bIsOnCooldown; // TODO: Re-enable tag check: && StateTags.HasTag(FAtlasGameplayTags::Get().Interactable_State_Ready);
 }
 
 void AInteractableBase::OnFocused_Implementation(AActor* FocusingActor)
@@ -136,8 +136,8 @@ void AInteractableBase::StartCooldown()
     bIsOnCooldown = true;
     CooldownTimeRemaining = CooldownDuration;
     
-    StateTags.RemoveTag(FAtlasGameplayTags::Get().Interactable_State_Ready);
-    StateTags.AddTag(FAtlasGameplayTags::Get().Interactable_State_Cooldown);
+    // StateTags.RemoveTag(FAtlasGameplayTags::Get().Interactable_State_Ready); // TODO: Fix AtlasGameplayTags compilation
+    // StateTags.AddTag(FAtlasGameplayTags::Get().Interactable_State_Cooldown); // TODO: Fix AtlasGameplayTags compilation
     
     GetWorld()->GetTimerManager().SetTimer(
         CooldownTimerHandle,
@@ -158,8 +158,8 @@ void AInteractableBase::EndCooldown()
     bIsOnCooldown = false;
     CooldownTimeRemaining = 0.0f;
     
-    StateTags.RemoveTag(FAtlasGameplayTags::Get().Interactable_State_Cooldown);
-    StateTags.AddTag(FAtlasGameplayTags::Get().Interactable_State_Ready);
+    // StateTags.RemoveTag(FAtlasGameplayTags::Get().Interactable_State_Cooldown); // TODO: Fix AtlasGameplayTags compilation
+    // StateTags.AddTag(FAtlasGameplayTags::Get().Interactable_State_Ready); // TODO: Fix AtlasGameplayTags compilation
     
     GetWorld()->GetTimerManager().ClearTimer(CooldownTimerHandle);
     

@@ -1,0 +1,288 @@
+================================================================================
+                        ATLAS CONSOLE COMMANDS REFERENCE
+                              Updated: 2025-01-22
+================================================================================
+
+HOW TO USE:
+- Open console with ~ (tilde) key
+- Type command exactly as shown
+- Parameters in [brackets] are required
+- Parameters in (parentheses) are optional
+- All commands are case-insensitive
+
+================================================================================
+                              CORE SYSTEM COMMANDS
+================================================================================
+
+HEALTH & DAMAGE
+---------------
+Atlas.Damage [amount]                      # Damage player by amount
+Atlas.Heal [amount]                        # Heal player by amount
+Atlas.SetHealth [amount]                   # Set player health to specific value
+Atlas.Kill                                 # Instantly kill player
+Atlas.Revive                              # Revive player with full health
+
+STATION INTEGRITY
+-----------------
+Atlas.DamageIntegrity [amount]            # Damage station integrity
+Atlas.SetIntegrityPercent [percent]       # Set integrity to percentage (0-100)
+Atlas.ShowIntegrityStatus                 # Display current integrity status
+Atlas.RestoreIntegrity                    # Restore integrity to 100%
+
+COMBAT ACTIONS
+--------------
+Atlas.ToggleFocusMode                     # Toggle focus/targeting mode
+Atlas.TriggerVulnerability [multiplier]   # Apply vulnerability (2, 4, or 8)
+Atlas.ResetPoise                          # Reset poise to maximum
+Atlas.ForceStaggers                       # Force stagger state
+Atlas.ShowCombatStats                     # Display all combat statistics
+
+================================================================================
+                            ACTION MANAGEMENT COMMANDS
+================================================================================
+
+Atlas_AssignAction [Slot] [ActionTag]     # Assign action to slot (0-5)
+Atlas_ClearSlot [Slot]                    # Clear specific slot
+Atlas_SwapSlots [Slot1] [Slot2]          # Swap two slots
+Atlas_ListActions                         # List all available actions
+Atlas_ShowSlots                           # Show current slot configuration
+Atlas_ClearAllSlots                       # Clear all action slots
+
+================================================================================
+                           PHASE 3 - CONTENT COMMANDS
+================================================================================
+
+REWARD MANAGEMENT
+-----------------
+Atlas.Phase3.ListRewards                  # List all 25 available rewards
+Atlas.Phase3.GiveReward [name]            # Give specific reward to player
+Atlas.Phase3.ShowSlots                    # Display equipped rewards
+Atlas.Phase3.EnhanceReward [name]         # Enhance existing reward
+Atlas.Phase3.ClearRewards                 # Remove all equipped rewards
+Atlas.Phase3.FillSlots                    # Fill all slots with random rewards
+
+REWARD NAMES (for GiveReward command):
+- Defense: IronSkin, ReactiveArmor, ShieldBoost, Evasion, DamageReduction
+- Offense: Berserker, CriticalStrikes, DoubleStrike, Bleed, ArmorPiercing
+- Passive Stats: HealthBoost, PoiseBoost, StaminaBoost, SpeedBoost, CooldownReduction
+- Passive Abilities: Lifesteal, Thorns, Regeneration, CounterStrike, LastStand
+- Interactables: ExplosiveBarrel, GravityWell, TurretHack, PowerSurge, EmergencyVent
+
+ROOM MANAGEMENT
+---------------
+Atlas.Phase3.ListRooms                    # List all 5 room types
+Atlas.Phase3.LoadRoom [name]              # Load specific room
+Atlas.Phase3.ShowCurrentRoom              # Display current room info
+Atlas.Phase3.NextRoom                     # Progress to next room
+
+ROOM NAMES (for LoadRoom command):
+- EngineeringBay
+- CombatArena
+- MedicalBay
+- CargoHold
+- Bridge
+
+RUN MANAGEMENT
+--------------
+Atlas.Phase3.StartRun                     # Begin new run from room 1
+Atlas.Phase3.EndRun                       # Force end current run
+Atlas.Phase3.ShowRunProgress              # Display run progress (1-5)
+Atlas.Phase3.SkipToRoom [number]          # Skip to specific room (1-5)
+Atlas.Phase3.CompleteRoom                 # Mark current room as complete
+
+ENEMY SPAWNING
+--------------
+Atlas.Phase3.SpawnEnemy [type]            # Spawn specific enemy type
+Atlas.Phase3.KillAllEnemies               # Remove all enemies
+Atlas.Phase3.SetEnemyPower [level]        # Set enemy power level (1-10)
+
+ENEMY TYPES (for SpawnEnemy command):
+- Mechanic
+- Gladiator
+- Medic
+- Brute
+- Captain
+
+TESTING SHORTCUTS
+-----------------
+Atlas.Phase3.RunTests                     # Run all Phase 3 validation tests
+Atlas.Phase3.QuickTest [type]             # Quick test specific feature
+Atlas.Phase3.CreateAssets                 # Generate all DataAsset templates
+Atlas.Phase3.ValidateContent              # Check all content is properly set up
+
+QUICK TEST TYPES:
+- Combat
+- Rewards
+- Rooms
+- Enemies
+- UI
+- Save
+
+================================================================================
+                         PHASE 4 - ENVIRONMENTAL COMMANDS
+================================================================================
+
+INTEGRITY VISUALIZATION
+-----------------------
+Atlas.Phase4.SetIntegrity [0-100]         # Set station integrity percentage
+Atlas.Phase4.HullBreach                   # Trigger hull breach effect
+Atlas.Phase4.ElectricalFailure            # Trigger electrical failure
+Atlas.Phase4.EmergencyLighting            # Activate emergency lighting
+Atlas.Phase4.ClearEffects                 # Clear all visual effects
+Atlas.Phase4.TestDegradation              # Test progressive degradation
+
+HAZARD SYSTEM
+-------------
+Atlas.Phase4.SpawnHazard [Type]           # Spawn specific hazard type
+Atlas.Phase4.ActivateHazards              # Activate all hazards in room
+Atlas.Phase4.DeactivateHazards            # Deactivate all hazards
+Atlas.Phase4.TestElectrical               # Test electrical surge hazard
+Atlas.Phase4.TestToxic                    # Test toxic leak hazard
+Atlas.Phase4.TestGravity                  # Test low gravity hazard
+Atlas.Phase4.ClearHazards                 # Remove all hazards
+
+HAZARD TYPES (for SpawnHazard command):
+- Electrical (or ElectricalSurge)
+- Toxic (or ToxicLeak)
+- Gravity (or LowGravity)
+
+INTERACTABLES
+-------------
+Atlas.Phase4.SpawnInteractable            # Spawn test interactable at player
+Atlas.Phase4.TestInteractable             # Activate nearest interactable
+Atlas.Phase4.ResetInteractables           # Reset all interactable cooldowns
+Atlas.Phase4.ListInteractables            # Show all interactables in level
+Atlas.Phase4.HighlightInteractables       # Visual highlight all interactables
+
+SYSTEM TESTING
+--------------
+Atlas.Phase4.TestAll                      # Test all Phase 4 systems
+Atlas.Phase4.StressTest                   # Stress test with multiple systems
+Atlas.Phase4.Status                       # Show all system statuses
+Atlas.Phase4.Benchmark                    # Run performance benchmark
+
+================================================================================
+                              DEBUG COMMANDS
+================================================================================
+
+GENERAL DEBUG
+-------------
+Atlas.Debug.ShowFPS                       # Toggle FPS counter
+Atlas.Debug.ShowStats                     # Show detailed statistics
+Atlas.Debug.God                           # Toggle god mode
+Atlas.Debug.NoClip                        # Toggle noclip mode
+Atlas.Debug.Teleport [x] [y] [z]         # Teleport to coordinates
+Atlas.Debug.Speed [multiplier]            # Set game speed multiplier
+
+SAVE SYSTEM
+-----------
+Atlas.Save.QuickSave                      # Create quick save
+Atlas.Save.QuickLoad                      # Load quick save
+Atlas.Save.ListSaves                      # List all save files
+Atlas.Save.DeleteSave [name]              # Delete specific save
+Atlas.Save.ExportSave                     # Export save to file
+Atlas.Save.ImportSave [path]              # Import save from file
+
+AI DEBUG
+--------
+Atlas.AI.ShowBehaviorTree                 # Display AI behavior tree
+Atlas.AI.ShowPerception                   # Show AI perception debug
+Atlas.AI.SetDifficulty [1-10]            # Set AI difficulty level
+Atlas.AI.DisableAI                        # Disable all AI
+Atlas.AI.EnableAI                         # Enable all AI
+Atlas.AI.ShowPatternAnalysis              # Display pattern learning data
+
+PERFORMANCE
+-----------
+Atlas.Perf.ShowDrawCalls                  # Display draw call count
+Atlas.Perf.ShowMemory                     # Show memory usage
+Atlas.Perf.ProfileGPU                     # Start GPU profiling
+Atlas.Perf.ProfileCPU                     # Start CPU profiling
+Atlas.Perf.DumpStats                      # Export performance stats
+
+================================================================================
+                            CHEAT COMMANDS
+================================================================================
+
+Atlas.Cheat.UnlockAll                     # Unlock all rewards
+Atlas.Cheat.MaxStats                      # Set all stats to maximum
+Atlas.Cheat.InfiniteHealth                # Toggle infinite health
+Atlas.Cheat.InfiniteIntegrity             # Toggle infinite station integrity
+Atlas.Cheat.InstantCooldowns              # Remove all ability cooldowns
+Atlas.Cheat.OneHitKill                    # Enable one-hit kills
+Atlas.Cheat.SpeedRun                      # Enable speedrun mode
+
+================================================================================
+                          BATCH TESTING COMMANDS
+================================================================================
+
+Atlas.Test.Phase1                         # Test all Phase 1 features
+Atlas.Test.Phase2                         # Test all Phase 2 features
+Atlas.Test.Phase3                         # Test all Phase 3 features
+Atlas.Test.Phase4                         # Test all Phase 4 features
+Atlas.Test.FullRun                        # Simulate complete 5-room run
+Atlas.Test.AllCombat                      # Test all combat mechanics
+Atlas.Test.AllRewards                     # Test all reward functionality
+Atlas.Test.StressTest                     # Run comprehensive stress test
+Atlas.Test.Validate                       # Validate all game systems
+
+================================================================================
+                         QUICK REFERENCE COMBOS
+================================================================================
+
+NEW RUN SETUP:
+--------------
+Atlas.Phase3.StartRun
+Atlas.Phase3.GiveReward Berserker
+Atlas.Phase3.GiveReward HealthBoost
+Atlas.SetIntegrityPercent 100
+
+TEST COMBAT:
+------------
+Atlas.Phase3.SpawnEnemy Gladiator
+Atlas.ToggleFocusMode
+Atlas.ShowCombatStats
+
+TEST HAZARDS:
+-------------
+Atlas.Phase4.TestElectrical
+Atlas.Phase4.TestToxic
+Atlas.Phase4.TestGravity
+Atlas.Phase4.Status
+
+QUICK POWER-UP:
+---------------
+Atlas.Cheat.MaxStats
+Atlas.Phase3.FillSlots
+Atlas.Heal 999
+
+STRESS TEST:
+------------
+Atlas.Phase3.SpawnEnemy Captain
+Atlas.Phase4.SpawnHazard Electrical
+Atlas.Phase4.HullBreach
+Atlas.SetIntegrityPercent 25
+
+================================================================================
+                              NOTES
+================================================================================
+
+- Commands are NOT case-sensitive
+- Some commands require specific game states to work
+- Use Tab for command auto-completion
+- Press Up/Down arrows to cycle through command history
+- Type 'help' for basic console help
+- Commands prefixed with Atlas.Cheat disable achievements
+
+================================================================================
+                           TROUBLESHOOTING
+================================================================================
+
+If commands don't work:
+1. Ensure you're using BP_AtlasGameMode
+2. Check that C++ classes are compiled
+3. Verify console is enabled in project settings
+4. Some commands only work during gameplay
+5. Check output log for error messages
+
+================================================================================

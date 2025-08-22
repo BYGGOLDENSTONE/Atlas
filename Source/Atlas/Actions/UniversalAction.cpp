@@ -61,7 +61,7 @@ bool UUniversalAction::CanActivate(AGameCharacterBase* Owner)
 		if (UActionManagerComponent* ActionManager = Owner->GetActionManagerComponent())
 		{
 			// Can't start most actions while staggered
-			if (ActionManager->HasCombatStateTag(FGameplayTag::RequestGameplayTag("State.Staggered")))
+			if (ActionManager->HasCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Staggered")))
 			{
 				return false;
 			}
@@ -110,7 +110,7 @@ void UUniversalAction::OnTick(float DeltaTime)
 				bIsDashing = false;
 				if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 				{
-					ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+					ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Dashing"));
 				}
 			}
 			if (bIsAttacking)
@@ -118,7 +118,7 @@ void UUniversalAction::OnTick(float DeltaTime)
 				bIsAttacking = false;
 				if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 				{
-					ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+					ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
 				}
 			}
 			if (bIsChanneling)
@@ -159,7 +159,7 @@ void UUniversalAction::OnRelease()
 		bIsParrying = false;
 		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Action.Parry"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Action.Combat.Parry"));
 		}
 	}
 	
@@ -169,7 +169,7 @@ void UUniversalAction::OnRelease()
 		bIsExecutingSoulAttack = false;
 		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.SoulAttacking"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.SoulAttacking"));
 		}
 	}
 	
@@ -179,7 +179,7 @@ void UUniversalAction::OnRelease()
 		bIsAttacking = false;
 		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
 		}
 	}
 	
@@ -189,7 +189,7 @@ void UUniversalAction::OnRelease()
 		bIsDashing = false;
 		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Dashing"));
 		}
 	}
 	
@@ -221,7 +221,7 @@ void UUniversalAction::OnInterrupted()
 	{
 		if (bIsAttacking)
 		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
 			ActionManager->SetCurrentActionData(nullptr);
 		}
 		if (bIsBlocking)
@@ -230,7 +230,7 @@ void UUniversalAction::OnInterrupted()
 		}
 		if (bIsDashing)
 		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Dashing"));
 		}
 	}
 	
@@ -276,7 +276,7 @@ void UUniversalAction::ExecuteDash()
 	// Add invincibility frames if needed
 	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 	{
-		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Dashing"));
+		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Dashing"));
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("Executed Dash"));
@@ -373,7 +373,7 @@ void UUniversalAction::ExecuteSoulAttack()
 		}
 		
 		// Set soul attack state
-		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.SoulAttacking"));
+		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.SoulAttacking"));
 		bIsExecutingSoulAttack = true;
 		bIsAttacking = true;
 		
@@ -441,7 +441,7 @@ void UUniversalAction::ExecuteMeleeAttack()
 		// Set attacking state IMMEDIATELY to prevent spam
 		// The animation's CombatStateNotify at frame 0 will re-set this (harmless)
 		// The animation's CombatStateNotify at end will clear it
-		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("Combat.State.Attacking"));
+		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
 		bIsAttacking = true;
 		
 		// ActionTimer is only used as a safety timeout, animation controls actual duration
@@ -510,7 +510,7 @@ void UUniversalAction::ExecuteFocusMode()
 	// Toggle focus mode through a component or state
 	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent())
 	{
-		FGameplayTag FocusTag = FGameplayTag::RequestGameplayTag("Combat.State.FocusMode");
+		FGameplayTag FocusTag = FGameplayTag::RequestGameplayTag("State.Combat.Focusing");
 		if (ActionManager->HasCombatStateTag(FocusTag))
 		{
 			ActionManager->RemoveCombatStateTag(FocusTag);
@@ -643,33 +643,30 @@ void UUniversalAction::ExecuteUtility()
 
 void UUniversalAction::InitializeExecutorMap()
 {
-	// Map action tags to their execution functions - using FName for safety
-	// Core actions that should exist
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Dash")), &UUniversalAction::ExecuteDash);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Block")), &UUniversalAction::ExecuteBlock);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.BasicAttack")), &UUniversalAction::ExecuteMeleeAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.HeavyAttack")), &UUniversalAction::ExecuteMeleeAttack);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.FocusMode")), &UUniversalAction::ExecuteFocusMode);
+	// Map action tags to their execution functions - using correct tag names from our clean structure
+	// Core combat actions
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Combat.Dash")), &UUniversalAction::ExecuteDash);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Combat.Block")), &UUniversalAction::ExecuteBlock);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Combat.BasicAttack")), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Combat.HeavyAttack")), &UUniversalAction::ExecuteMeleeAttack);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Combat.Parry")), &UUniversalAction::ExecuteParry);
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Combat.SoulAttack")), &UUniversalAction::ExecuteSoulAttack);
 	
-	// New actions - tags are now registered in AtlasGameplayTags
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Parry")), &UUniversalAction::ExecuteParry);
-	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.SoulAttack")), &UUniversalAction::ExecuteSoulAttack);
-	
-	// Map area effect abilities - using FName for safety
+	// Focus mode and other abilities don't exist in our clean tag structure - commenting out
+	// We'll add them back if/when they're properly defined in DefaultGameplayTags.ini
+	/*
+	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.Combat.FocusMode")), &UUniversalAction::ExecuteFocusMode);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.KineticPulse")), &UUniversalAction::ExecuteAreaEffect);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.SeismicStamp")), &UUniversalAction::ExecuteAreaEffect);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.LocalizedEMP")), &UUniversalAction::ExecuteAreaEffect);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.FloorDestabilizer")), &UUniversalAction::ExecuteAreaEffect);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.AirlockBreach")), &UUniversalAction::ExecuteAreaEffect);
-	
-	// Map ranged abilities - using FName for safety
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.DebrisPull")), &UUniversalAction::ExecuteRangedAttack);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.ImpactGauntlet")), &UUniversalAction::ExecuteRangedAttack);
-	
-	// Map utility abilities - using FName for safety
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.CoolantSpray")), &UUniversalAction::ExecuteUtility);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.SystemHack")), &UUniversalAction::ExecuteUtility);
 	ActionExecutorMap.Add(FGameplayTag::RequestGameplayTag(FName("Action.GravityAnchor")), &UUniversalAction::ExecuteUtility);
+	*/
 }
 
 void UUniversalAction::ExecuteActionByType()

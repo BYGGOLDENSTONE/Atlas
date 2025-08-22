@@ -461,11 +461,11 @@ void FAtlasDebugCommands::ResetSlots(const TArray<FString>& Args)
         ActionManager->ExecuteClearSlotCommand("Slot5");
         
         // Assign defaults
-        ActionManager->ExecuteAssignCommand("Slot1", "Action.Ability.BasicAttack");
-        ActionManager->ExecuteAssignCommand("Slot2", "Action.Ability.HeavyAttack");
-        ActionManager->ExecuteAssignCommand("Slot3", "Action.Ability.Block");
-        ActionManager->ExecuteAssignCommand("Slot4", "Action.Ability.Dash");
-        ActionManager->ExecuteAssignCommand("Slot5", "Action.Ability.FocusMode");
+        ActionManager->ExecuteAssignCommand("Slot1", "Action.Combat.BasicAttack");
+        ActionManager->ExecuteAssignCommand("Slot2", "Action.Combat.HeavyAttack");
+        ActionManager->ExecuteAssignCommand("Slot3", "Action.Combat.Block");
+        ActionManager->ExecuteAssignCommand("Slot4", "Action.Combat.Dash");
+        ActionManager->ExecuteAssignCommand("Slot5", "Action.Combat.FocusMode");
         
         UE_LOG(LogTemp, Warning, TEXT("Reset all slots to default assignments"));
     }

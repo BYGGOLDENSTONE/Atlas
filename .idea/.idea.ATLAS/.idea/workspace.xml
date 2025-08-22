@@ -13,8 +13,39 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Atlas.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/GameplayTags.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/GameplayTags_Organized.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_BasicAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_BasicAttack.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Dataassets/Actions/DA_HeavyAttack.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Dataassets/DA_Debug.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/blueprints/BP_Player.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actions/UniversalAction.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actors/InteractableBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actors/InteractableBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actors/ValveInteractable.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actors/ValveInteractable.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Actors/VentInteractable.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Actors/VentInteractable.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/CombatStateNotify.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/CombatStateNotify.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Animation/ParryNotifyState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Animation/ParryNotifyState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/GameCharacterBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Characters/PlayerCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/AIDifficultyComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/AIDifficultyComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/FocusModeComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/VulnerabilityComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasCheatManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasCheatManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Core/AtlasGameplayTags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/CombatRulesDataAsset.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/RewardDataAssetFactory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/RewardDataAssetFactory.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Data/RoomDataAssetFactory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Data/RoomDataAssetFactory.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/claude.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -29,10 +60,42 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://4" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UnrealEditor/Inc/Atlas/UHT/ICombatInterface.gen.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 3
@@ -205,12 +268,15 @@
       <workItem from="1755793847945" duration="1942000" />
       <workItem from="1755812894139" duration="4415000" />
       <workItem from="1755818026664" duration="4335000" />
+      <workItem from="1755852662151" duration="2483000" />
+      <workItem from="1755857335981" duration="2458000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />

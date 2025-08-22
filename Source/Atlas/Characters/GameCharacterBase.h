@@ -11,6 +11,10 @@ class USpringArmComponent;
 class UCameraComponent;
 class UHealthComponent;
 class UActionManagerComponent;
+class UVulnerabilityComponent;
+class UStationIntegrityComponent;
+class USlotManagerComponent;
+class UFocusModeComponent;
 
 UCLASS(Abstract)
 class ATLAS_API AGameCharacterBase : public ACharacter, public ICombatInterface, public IHealthInterface, public IActionInterface
@@ -32,6 +36,18 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Actions, meta = (AllowPrivateAccess = "true"))
 	UActionManagerComponent* ActionManagerComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UVulnerabilityComponent* VulnerabilityComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Station, meta = (AllowPrivateAccess = "true"))
+	UStationIntegrityComponent* StationIntegrityComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Rewards, meta = (AllowPrivateAccess = "true"))
+	USlotManagerComponent* SlotManagerComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UFocusModeComponent* FocusModeComponent;
 
 protected:
 	virtual void BeginPlay() override;
@@ -44,6 +60,10 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE class UActionManagerComponent* GetActionManagerComponent() const { return ActionManagerComponent; }
 	FORCEINLINE class UHealthComponent* GetHealthComponent() const { return HealthComponent; }
+	FORCEINLINE class UVulnerabilityComponent* GetVulnerabilityComponent() const { return VulnerabilityComponent; }
+	FORCEINLINE class UStationIntegrityComponent* GetStationIntegrityComponent() const { return StationIntegrityComponent; }
+	FORCEINLINE class USlotManagerComponent* GetSlotManagerComponent() const { return SlotManagerComponent; }
+	FORCEINLINE class UFocusModeComponent* GetFocusModeComponent() const { return FocusModeComponent; }
 	
 	// ICombatInterface implementation
 	virtual bool IsInCombat_Implementation() const override;

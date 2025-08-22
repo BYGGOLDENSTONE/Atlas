@@ -1,5 +1,5 @@
 #include "ValveInteractable.h"
-#include "../Core/AtlasGameplayTags.h"
+// #include "../Core/AtlasGameplayTags.h" // TODO: Fix AtlasGameplayTags compilation
 #include "../Characters/GameCharacterBase.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Components/HealthComponent.h"
@@ -12,7 +12,7 @@
 
 AValveInteractable::AValveInteractable()
 {
-    InteractableTypeTag = FAtlasGameplayTags::Get().Interactable_Type_Valve;
+    // InteractableTypeTag = FAtlasGameplayTags::Get().Interactable_Type_Valve; // TODO: Fix AtlasGameplayTags compilation
     CooldownDuration = 10.0f;
     MaxInteractionDistance = 300.0f;
 }

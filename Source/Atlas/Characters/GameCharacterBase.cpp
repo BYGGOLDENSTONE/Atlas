@@ -5,6 +5,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/ActionManagerComponent.h"
+#include "../Components/VulnerabilityComponent.h"
+#include "../Components/StationIntegrityComponent.h"
+#include "../Components/SlotManagerComponent.h"
+#include "../Components/FocusModeComponent.h"
 #include "../Actions/BaseAction.h"
 
 AGameCharacterBase::AGameCharacterBase()
@@ -37,6 +41,10 @@ AGameCharacterBase::AGameCharacterBase()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	ActionManagerComponent = CreateDefaultSubobject<UActionManagerComponent>(TEXT("ActionManagerComponent"));
+	VulnerabilityComponent = CreateDefaultSubobject<UVulnerabilityComponent>(TEXT("VulnerabilityComponent"));
+	StationIntegrityComponent = CreateDefaultSubobject<UStationIntegrityComponent>(TEXT("StationIntegrityComponent"));
+	SlotManagerComponent = CreateDefaultSubobject<USlotManagerComponent>(TEXT("SlotManagerComponent"));
+	FocusModeComponent = CreateDefaultSubobject<UFocusModeComponent>(TEXT("FocusModeComponent"));
 }
 
 void AGameCharacterBase::BeginPlay()

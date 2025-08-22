@@ -19,7 +19,9 @@
       "Bash(cmd /c mkdir:*)",
       "Bash(cmd /c move:*)",
       "Bash(sed:*)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(grep:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

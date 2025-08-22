@@ -7,53 +7,17 @@ void FAtlasGameplayTags::InitializeNativeTags()
 {
     UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
 
-    // ===== ACTIONS (17 abilities total with new ones) =====
-    GameplayTags.Action_BasicAttack = Manager.AddNativeGameplayTag(FName("Action.BasicAttack"), FString("Basic Attack"));
-    GameplayTags.Action_HeavyAttack = Manager.AddNativeGameplayTag(FName("Action.HeavyAttack"), FString("Heavy Attack"));
-    GameplayTags.Action_Block = Manager.AddNativeGameplayTag(FName("Action.Block"), FString("Block"));
-    GameplayTags.Action_Parry = Manager.AddNativeGameplayTag(FName("Action.Parry"), FString("Parry - Perfect timing defense"));
-    GameplayTags.Action_SoulAttack = Manager.AddNativeGameplayTag(FName("Action.SoulAttack"), FString("Soul Attack - 50 unblockable damage"));
-    GameplayTags.Action_Dash = Manager.AddNativeGameplayTag(FName("Action.Dash"), FString("Dash"));
-    GameplayTags.Action_FocusMode = Manager.AddNativeGameplayTag(FName("Action.FocusMode"), FString("Focus Mode"));
-    GameplayTags.Action_KineticPulse = Manager.AddNativeGameplayTag(FName("Action.KineticPulse"), FString("Kinetic Pulse"));
-    GameplayTags.Action_DebrisPull = Manager.AddNativeGameplayTag(FName("Action.DebrisPull"), FString("Debris Pull"));
-    GameplayTags.Action_CoolantSpray = Manager.AddNativeGameplayTag(FName("Action.CoolantSpray"), FString("Coolant Spray"));
-    GameplayTags.Action_SystemHack = Manager.AddNativeGameplayTag(FName("Action.SystemHack"), FString("System Hack"));
-    GameplayTags.Action_FloorDestabilizer = Manager.AddNativeGameplayTag(FName("Action.FloorDestabilizer"), FString("Floor Destabilizer"));
-    GameplayTags.Action_ImpactGauntlet = Manager.AddNativeGameplayTag(FName("Action.ImpactGauntlet"), FString("Impact Gauntlet"));
-    GameplayTags.Action_LocalizedEMP = Manager.AddNativeGameplayTag(FName("Action.LocalizedEMP"), FString("Localized EMP"));
-    GameplayTags.Action_SeismicStamp = Manager.AddNativeGameplayTag(FName("Action.SeismicStamp"), FString("Seismic Stamp"));
-    GameplayTags.Action_GravityAnchor = Manager.AddNativeGameplayTag(FName("Action.GravityAnchor"), FString("Gravity Anchor"));
-    GameplayTags.Action_AirlockBreach = Manager.AddNativeGameplayTag(FName("Action.AirlockBreach"), FString("Airlock Breach"));
-
-    // ===== COMBAT STATES =====
-    GameplayTags.State_Attacking = Manager.AddNativeGameplayTag(FName("State.Attacking"), FString("Attacking"));
-    GameplayTags.State_Blocking = Manager.AddNativeGameplayTag(FName("State.Blocking"), FString("Blocking"));
-    GameplayTags.State_Dashing = Manager.AddNativeGameplayTag(FName("State.Dashing"), FString("Dashing"));
-    GameplayTags.State_Vulnerable = Manager.AddNativeGameplayTag(FName("State.Vulnerable"), FString("Vulnerable"));
-    GameplayTags.State_Staggered = Manager.AddNativeGameplayTag(FName("State.Staggered"), FString("Staggered"));
-    GameplayTags.State_Dead = Manager.AddNativeGameplayTag(FName("State.Dead"), FString("Dead"));
-    GameplayTags.State_IFrames = Manager.AddNativeGameplayTag(FName("State.IFrames"), FString("Invincible"));
+    // COMMENTED OUT - We're using tags from DefaultGameplayTags.ini instead
+    // Keeping this file for potential future native tag needs
     
-    // Combat substates
-    GameplayTags.Combat_State_SoulAttacking = Manager.AddNativeGameplayTag(FName("Combat.State.SoulAttacking"), FString("Performing Soul Attack"));
-
-    // ===== ANIMATION =====
-    GameplayTags.Anim_HitLight = Manager.AddNativeGameplayTag(FName("Anim.HitLight"), FString("Light Hit Reaction"));
-    GameplayTags.Anim_HitHeavy = Manager.AddNativeGameplayTag(FName("Anim.HitHeavy"), FString("Heavy Hit Reaction"));
-    GameplayTags.Anim_Stagger = Manager.AddNativeGameplayTag(FName("Anim.Stagger"), FString("Stagger Animation"));
-    GameplayTags.Anim_BlockSuccess = Manager.AddNativeGameplayTag(FName("Anim.BlockSuccess"), FString("Block Success"));
-    GameplayTags.Anim_BlockImpact = Manager.AddNativeGameplayTag(FName("Anim.BlockImpact"), FString("Block Impact"));
-    GameplayTags.Anim_Death = Manager.AddNativeGameplayTag(FName("Anim.Death"), FString("Death Animation"));
-
-    // ===== STATION RISK =====
-    GameplayTags.Risk_High = Manager.AddNativeGameplayTag(FName("Risk.High"), FString("High Risk"));
-    GameplayTags.Risk_Medium = Manager.AddNativeGameplayTag(FName("Risk.Medium"), FString("Medium Risk"));
-    GameplayTags.Risk_Low = Manager.AddNativeGameplayTag(FName("Risk.Low"), FString("Low Risk"));
-
-    // ===== INTERACTABLES =====
-    GameplayTags.Interactable_State_Ready = Manager.AddNativeGameplayTag(FName("Interactable.State.Ready"), FString("Interactable Ready"));
-    GameplayTags.Interactable_State_Cooldown = Manager.AddNativeGameplayTag(FName("Interactable.State.Cooldown"), FString("Interactable Cooldown"));
-    GameplayTags.Interactable_Type_Valve = Manager.AddNativeGameplayTag(FName("Interactable.Type.Valve"), FString("Valve Interactable"));
-    GameplayTags.Interactable_Type_Vent = Manager.AddNativeGameplayTag(FName("Interactable.Type.Vent"), FString("Vent Interactable"));
+    /*
+    // ===== OLD NATIVE TAGS - REMOVED =====
+    // These were causing conflicts with our clean tag structure
+    // All tags are now defined in Config/DefaultGameplayTags.ini
+    
+    // If we need native tags in the future, use this pattern:
+    // GameplayTags.SomeTag = Manager.AddNativeGameplayTag(FName("Category.Subcategory.Tag"), FString("Description"));
+    */
+    
+    // Currently no native tags needed - all tags come from DefaultGameplayTags.ini
 }

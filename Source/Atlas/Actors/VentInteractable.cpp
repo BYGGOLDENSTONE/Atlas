@@ -1,5 +1,5 @@
 #include "VentInteractable.h"
-#include "../Core/AtlasGameplayTags.h"
+// #include "../Core/AtlasGameplayTags.h" // TODO: Fix AtlasGameplayTags compilation
 #include "../Characters/EnemyCharacter.h"
 #include "../Characters/GameCharacterBase.h"
 #include "../Characters/PlayerCharacter.h"
@@ -14,7 +14,7 @@
 
 AVentInteractable::AVentInteractable()
 {
-    InteractableTypeTag = FAtlasGameplayTags::Get().Interactable_Type_Vent;
+    // InteractableTypeTag = FAtlasGameplayTags::Get().Interactable_Type_Vent; // TODO: Fix AtlasGameplayTags compilation
     CooldownDuration = 999999.0f; // Effectively infinite - can only be triggered once
     MaxInteractionDistance = 1000.0f; // Not used anymore, focus range is used instead
     
@@ -140,7 +140,7 @@ void AVentInteractable::LaunchSelf(AActor* Interactor)
     
     // Disable interactability after launch
     bIsFocused = false;
-    StateTags.RemoveTag(FAtlasGameplayTags::Get().Interactable_State_Ready);
+    // StateTags.RemoveTag(FAtlasGameplayTags::Get().Interactable_State_Ready); // TODO: Fix AtlasGameplayTags compilation
     
     OnVentLaunched(LaunchVelocity);
     

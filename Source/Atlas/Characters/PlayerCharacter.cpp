@@ -16,10 +16,7 @@ APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	// ActionManagerComponent is created in parent class GameCharacterBase
-	
-	// Focus Mode Component (still needed for focus system)
-	FocusModeComponent = CreateDefaultSubobject<UFocusModeComponent>(TEXT("FocusModeComponent"));
+	// All components are created in parent class GameCharacterBase
 }
 
 void APlayerCharacter::BeginPlay()

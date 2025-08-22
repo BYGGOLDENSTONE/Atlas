@@ -8,7 +8,6 @@
 
 class UInputMappingContext;
 class UInputAction;
-class UFocusModeComponent;
 
 UCLASS()
 class ATLAS_API APlayerCharacter : public AGameCharacterBase
@@ -48,9 +47,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* FocusQHoldAction;
 
-	// Focus Mode Component (still needed for focus system)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
-	UFocusModeComponent* FocusModeComponent;
+	// FocusModeComponent is now in base class GameCharacterBase
 
 protected:
 	virtual void BeginPlay() override;
