@@ -1,9 +1,13 @@
 #include "RunManagerComponent.h"
 #include "Atlas/Data/RoomDataAsset.h"
+#include "Atlas/Data/RewardDataAsset.h"
 #include "Atlas/Characters/GameCharacterBase.h"
 #include "Atlas/Components/SlotManagerComponent.h"
 #include "Atlas/Components/HealthComponent.h"
 #include "Atlas/Components/StationIntegrityComponent.h"
+#include "Atlas/Rooms/RoomStreamingManager.h"
+#include "Atlas/Rooms/RoomBase.h"
+#include "Atlas/Rooms/EngineeringBayRoom.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
@@ -23,6 +27,36 @@ URunManagerComponent::URunManagerComponent()
 void URunManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// TEMPORARY: Create test rooms if none configured
+	if (AllRoomDataAssets.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RunManagerComponent: No rooms configured, creating 5 test rooms"));
+		
+		for (int32 i = 1; i <= 5; i++)
+		{
+			URoomDataAsset* TestRoom = NewObject<URoomDataAsset>(this, *FString::Printf(TEXT("TestRoom_%d"), i));
+			TestRoom->RoomID = FName(*FString::Printf(TEXT("TestRoom%d"), i));
+			TestRoom->RoomName = FText::FromString(FString::Printf(TEXT("Test Room %d"), i));
+			TestRoom->Difficulty = ERoomDifficulty::Easy;
+			TestRoom->RoomTheme = ERewardCategory::Defense;
+			TestRoom->bCanRepeat = (i <= 2); // First 2 rooms can repeat
+			TestRoom->RoomSelectionWeight = 1.0f;
+			TestRoom->EnemyBasePower = i; // Increasing difficulty
+			
+			// All test rooms appear on all levels for testing
+			TestRoom->AppearOnLevels = {1, 2, 3, 4, 5};
+			
+			AllRoomDataAssets.Add(TestRoom);
+			UE_LOG(LogTemp, Log, TEXT("  Created test room: %s"), *TestRoom->RoomName.ToString());
+		}
+		
+		UE_LOG(LogTemp, Log, TEXT("RunManagerComponent: Created %d test rooms for testing"), AllRoomDataAssets.Num());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("RunManagerComponent: Loaded %d room data assets"), AllRoomDataAssets.Num());
+	}
 	
 	// Get player references
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
@@ -298,11 +332,39 @@ void URunManagerComponent::LoadRoom(URoomDataAsset* Room)
 		RemainingRooms.Remove(Room);
 	}
 	
-	// Load room level if specified
-	LoadRoomLevel(Room);
+	// Initialize streaming manager if needed
+	if (!StreamingManager)
+	{
+		StreamingManager = NewObject<URoomStreamingManager>(this);
+		StreamingManager->Initialize(GetWorld());
+	}
 	
-	// Apply environmental hazards
-	ApplyRoomHazards();
+	// Load room level using streaming manager
+	StreamingManager->LoadRoomLevel(Room, true);
+	
+	// Determine room class based on RoomID
+	TSubclassOf<ARoomBase> RoomClass = nullptr;
+	
+	if (Room->RoomID == "EngineeringBay")
+	{
+		RoomClass = AEngineeringBayRoom::StaticClass();
+	}
+	// For test rooms or unknown rooms, use EngineeringBayRoom as default
+	else
+	{
+		RoomClass = AEngineeringBayRoom::StaticClass();
+		UE_LOG(LogTemp, Warning, TEXT("Using EngineeringBayRoom as default for room: %s"), *Room->RoomName.ToString());
+	}
+	
+	// Spawn the room actor with appropriate class
+	CurrentRoomInstance = StreamingManager->SpawnRoomActor(Room, RoomClass);
+	
+	// Apply environmental hazards through room instance
+	if (CurrentRoomInstance)
+	{
+		// Room instance handles its own hazards
+		ApplyRoomHazards();
+	}
 	
 	// Play ambient sound
 	if (Room->AmbientSound)
@@ -310,7 +372,7 @@ void URunManagerComponent::LoadRoom(URoomDataAsset* Room)
 		UGameplayStatics::PlaySound2D(GetWorld(), Room->AmbientSound);
 	}
 	
-	// Broadcast room started event
+	// Fire event
 	OnRoomStarted.Broadcast(Room);
 }
 

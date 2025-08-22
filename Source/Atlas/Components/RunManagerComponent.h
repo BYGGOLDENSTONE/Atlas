@@ -9,6 +9,8 @@
 class URoomDataAsset;
 class AGameCharacterBase;
 class USlotManagerComponent;
+class URoomStreamingManager;
+class ARoomBase;
 
 /**
  * Current state of the run
@@ -372,4 +374,12 @@ protected:
 	/** Whether to auto-save after each room */
 	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
 	bool bAutoSaveProgress = true;
+	
+	/** Room streaming manager instance */
+	UPROPERTY()
+	URoomStreamingManager* StreamingManager;
+	
+	/** Current room actor instance */
+	UPROPERTY()
+	ARoomBase* CurrentRoomInstance;
 };

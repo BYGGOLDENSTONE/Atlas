@@ -9,6 +9,8 @@
 #include "../Components/FocusModeComponent.h"
 #include "../Components/ActionManagerComponent.h"
 #include "../Core/AtlasGameState.h"
+#include "Phase3ConsoleCommands.h"
+#include "Phase4ConsoleCommands.h"
 
 // Static member initialization
 bool FAtlasDebugCommands::bGodModeEnabled = false;
@@ -19,6 +21,12 @@ bool FAtlasDebugCommands::bNoIntegrityCostEnabled = false;
 
 void FAtlasDebugCommands::RegisterAllCommands()
 {
+    // Register Phase 3 and Phase 4 commands first
+    UPhase3ConsoleCommands::RegisterCommands();
+    UPhase4ConsoleCommands::RegisterCommands();
+    
+    UE_LOG(LogTemp, Log, TEXT("AtlasDebugCommands: Phase 3 and Phase 4 commands registered"));
+    
     // ===== FOCUS MODE COMMANDS =====
     IConsoleManager::Get().RegisterConsoleCommand(
         TEXT("Atlas.ToggleFocusMode"),

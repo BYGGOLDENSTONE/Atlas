@@ -7,10 +7,12 @@
 #include "Atlas/Characters/GameCharacterBase.h"
 #include "Atlas/Components/SlotManagerComponent.h"
 #include "Atlas/Components/RunManagerComponent.h"
+#include "Atlas/Components/RunManagerSubsystem.h"
 #include "Atlas/Components/RewardSelectionComponent.h"
 #include "Atlas/Data/RewardDataAsset.h"
 #include "Atlas/Data/RoomDataAsset.h"
 #include "Atlas/AtlasGameMode.h"
+#include "GlobalRunManager.h"
 
 #define PHASE3_LOG(Message) LogPhase3(Message, false)
 #define PHASE3_ERROR(Message) LogPhase3(Message, true)
@@ -825,13 +827,115 @@ USlotManagerComponent* UPhase3ConsoleCommands::GetSlotManager()
 
 URunManagerComponent* UPhase3ConsoleCommands::GetRunManager()
 {
-	if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+	// Debug: Check basic engine state
+	if (!GEngine)
 	{
-		if (AAtlasGameMode* GameMode = Cast<AAtlasGameMode>(World->GetAuthGameMode()))
+		UE_LOG(LogTemp, Error, TEXT("[PHASE3] GEngine is null!"));
+		return nullptr;
+	}
+	
+	if (GEngine->GetWorldContexts().Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[PHASE3] No world contexts available!"));
+		return nullptr;
+	}
+	
+	UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull);
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[PHASE3] World is null!"));
+		return nullptr;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("[PHASE3] World found: %s"), *World->GetName());
+	
+	// Method 1: Try to get from GameMode
+	AGameModeBase* GameModeBase = World->GetAuthGameMode();
+	if (!GameModeBase)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[PHASE3] No GameMode found in world!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[PHASE3] GameMode class: %s"), *GameModeBase->GetClass()->GetName());
+		
+		// First try casting to our C++ GameMode
+		AAtlasGameMode* GameMode = Cast<AAtlasGameMode>(GameModeBase);
+		if (GameMode)
 		{
-			return GameMode->FindComponentByClass<URunManagerComponent>();
+			UE_LOG(LogTemp, Warning, TEXT("[PHASE3] Successfully cast to AAtlasGameMode"));
+			URunManagerComponent* RunManager = GameMode->GetRunManager();
+			if (RunManager)
+			{
+				UE_LOG(LogTemp, Log, TEXT("[PHASE3] Got RunManager from GameMode"));
+				return RunManager;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("[PHASE3] GameMode->GetRunManager() returned null"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[PHASE3] Could not cast to AAtlasGameMode, trying FindComponentByClass"));
+		}
+		
+		// If that didn't work, try finding the component on the GameMode actor
+		URunManagerComponent* RunManager = GameModeBase->FindComponentByClass<URunManagerComponent>();
+		if (RunManager)
+		{
+			UE_LOG(LogTemp, Log, TEXT("[PHASE3] Found RunManager component on GameMode actor"));
+			return RunManager;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[PHASE3] FindComponentByClass<URunManagerComponent>() returned null"));
 		}
 	}
+	
+	// Method 2: Try the subsystem approach
+	UE_LOG(LogTemp, Warning, TEXT("[PHASE3] Trying subsystem approach..."));
+	
+	UGameInstance* GameInstance = World->GetGameInstance();
+	if (!GameInstance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[PHASE3] GameInstance is null!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[PHASE3] GameInstance found: %s"), *GameInstance->GetClass()->GetName());
+		
+		URunManagerSubsystem* Subsystem = GameInstance->GetSubsystem<URunManagerSubsystem>();
+		if (!Subsystem)
+		{
+			UE_LOG(LogTemp, Error, TEXT("[PHASE3] RunManagerSubsystem not found! Subsystem might not be registered."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[PHASE3] RunManagerSubsystem found, getting RunManager..."));
+			URunManagerComponent* RunManager = Subsystem->GetRunManager();
+			if (RunManager)
+			{
+				UE_LOG(LogTemp, Log, TEXT("[PHASE3] Got RunManager from Subsystem"));
+				return RunManager;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("[PHASE3] Subsystem->GetRunManager() returned null"));
+			}
+		}
+	}
+	
+	// Method 3: Use global singleton as last resort
+	UE_LOG(LogTemp, Warning, TEXT("[PHASE3] Trying global singleton approach..."));
+	URunManagerComponent* GlobalRunManager = FGlobalRunManager::Get();
+	if (GlobalRunManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[PHASE3] Got RunManager from global singleton (fallback)"));
+		return GlobalRunManager;
+	}
+	
+	UE_LOG(LogTemp, Error, TEXT("[PHASE3] RunManager not found - tried GameMode, Subsystem, and Global approaches"));
 	return nullptr;
 }
 
