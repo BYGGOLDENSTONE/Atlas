@@ -10,6 +10,8 @@
 #include "Atlas/Components/RunManagerComponent.h"
 #include "Atlas/Components/RunManagerSubsystem.h"
 #include "Atlas/Components/RewardSelectionComponent.h"
+#include "Atlas/Components/HealthComponent.h"
+#include "Atlas/Interfaces/IHealthInterface.h"
 #include "Atlas/Data/RewardDataAsset.h"
 #include "Atlas/Data/RoomDataAsset.h"
 #include "Atlas/Rooms/RoomBase.h"
@@ -1334,24 +1336,57 @@ void UPhase3ConsoleCommands::NextRoom(const TArray<FString>& Args)
 							UClass* EnemyBP = LoadClass<APawn>(nullptr, TEXT("/Game/blueprints/BP_Enemy.BP_Enemy_C"));
 							if (EnemyBP)
 							{
+								PHASE3_LOG(FString::Printf(TEXT("Loaded EnemyBP: %s"), *EnemyBP->GetName()));
+								
 								if (AActor* Enemy = World->SpawnActor<AActor>(EnemyBP, SpawnLocation, SpawnRotation, SpawnParams))
 								{
 									UPhase3ConsoleCommands::CurrentSpawnedEnemy = Enemy;
-									PHASE3_LOG(FString::Printf(TEXT("Enemy spawned in %s!"), *RoomName));
+									PHASE3_LOG(FString::Printf(TEXT("Enemy spawned in %s! Class: %s"), *RoomName, *Enemy->GetClass()->GetName()));
+									
+									// Validate enemy has health component
+									if (UHealthComponent* HealthComp = Enemy->FindComponentByClass<UHealthComponent>())
+									{
+										PHASE3_LOG(FString::Printf(TEXT("Enemy Health: %.1f/%.1f"), HealthComp->GetCurrentHealth(), HealthComp->GetMaxHealth()));
+									}
+									else if (AGameCharacterBase* EnemyChar = Cast<AGameCharacterBase>(Enemy))
+									{
+										if (UHealthComponent* CharHealthComp = EnemyChar->GetHealthComponent())
+										{
+											PHASE3_LOG(FString::Printf(TEXT("Enemy Health (GameChar): %.1f/%.1f"), CharHealthComp->GetCurrentHealth(), CharHealthComp->GetMaxHealth()));
+										}
+										else
+										{
+											PHASE3_ERROR("Enemy spawned but has no HealthComponent!");
+										}
+									}
+									else
+									{
+										PHASE3_ERROR("Enemy spawned but cannot find HealthComponent!");
+									}
+									
 									PHASE3_LOG("Defeat the enemy to progress!");
 									
-									// Start checking for enemy death
+									// Start checking for enemy death every second
 									FTimerDelegate EnemyCheckDelegate;
 									EnemyCheckDelegate.BindLambda([World]()
 									{
 										UPhase3ConsoleCommands::CheckEnemyStatus(World);
 									});
 									World->GetTimerManager().SetTimer(UPhase3ConsoleCommands::EnemyCheckTimer, EnemyCheckDelegate, 1.0f, true);
+									PHASE3_LOG("Enemy death monitoring started (checking every 1.0s)");
+								}
+								else
+								{
+									PHASE3_ERROR("Failed to spawn enemy actor! Check spawn location and collision.");
 								}
 							}
 							else
 							{
 								PHASE3_ERROR("Failed to load BP_Enemy blueprint! Check path: /Game/blueprints/BP_Enemy");
+								PHASE3_ERROR("Alternative paths to try:");
+								PHASE3_ERROR("  /Game/Blueprints/BP_Enemy.BP_Enemy_C");
+								PHASE3_ERROR("  /Game/Characters/BP_Enemy.BP_Enemy_C");
+								PHASE3_ERROR("  /Game/Enemy/BP_Enemy.BP_Enemy_C");
 							}
 						}
 					});
@@ -1612,10 +1647,79 @@ void UPhase3ConsoleCommands::CompleteAndProgress(const TArray<FString>& Args)
 
 void UPhase3ConsoleCommands::CheckEnemyStatus(UWorld* World)
 {
-	// Check if enemy is still alive
+	// Debug: Show we're checking
+	static int32 CheckCount = 0;
+	CheckCount++;
+	
+	// Check if enemy exists and is valid first
 	if (!CurrentSpawnedEnemy || !IsValid(CurrentSpawnedEnemy))
 	{
-		// Enemy is dead/destroyed - auto progress!
+		// Enemy was destroyed - auto progress!
+		PHASE3_LOG("Enemy destroyed! Auto-progressing to next room...");
+		
+		// Clear the timer
+		if (World && EnemyCheckTimer.IsValid())
+		{
+			World->GetTimerManager().ClearTimer(EnemyCheckTimer);
+		}
+		
+		// Auto-progress to next room
+		CompleteAndProgress(TArray<FString>());
+		return;
+	}
+	
+	// Check if enemy is dead (health <= 0) using multiple methods
+	bool bEnemyIsDead = false;
+	FString DeathCheckMethod = TEXT("None");
+	float CurrentHealth = -1.0f;
+	float MaxHealth = -1.0f;
+	
+	// Method 1: Try casting to GameCharacterBase and check IHealthInterface
+	if (AGameCharacterBase* EnemyCharacter = Cast<AGameCharacterBase>(CurrentSpawnedEnemy))
+	{
+		if (UHealthComponent* HealthComp = EnemyCharacter->GetHealthComponent())
+		{
+			bEnemyIsDead = HealthComp->IsDead();
+			CurrentHealth = HealthComp->GetCurrentHealth();
+			MaxHealth = HealthComp->GetMaxHealth();
+			DeathCheckMethod = TEXT("GameCharacterBase->HealthComponent");
+		}
+		else
+		{
+			// Fallback: use interface method
+			bEnemyIsDead = EnemyCharacter->Execute_IsDead(EnemyCharacter);
+			DeathCheckMethod = TEXT("GameCharacterBase->IHealthInterface");
+		}
+	}
+	// Method 2: Try direct HealthComponent lookup
+	else if (UHealthComponent* HealthComp = CurrentSpawnedEnemy->FindComponentByClass<UHealthComponent>())
+	{
+		bEnemyIsDead = HealthComp->IsDead();
+		CurrentHealth = HealthComp->GetCurrentHealth();
+		MaxHealth = HealthComp->GetMaxHealth();
+		DeathCheckMethod = TEXT("FindComponentByClass<UHealthComponent>");
+	}
+	// Method 3: Try IHealthInterface if implemented
+	else if (CurrentSpawnedEnemy->GetClass()->ImplementsInterface(UHealthInterface::StaticClass()))
+	{
+		bEnemyIsDead = IHealthInterface::Execute_IsDead(CurrentSpawnedEnemy);
+		DeathCheckMethod = TEXT("IHealthInterface");
+	}
+	else
+	{
+		DeathCheckMethod = TEXT("No valid method found!");
+	}
+	
+	// Log status every 5 checks (every 5 seconds) or if enemy is dead
+	if (CheckCount % 5 == 0 || bEnemyIsDead)
+	{
+		PHASE3_LOG(FString::Printf(TEXT("Enemy Status Check #%d: Method=%s, Health=%.1f/%.1f, IsDead=%s"), 
+			CheckCount, *DeathCheckMethod, CurrentHealth, MaxHealth, bEnemyIsDead ? TEXT("TRUE") : TEXT("FALSE")));
+	}
+	
+	if (bEnemyIsDead)
+	{
+		// Enemy is dead - auto progress!
 		PHASE3_LOG("Enemy defeated! Auto-progressing to next room...");
 		
 		// Clear the timer
@@ -1623,6 +1727,9 @@ void UPhase3ConsoleCommands::CheckEnemyStatus(UWorld* World)
 		{
 			World->GetTimerManager().ClearTimer(EnemyCheckTimer);
 		}
+		
+		// Reset check count for next enemy
+		CheckCount = 0;
 		
 		// Auto-progress to next room
 		CompleteAndProgress(TArray<FString>());
