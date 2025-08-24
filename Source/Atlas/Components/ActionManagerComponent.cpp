@@ -1,5 +1,5 @@
 #include "ActionManagerComponent.h"
-#include "../Actions/BaseAction.h"
+#include "../Actions/ActionInstance.h"
 #include "../Data/ActionDataAsset.h"
 #include "../Characters/GameCharacterBase.h"
 #include "../Characters/PlayerCharacter.h"
@@ -108,7 +108,7 @@ bool UActionManagerComponent::AssignActionToSlotByDataAsset(FName SlotName, UAct
 	}
 
 	// Create new action instance
-	UBaseAction* NewAction = CreateActionInstance(ActionData);
+	UActionInstance* NewAction = CreateActionInstance(ActionData);
 	if (!NewAction)
 	{
 		UE_LOG(LogTemp, Error, TEXT("ActionManager: Failed to create action instance"));
@@ -149,7 +149,7 @@ void UActionManagerComponent::SwapSlots(FName Slot1, FName Slot2)
 		return;
 	}
 
-	UBaseAction* TempAction = ActionSlots[Slot1];
+	UActionInstance* TempAction = ActionSlots[Slot1];
 	ActionSlots[Slot1] = ActionSlots[Slot2];
 	ActionSlots[Slot2] = TempAction;
 
@@ -157,7 +157,7 @@ void UActionManagerComponent::SwapSlots(FName Slot1, FName Slot2)
 	OnActionSlotChanged.Broadcast(Slot2, ActionSlots[Slot2]);
 }
 
-UBaseAction* UActionManagerComponent::GetActionInSlot(FName SlotName) const
+UActionInstance* UActionManagerComponent::GetActionInSlot(FName SlotName) const
 {
 	if (ActionSlots.Contains(SlotName))
 	{
@@ -330,17 +330,17 @@ UActionDataAsset* UActionManagerComponent::GetActionDataByTag(FGameplayTag Actio
 	return nullptr;
 }
 
-UBaseAction* UActionManagerComponent::CreateActionInstance(UActionDataAsset* ActionData)
+UActionInstance* UActionManagerComponent::CreateActionInstance(UActionDataAsset* ActionData)
 {
-	if (!ActionData || !ActionData->ActionClass)
+	if (!ActionData)
 	{
 		return nullptr;
 	}
 
-	UBaseAction* NewAction = NewObject<UBaseAction>(this, ActionData->ActionClass);
+	UActionInstance* NewAction = NewObject<UActionInstance>(this, UActionInstance::StaticClass());
 	if (NewAction)
 	{
-		NewAction->SetDataAsset(ActionData);
+		NewAction->Initialize(ActionData);
 	}
 	return NewAction;
 }
@@ -352,7 +352,7 @@ void UActionManagerComponent::TickActions(float DeltaTime)
 	{
 		if (Slot.Value)
 		{
-			Slot.Value->OnTick(DeltaTime);
+			Slot.Value->Update(DeltaTime);
 		}
 	}
 }

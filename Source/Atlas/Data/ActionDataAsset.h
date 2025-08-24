@@ -5,7 +5,7 @@
 #include "GameplayTagContainer.h"
 #include "ActionDataAsset.generated.h"
 
-class UBaseAction;
+class UActionInstance;
 
 UENUM(BlueprintType)
 enum class EActionType : uint8
@@ -39,8 +39,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "1. Identity", meta = (Priority = 2))
     EActionType ActionType = EActionType::Utility;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "1. Identity", meta = (Priority = 3))
-    TSubclassOf<UBaseAction> ActionClass;
+    // Note: ActionClass removed - all actions use UActionInstance now
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "1. Identity", meta = (Priority = 4))
     FText ActionName;

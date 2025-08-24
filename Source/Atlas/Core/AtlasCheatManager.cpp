@@ -2,7 +2,7 @@
 #include "../Components/ActionManagerComponent.h"
 #include "../Components/RunManagerComponent.h"
 #include "../Characters/PlayerCharacter.h"
-#include "../Actions/BaseAction.h"
+#include "../Actions/ActionInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
@@ -78,7 +78,7 @@ void UAtlasCheatManager::Atlas_ShowSlots()
 		TArray<FName> SlotNames = ActionManager->GetAllSlotNames();
 		for (const FName& SlotName : SlotNames)
 		{
-			if (UBaseAction* Action = ActionManager->GetActionInSlot(SlotName))
+			if (UActionInstance* Action = ActionManager->GetActionInSlot(SlotName))
 			{
 				FString Status = Action->GetCooldownRemaining() > 0.0f ? 
 					FString::Printf(TEXT(" (Cooldown: %.1fs)"), Action->GetCooldownRemaining()) : 

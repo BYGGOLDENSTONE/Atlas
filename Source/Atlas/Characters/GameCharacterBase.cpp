@@ -9,7 +9,7 @@
 #include "../Components/StationIntegrityComponent.h"
 #include "../Components/SlotManagerComponent.h"
 #include "../Components/FocusModeComponent.h"
-#include "../Actions/BaseAction.h"
+#include "../Actions/ActionInstance.h"
 
 AGameCharacterBase::AGameCharacterBase()
 {
@@ -269,7 +269,7 @@ bool AGameCharacterBase::TryPerformAction_Implementation(const FGameplayTag& Act
 		TArray<FName> Slots = ActionManagerComponent->GetAllSlotNames();
 		for (const FName& Slot : Slots)
 		{
-			if (UBaseAction* Action = ActionManagerComponent->GetActionInSlot(Slot))
+			if (UActionInstance* Action = ActionManagerComponent->GetActionInSlot(Slot))
 			{
 				if (Action->GetActionTag() == ActionTag)
 				{
@@ -299,7 +299,7 @@ bool AGameCharacterBase::IsPerformingAction_Implementation() const
 	return false;
 }
 
-UBaseAction* AGameCharacterBase::GetCurrentAction_Implementation() const
+UActionInstance* AGameCharacterBase::GetCurrentAction_Implementation() const
 {
 	if (ActionManagerComponent)
 	{
@@ -325,7 +325,7 @@ void AGameCharacterBase::ClearActionSlot_Implementation(FName SlotName)
 	}
 }
 
-UBaseAction* AGameCharacterBase::GetActionInSlot_Implementation(FName SlotName) const
+UActionInstance* AGameCharacterBase::GetActionInSlot_Implementation(FName SlotName) const
 {
 	if (ActionManagerComponent)
 	{
