@@ -23,6 +23,19 @@ enum class ERoomDifficulty : uint8
 };
 
 /**
+ * Types of rooms in the game
+ */
+UENUM(BlueprintType)
+enum class ERoomType : uint8
+{
+	EngineeringBay    UMETA(DisplayName = "Engineering Bay"),
+	CombatArena       UMETA(DisplayName = "Combat Arena"),
+	MedicalBay        UMETA(DisplayName = "Medical Bay"),
+	CargoHold         UMETA(DisplayName = "Cargo Hold"),
+	Bridge            UMETA(DisplayName = "Bridge")
+};
+
+/**
  * Environmental hazards that can appear in rooms
  */
 UENUM(BlueprintType)
@@ -91,6 +104,10 @@ public:
 	/** Room icon for map display */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Identity")
 	class UTexture2D* RoomIcon;
+	
+	/** The type of this room */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Identity")
+	ERoomType RoomType = ERoomType::EngineeringBay;
 	
 	// ========================================
 	// ROOM CONFIGURATION

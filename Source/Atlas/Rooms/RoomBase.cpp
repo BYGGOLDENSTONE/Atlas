@@ -454,3 +454,116 @@ void ARoomBase::StopCombatMusic()
 	// Stop all sounds (simplified - in production use audio component)
 	// This would be better handled with an audio component that can be stopped
 }
+
+// ========================================
+// TEST ARENA SUPPORT IMPLEMENTATION
+// ========================================
+
+void ARoomBase::TeleportPlayerToRoom()
+{
+	if (!GetWorld())
+	{
+		UE_LOG(LogTemp, Error, TEXT("TeleportPlayerToRoom: World is null"));
+		return;
+	}
+	
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC)
+	{
+		UE_LOG(LogTemp, Error, TEXT("TeleportPlayerToRoom: No player controller found"));
+		return;
+	}
+	
+	APawn* PlayerPawn = PC->GetPawn();
+	if (!PlayerPawn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("TeleportPlayerToRoom: No player pawn found"));
+		return;
+	}
+	
+	// Calculate spawn position
+	FVector SpawnLocation;
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+	
+	if (PlayerSpawnPoint)
+	{
+		// Use spawn point if available
+		SpawnLocation = GetActorLocation() + PlayerSpawnPoint->GetRelativeLocation();
+		SpawnRotation = PlayerSpawnPoint->GetComponentRotation();
+	}
+	else
+	{
+		// Fallback: Use room location + offset
+		SpawnLocation = GetActorLocation() + FVector(0, 0, 100);
+		UE_LOG(LogTemp, Warning, TEXT("PlayerSpawnPoint is null for room, using default offset"));
+	}
+	
+	// Teleport player
+	PlayerPawn->SetActorLocation(SpawnLocation, false, nullptr, ETeleportType::TeleportPhysics);
+	PlayerPawn->SetActorRotation(SpawnRotation);
+	
+	// Reset velocity if it's a character
+	if (ACharacter* PlayerChar = Cast<ACharacter>(PlayerPawn))
+	{
+		if (PlayerChar->GetCharacterMovement())
+		{
+			PlayerChar->GetCharacterMovement()->Velocity = FVector::ZeroVector;
+			PlayerChar->GetCharacterMovement()->StopMovementImmediately();
+		}
+	}
+	
+	const UEnum* EnumPtr = StaticEnum<ERoomType>();
+	FString RoomName = EnumPtr ? EnumPtr->GetNameStringByValue((int64)RoomTypeForTesting) : TEXT("Unknown");
+	UE_LOG(LogTemp, Log, TEXT("Teleported player to room: %s at position %s"), 
+		*RoomName,
+		*SpawnLocation.ToString());
+	
+	// Activate this room if not already active
+	if (!bIsRoomActive && CurrentRoomData)
+	{
+		ActivateRoom(CurrentRoomData);
+	}
+}
+
+void ARoomBase::ResetRoom()
+{
+	// Clear all spawned entities
+	ClearSpawnedEntities();
+	
+	// Reset room state
+	bIsRoomActive = false;
+	bTestRoomCompleted = false;
+	SpawnedEnemy = nullptr;
+	
+	// Remove environmental effects
+	RemoveEnvironmentalEffects();
+	
+	// Stop combat music
+	StopCombatMusic();
+	
+	// Re-enable exit trigger if it was locked
+	if (ExitTrigger)
+	{
+		ExitTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
+	const UEnum* EnumPtr2 = StaticEnum<ERoomType>();
+	FString RoomName2 = EnumPtr2 ? EnumPtr2->GetNameStringByValue((int64)RoomTypeForTesting) : TEXT("Unknown");
+	UE_LOG(LogTemp, Log, TEXT("Room reset: %s"), *RoomName2);
+}
+
+bool ARoomBase::IsPlayerInRoom() const
+{
+	if (APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn())
+	{
+		FVector PlayerLocation = PlayerPawn->GetActorLocation();
+		FVector RoomCenter = TestArenaPosition;
+		
+		// Check if player is within room radius (2D check)
+		float Distance2D = FVector::Dist2D(PlayerLocation, RoomCenter);
+		
+		return Distance2D <= RoomRadius;
+	}
+	
+	return false;
+}

@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameplayTagContainer.h"
+#include "Atlas/Data/RoomDataAsset.h"  // Need full include for ERoomType
 #include "RunManagerComponent.generated.h"
 
 // Forward declarations
-class URoomDataAsset;
 class AGameCharacterBase;
 class USlotManagerComponent;
 class URoomStreamingManager;
@@ -243,6 +243,47 @@ public:
 	AGameCharacterBase* GetCurrentEnemy() const { return CurrentRoomEnemy; }
 	
 	// ========================================
+	// TEST ARENA SUPPORT
+	// ========================================
+	
+	/**
+	 * Teleport to a specific room by name (for testing)
+	 * @param RoomName Name of the room (EngineeringBay, CombatArena, etc.)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
+	void GoToRoom(const FString& RoomName);
+	
+	/**
+	 * Complete current room and spawn next (for testing)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
+	void CompleteRoomTest();
+	
+	/**
+	 * Reset all rooms in test arena
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
+	void ResetAllRooms();
+	
+	/**
+	 * Show debug information about rooms
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
+	void DebugRooms();
+	
+	/**
+	 * Test complete room sequence
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
+	void TestRoomSequence();
+	
+	/**
+	 * Get room actor by type (for test arena)
+	 */
+	UFUNCTION(BlueprintPure, Category = "Run Manager|Testing")
+	ARoomBase* GetRoomActorByType(ERoomType RoomType) const;
+	
+	// ========================================
 	// ENEMY SCALING
 	// ========================================
 	
@@ -382,4 +423,18 @@ protected:
 	/** Current room actor instance */
 	UPROPERTY()
 	ARoomBase* CurrentRoomInstance;
+	
+	// ========================================
+	// TEST ARENA PROPERTIES
+	// ========================================
+	
+	/** All room actors in test arena (populated at runtime) */
+	UPROPERTY()
+	TArray<ARoomBase*> TestArenaRooms;
+	
+	/** Current room index in test sequence */
+	int32 TestSequenceIndex = 0;
+	
+	/** Whether we're in test arena mode */
+	bool bTestArenaMode = false;
 };

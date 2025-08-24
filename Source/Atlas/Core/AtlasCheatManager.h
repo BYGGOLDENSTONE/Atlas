@@ -32,6 +32,28 @@ public:
 	UFUNCTION(Exec, Category = "Atlas|Actions")
 	void Atlas_ResetSlots();
 
+	// ========================================
+	// Room Testing Commands
+	// ========================================
+	
+	UFUNCTION(Exec, Category = "Atlas|Rooms")
+	void Atlas_Room_GoTo(const FString& RoomName);
+	
+	UFUNCTION(Exec, Category = "Atlas|Rooms")
+	void Atlas_Room_CompleteTest();
+	
+	UFUNCTION(Exec, Category = "Atlas|Rooms")
+	void Atlas_Room_ResetAll();
+	
+	UFUNCTION(Exec, Category = "Atlas|Rooms")
+	void Atlas_Room_Debug();
+	
+	UFUNCTION(Exec, Category = "Atlas|Rooms")
+	void Atlas_Room_TestSequence();
+
 	// Helper function to get action manager
 	class UActionManagerComponent* GetActionManager() const;
+	
+	// Helper function to get run manager
+	class URunManagerComponent* GetRunManager() const;
 };

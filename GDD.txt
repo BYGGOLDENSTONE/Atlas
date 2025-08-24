@@ -1,5 +1,16 @@
 Of course. Here is a comprehensive Game Design Document (GDD) based on all the information you have provided. It synthesizes the initial technical documents with your latest, detailed explanation of the gameplay loop, treating the latter as the current project scope.
 
+**DEVELOPMENT STATUS UPDATE - 2025-01-24:**
+✅ Complete 5-room run system implemented with randomization
+✅ Room teleportation working correctly
+✅ Enemy spawning (BP_Enemy) working correctly  
+⚠️ KNOWN ISSUE: Automatic enemy death detection not working - room completion requires manual command
+   - Enemy spawns correctly in each room
+   - Player can kill enemy successfully
+   - Auto-progression to next room fails - requires manual "Atlas.Phase3.CompleteAndProgress"
+   - Timer-based enemy death checking implemented but needs debugging
+   - FOR NEXT SESSION: Fix CheckEnemyStatus function to properly detect enemy death
+
 ***
 
 # **Game Design Document: Atlas**
@@ -8,7 +19,7 @@ Of course. Here is a comprehensive Game Design Document (GDD) based on all the i
 
 * **Game Title:** Atlas
 * **Genre:** 1v1 Roguelite Dueler
-* **Core Concept:** Atlas is a single-player, run-based dueling game set on a decaying space station. Players progress through a series of unique rooms, fighting a distinct enemy in each. After every victory, the player chooses a new ability or passive upgrade from a themed pool of rewards to build out their character. The goal is to complete a full run of five rooms without dying or allowing the station's integrity to collapse. A key feature is the persistence and enhancement of abilities across runs, creating long-term strategic progression.
+* **Core Concept:** Atlas is a single-player, run-based dueling game set on a decaying space station. The player, having lost their left arm in a catastrophic incident, now bears their deceased wife's arm as a replacement—a limb they cannot consciously control except in moments of mortal danger. They face temporal echoes of themselves with both arms intact, representing what they once were. Players progress through five rooms, each a memory-laden location on the station, fighting increasingly powerful versions of their former self. After every victory, the player chooses a new ability or passive upgrade from a themed pool of rewards to build out their character. The goal is to complete a full run of five rooms without dying or allowing the station's integrity (representing their psychological state) to collapse. A key feature is the persistence and enhancement of abilities across runs, symbolizing the gradual adaptation to their disability and loss.
 
 ## **2. Core Gameplay Loop**
 
@@ -39,24 +50,51 @@ The combat is designed to be animation-driven, tactical, and impactful.
 
 ### **3.2. The Dual-Fail State**
 
-Victory is not just about defeating the enemy, but also preserving the arena.
+Victory is not just about defeating the enemy, but also preserving one's sanity.
 
-* **Player Health:** Managed by the `HealthComponent`. If it reaches zero, the run ends.
-* **Station Integrity:** Managed by the `StationIntegrityComponent`. The station is damaged by powerful player abilities and environmental collisions (e.g., an enemy being launched into a wall). If it reaches zero, the run ends.
+* **Player Health:** Managed by the `HealthComponent`. Physical damage and exhaustion. If it reaches zero, the run ends.
+* **Station Integrity:** Managed by the `StationIntegrityComponent`. Represents the player's psychological state and trauma. The station (mind) is damaged by violent actions: powerful abilities, environmental collisions, and witnessing destruction. Station at 0% represents complete psychological breakdown. If it reaches zero, the run ends.
 
 ### **3.3. Player Progression & The Slot System**
 
-* **Limited Slots:** The player has a finite number of slots to equip rewards. Every active ability, passive buff, or interactable requires a slot.
+* **Limited Slots:** The player has 5 ability slots (limited by one-armed disability), while enemies have player slots + 1 (two-armed advantage). Every active ability, passive buff, or interactable requires a slot.
+* **Wife's Arm Activation:** The grafted left arm cannot be consciously controlled but activates automatically during critical moments:
+    * **Second Life:** The arm forces survival when health depletes (*"Not yet. We're not done yet."*)
+    * **Critical Parries:** Autonomous defensive movements in lethal situations
+    * **Soul Attack:** Channels her spiritual energy (unblockable, doesn't damage station as it's not physical)
 * **Reward Enhancement:** If a player finds a reward they already have equipped from a previous run, they can select it again to enhance its effect (e.g., a 20% speed boost becomes a 40% speed boost).
 * **Reward Scaling:** The quality and power of available rewards scale with the level of the run. Basic rewards are available at Level 1, while game-changing rewards (like increasing max station health) can only be found in later levels.
 
 ## **4. Level & Enemy Design**
 
-* **Themed Rooms:** The game features 5 unique rooms (A, B, C, D, E), each with a unique enemy and a specific reward theme. The order of the rooms is randomized in each run.
-* **Dynamic Enemy AI:**
-    * **Shared Ability Pool:** Enemies pull their abilities from the same pool as the player. An enemy can use abilities like `Second Life` or `Heavy Attack`.
-    * **Reactive Scaling:** The number of abilities an enemy possesses is directly tied to the player's power, specifically `player filled slots + 1`.
-    * **Behavioral Priority:** While the ability pool is shared, each unique enemy has a different AI priority based on its room's theme. For example, the enemy in the "Interactables" room will prioritize hacking environmental objects to use against the player.
+### **4.1. Themed Rooms**
+The game features 5 unique rooms, each representing a significant location and memory on the station. The order is randomized each run:
+
+1. **Engineering Bay** - Where they once worked together (Defense rewards)
+2. **Combat Arena** - Where the player trained when whole (Offense rewards)
+3. **Medical Bay** - Where the fusion surgery happened (Passive Stats)
+4. **Cargo Hold** - Carrying the weight of survival (Passive Abilities)
+5. **Bridge** - Where the incident occurred (Mixed rewards)
+
+### **4.2. Enemy Design - Temporal Echoes**
+All enemies are versions of the player with both original arms intact, explaining their superior capabilities:
+
+1. **"The Untouched"** (Engineering Bay) - Pre-incident version, defensive and cautious
+   * *Dialogue:* "You still have both. You don't know what's coming."
+2. **"The Unbroken"** (Combat Arena) - Peak physical capability, balanced fighter
+   * *Dialogue:* "Remember when we could fight with both fists?"
+3. **"The Healer"** (Medical Bay) - Version that could have saved her
+   * *Dialogue:* "With both hands, I could have saved her."
+4. **"The Whole"** (Cargo Hold) - Raw aggression with full motor control
+   * *Dialogue:* "This is what you gave up. Was it worth it?"
+5. **"The Complete"** (Bridge) - Final echo, master of two-armed techniques
+   * *Dialogue:* "I am everything you were. Defeat me to become something more."
+
+### **4.3. Dynamic Enemy AI**
+* **Shared Ability Pool:** Enemies use the same abilities as the player, justified by being alternate versions of the same person.
+* **Reactive Scaling:** Enemies have `player filled slots + 1` abilities, representing their two-armed advantage over the player's one-armed limitation.
+* **Two-Arm Exclusive Abilities (Future):** Dual Wield, Grapple, Full Block, Charge Attack - techniques requiring both arms that the player cannot perform.
+* **Behavioral Priority:** Each echo has different combat priorities based on what aspect of the player they represent.
 
 ## **5. Reward & Ability Library**
 
@@ -73,18 +111,274 @@ There are five distinct categories of rewards the player can earn.
 5.  **Interactables (Hacking):** Abilities that allow the player to trigger environmental objects. These are neutral and powerful, but can also harm the player if used carelessly.
     * *Examples:* Trigger an `Exploding Valve` (staggers everyone nearby), activate a `Vent` (launches anyone in front of it, making them vulnerable on collision).
 
-## **6. Update Notes & Scope Changes**
+## **6. Narrative & Thematic Elements**
 
-This section documents the evolution of the project design, noting how the current roguelite scope updates the initial technical framework.
+### **6.1. Core Narrative**
+The player struggles with survivor's guilt and physical disability after losing their left arm in a station incident that killed their wife. Her arm was grafted onto them as an emergency measure, creating a unique combat dynamic where the arm only responds in critical moments, driven by protective instinct rather than conscious control.
 
-* **Ability System Overhaul:**
-    * **OLD:** The original design specified "15 abilities" that could be assigned via console commands. This implied a predefined loadout system.
-    * **NEW:** The "15 abilities" now represent the total **reward pool** the player discovers throughout runs. The system is no longer about pre-run loadouts, but about dynamic, in-run build crafting. The console commands are now likely for debug purposes only.
+### **6.2. Psychological Themes**
+* **Roguelike Loop = Healing Process:** Each run represents a therapy session or meditation on loss
+* **Persistent Rewards = Adaptation:** Learning to live with disability and trauma
+* **Failed Runs = Setbacks:** Natural part of the recovery journey
+* **Station Integrity = Mental Health:** Violent actions damage the psyche
+* **Enemy Encounters = Self-Confrontation:** Fighting idealized versions of the former self
 
-* **Inclusion of a Parry Mechanic:**
-    * **OLD:** The initial documents explicitly stated "no parry" as a design rule.
-    * **NEW:** The current scope explicitly includes `Parry` as a potential reward in the Defense category. **This rule has been intentionally overridden.** The implementation of a parry system is now a required feature.
+### **6.3. Visual Storytelling**
+* **Player Character:** Right arm normal, left arm distinctly different (feminine features, different skin tone, wedding ring still present)
+* **Enemy Echoes:** Both arms matching, confident stance, representing wholeness
+* **Wife's Arm:** Glows or reacts during critical activations (Second Life, Soul Attack)
+* **Player Stance:** Slightly off-balance, compensating for unnatural limb
 
-* **Refined Ability Structure:**
-    * **OLD:** The design mentioned `ActionDataAssets` for abilities like attacks.
-    * **NEW:** This data-driven structure is still perfectly valid and should be expanded. All five reward types—including passive stat boosts and interactables—will need their own data asset configurations to define their function, cost, and enhancement progression. The `bCanBeInterrupted = false` flag is still relevant for attack-type abilities.
+## **7. Technical Implementation Notes**
+
+* **Ability System:** The reward pool consists of discoverable abilities found throughout runs. The system focuses on dynamic, in-run build crafting rather than pre-run loadouts. Console commands exist for debugging and testing purposes.
+
+* **Parry Mechanic:** `Parry` is implemented as a Defense category reward with perfect (100% reduction, 0.2s) and late (50% reduction, 0.1s) timing windows.
+
+* **Data-Driven Structure:** All five reward types use `ActionDataAssets` configurations to define their function, cost, and enhancement progression. The `bCanBeInterrupted = false` flag is used for attack-type abilities to prevent interruption during animations.
+
+* **Narrative Integration:** The asymmetric gameplay (one-armed player vs two-armed enemies) and the wife's arm mechanic are core story elements that explain and justify the mechanical differences between player and enemies.
+
+## **8. Combat Values & Balancing**
+
+### **8.1. Damage Values**
+* **Basic Attack:** 5 damage, fast animation (0.6s)
+* **Heavy Attack:** 15 damage + 500 unit knockback force
+* **Soul Attack:** 50 unblockable damage (no station damage - spiritual energy)
+* **Environmental Damage:** 10-20 based on collision speed
+* **Hazard Damage:** 5 DPS (toxic), 10 instant (electrical), varies (gravity)
+
+### **8.2. Defensive Values**
+* **Block:** 40% damage reduction while held
+* **Parry Windows:**
+  * Perfect: 100% reduction (0.2s window)
+  * Late: 50% reduction (0.1s window after perfect)
+* **Dash:** 400 units distance, 2s cooldown, 0.3s i-frames
+* **Poise:** 100 points, 2s stagger when depleted
+
+### **8.3. Vulnerability System**
+* **Stunned (Yellow):** 2x damage, 1 hit to break, 2s duration
+* **Crippled (Orange):** 4x damage, 3 hits to break, 3s duration
+* **Exposed (Red):** 8x damage, 5 hits to break, 4s duration
+
+### **8.4. Core Stats**
+* **Player Health:** 100 (can be increased via rewards)
+* **Station Integrity:** 100 (represents psychological stability)
+* **Enemy Health Scaling:** Base 100 × (1 + 0.2 × Room Level)
+* **Movement Speed:** 600 units/s base
+
+### **8.5. Ability Cooldowns**
+* **Dash:** 2 seconds
+* **Heavy Attack:** 1.5 seconds
+* **Soul Attack:** 10 seconds
+* **Interactable Activation:** One-time use per room
+* **Second Life:** Once per run (consumes reward slot)
+
+## **9. UI/UX Design**
+
+### **9.1. HUD Elements**
+* **Top Left:** Player health bar with numerical display
+* **Top Right:** Station integrity meter (cracks appear as it decreases)
+* **Bottom Left:** Equipped ability slots (1-5) with cooldown indicators
+* **Bottom Right:** Current room indicator (1/5, 2/5, etc.)
+* **Center Screen:** Vulnerability state indicator when active
+
+### **9.2. Combat Feedback**
+* **Damage Numbers:** 
+  * White: Normal damage
+  * Yellow/Orange/Red: Vulnerability multipliers
+  * Purple: Soul damage
+  * Gray: Blocked damage
+* **Hit Effects:** Screen shake scales with damage
+* **Wife's Arm Glow:** Pulses during critical activations
+
+### **9.3. Reward Selection Interface**
+* **Layout:** Two cards side by side
+* **Information Displayed:**
+  * Reward name and icon
+  * Category (color-coded)
+  * Slot cost
+  * Current stack level if owned
+  * Description of effect
+* **Timer:** Optional 30-second selection timer
+* **Preview:** Shows stat changes before confirmation
+
+### **9.4. Status Indicators**
+* **Vulnerability Aura:** Character outline in tier color
+* **Stagger State:** Dizzy stars animation
+* **Block Stance:** Blue shield overlay
+* **Dash I-Frames:** Ghostly afterimage effect
+
+## **10. Audio Design**
+
+### **10.1. Combat Audio**
+* **Player Attacks:** Slightly muffled/strained (one-armed effort)
+* **Enemy Attacks:** Clean, powerful sounds (two-armed strength)
+* **Wife's Arm Activation:** Ethereal whisper overlay
+* **Parry Success:** Crystal chime sound
+* **Vulnerability Trigger:** Rising pitch indicator
+
+### **10.2. Environmental Audio**
+* **Engineering Bay:** Mechanical hums, memories of tools
+* **Combat Arena:** Echoes of training, phantom cheers
+* **Medical Bay:** Heart monitors, surgical equipment
+* **Cargo Hold:** Creaking metal, weight shifting
+* **Bridge:** Alert klaxons, command deck ambiance
+
+### **10.3. Voice Design**
+* **Enemy Echoes:** Player's voice with distortion effects
+  * The Untouched: Clear, younger tone
+  * The Unbroken: Confident, strong
+  * The Healer: Soft, regretful
+  * The Whole: Aggressive, bitter
+  * The Complete: Layered voices, all aspects combined
+* **Wife's Voice:** Soft whispers during arm activation
+
+### **10.4. Integrity Warnings**
+* **75%:** Subtle creaking
+* **50%:** Structural groaning, alarm beeps
+* **25%:** Critical alarms, breaking sounds
+* **10%:** Heartbeat overlay, tinnitus effect
+
+## **11. Controls & Input**
+
+### **11.1. Keyboard + Mouse**
+* **Movement:** WASD
+* **Camera:** Mouse
+* **Basic Attack:** Left Mouse Button
+* **Heavy Attack:** Right Mouse Button
+* **Block:** Q (hold)
+* **Dash:** Shift
+* **Soul Attack:** E
+* **Focus Mode:** F (target interactables)
+* **Interact:** E (context-sensitive)
+
+### **11.2. Gamepad**
+* **Movement:** Left Stick
+* **Camera:** Right Stick
+* **Basic Attack:** X/Square
+* **Heavy Attack:** Y/Triangle
+* **Block:** LB/L1 (hold)
+* **Dash:** RB/R1
+* **Soul Attack:** RT/R2
+* **Focus Mode:** LT/L2
+* **Interact:** A/Cross
+
+### **11.3. One-Handed Considerations**
+* All critical actions mapped to easily reachable keys
+* Combo inputs designed for single-hand execution
+* Hold actions have toggle option in accessibility
+* Auto-run option for extended movement
+
+## **12. Progression Mathematics**
+
+### **12.1. Reward Scaling**
+* **Tier 1 Enhancement:** Base effect (e.g., 20% speed)
+* **Tier 2 Enhancement:** 2x base (40% speed)
+* **Tier 3 Enhancement:** 3x base (60% speed)
+* **Special Rewards:** Some cap at Tier 2 with unique bonuses
+
+### **12.2. Enemy Power Formula**
+```
+Enemy Abilities = Player Filled Slots + 1
+Enemy Health = 100 × (1 + 0.2 × Current Level)
+Enemy Damage = Base × (1 + 0.1 × Current Level)
+```
+
+### **12.3. Station Integrity Damage**
+* **Heavy Attack Wall Impact:** 5 damage
+* **Environmental Explosion:** 10 damage
+* **Enemy Collision (high speed):** 3-7 damage
+* **Hazard Activation:** 2-5 damage
+* **Critical Failure Events:** 15-20 damage
+
+### **12.4. Run Completion Rewards**
+* **Slots Preserved:** All equipped rewards carry forward
+* **Empty Slots:** Remain empty for next run
+* **Failed Run:** Lose all temporary rewards, keep permanent unlocks
+
+## **13. Tutorial & Onboarding**
+
+### **13.1. Opening Sequence**
+1. **Awakening:** Player discovers the grafted arm
+2. **Movement Tutorial:** Learn to compensate for balance
+3. **First Attack:** Struggle with one-armed combat
+4. **Wife's Arm Trigger:** Forced activation during near-death
+5. **First Echo Encounter:** "You still have both arms..."
+
+### **13.2. Core Lessons**
+* **Combat Limitations:** Cannot perform certain two-handed moves
+* **Station Integrity:** "Your mind is as fragile as this station"
+* **Vulnerability System:** First stagger leads to tutorial prompt
+* **Reward Selection:** Forced choice between two healing items
+* **Slot Management:** "You can only handle so much with one arm"
+
+### **13.3. Progressive Disclosure**
+* **Room 1:** Basic combat only
+* **Room 2:** Introduce vulnerability mechanics
+* **Room 3:** Environmental interactions unlocked
+* **Room 4:** Complex ability combinations
+* **Room 5:** All systems combined
+
+## **14. Save System**
+
+### **14.1. Persistent Data**
+* **Profile Statistics:**
+  * Total runs attempted
+  * Successful completions
+  * Enemies defeated
+  * Total damage dealt/taken
+  * Favorite reward usage stats
+
+### **14.2. Run State Data**
+* **Current Progress:**
+  * Current room (1-5)
+  * Equipped rewards and stack levels
+  * Health and integrity values
+  * Completed rooms list
+  * Current seed for room order
+
+### **14.3. Between-Run Persistence**
+* **Saved Elements:**
+  * Equipped rewards in slots
+  * Unlocked reward pool
+  * Configuration settings
+* **Reset Elements:**
+  * Health returns to 100
+  * Station integrity returns to 100
+  * Room order reshuffles
+  * Enemy configurations reset
+
+### **14.4. Checkpoint System**
+* **Auto-save:** After each room completion
+* **Manual Save:** Available in safe rooms only
+* **Save Slots:** 3 separate run slots available
+* **Iron Man Mode:** Optional permadeath setting
+
+## **15. Accessibility Features**
+
+### **15.1. Motor Accessibility**
+* **One-Handed Mode:** Remappable controls for actual one-handed play
+* **Hold-to-Toggle:** Convert all hold inputs to toggles
+* **Auto-Combat:** Basic attack automation option
+* **Difficulty Sliders:** Separate sliders for enemy health/damage/speed
+* **Slow Motion:** Tactical pause during reward selection
+
+### **15.2. Visual Accessibility**
+* **Colorblind Modes:** Alternative colors for vulnerability states
+* **UI Scaling:** 75% to 150% interface size
+* **Damage Number Size:** Adjustable combat text
+* **Motion Reduction:** Reduce screen shake and effects
+* **High Contrast Mode:** Enhanced visibility for key elements
+
+### **15.3. Audio Accessibility**
+* **Visual Sound Indicators:** On-screen prompts for audio cues
+* **Subtitles:** Full dialogue and effect captioning
+* **Audio Mixing:** Separate sliders for music/SFX/voice/ambient
+* **Wife's Arm Haptics:** Controller vibration for arm activation
+
+### **15.4. Cognitive Accessibility**
+* **Story Mode:** Reduced combat difficulty, focus on narrative
+* **Hint System:** Optional combat tips and strategy suggestions
+* **Objective Reminders:** Current goal always visible
+* **Simplified Rewards:** Option to reduce reward pool complexity

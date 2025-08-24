@@ -1,8 +1,11 @@
 #include "AtlasCheatManager.h"
 #include "../Components/ActionManagerComponent.h"
+#include "../Components/RunManagerComponent.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Actions/BaseAction.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameStateBase.h"
 #include "Engine/World.h"
 #include "GameplayTagContainer.h"
 
@@ -138,5 +141,80 @@ UActionManagerComponent* UAtlasCheatManager::GetActionManager() const
 	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("Could not find ActionManagerComponent"));
+	return nullptr;
+}
+
+// ========================================
+// ROOM TESTING COMMANDS
+// ========================================
+
+void UAtlasCheatManager::Atlas_Room_GoTo(const FString& RoomName)
+{
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->GoToRoom(RoomName);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Could not find RunManagerComponent. Make sure your GameMode has one."));
+	}
+}
+
+void UAtlasCheatManager::Atlas_Room_CompleteTest()
+{
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->CompleteRoomTest();
+	}
+}
+
+void UAtlasCheatManager::Atlas_Room_ResetAll()
+{
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->ResetAllRooms();
+	}
+}
+
+void UAtlasCheatManager::Atlas_Room_Debug()
+{
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->DebugRooms();
+	}
+}
+
+void UAtlasCheatManager::Atlas_Room_TestSequence()
+{
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->TestRoomSequence();
+	}
+}
+
+URunManagerComponent* UAtlasCheatManager::GetRunManager() const
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (AGameModeBase* GameMode = World->GetAuthGameMode())
+		{
+			// Try to find RunManagerComponent on the GameMode
+			if (URunManagerComponent* RunManager = GameMode->FindComponentByClass<URunManagerComponent>())
+			{
+				return RunManager;
+			}
+			
+			// If not on GameMode, try GameState
+			if (AGameStateBase* GameState = World->GetGameState())
+			{
+				if (URunManagerComponent* RunManager = GameState->FindComponentByClass<URunManagerComponent>())
+				{
+					return RunManager;
+				}
+			}
+		}
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Could not find RunManagerComponent. Make sure it's attached to your GameMode or GameState."));
 	return nullptr;
 }

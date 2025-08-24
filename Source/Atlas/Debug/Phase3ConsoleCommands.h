@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "../Data/RoomDataAsset.h"  // For ERoomType
 #include "Phase3ConsoleCommands.generated.h"
 
 /**
@@ -78,6 +79,41 @@ public:
 	
 	/** Force specific room sequence */
 	static void SetRoomSequence(const TArray<FString>& Args);
+	
+	// ========================================
+	// ROOM TELEPORT COMMANDS
+	// ========================================
+	
+	/** Teleport to specific room */
+	static void GoToRoom(const TArray<FString>& Args);
+	
+	/** Reset all rooms */
+	static void ResetRooms(const TArray<FString>& Args);
+	
+	/** Debug room info */
+	static void DebugRooms(const TArray<FString>& Args);
+	
+	/** Start a complete 5-room run */
+	static void StartTestRun(const TArray<FString>& Args);
+	
+	/** Progress to next room in run */
+	static void NextRoom(const TArray<FString>& Args);
+	
+	/** Complete current room and progress */
+	static void CompleteAndProgress(const TArray<FString>& Args);
+	
+	/** Check if game setup is correct */
+	static void CheckSetup(const TArray<FString>& Args);
+	
+	/** Check enemy status for auto-progression */
+	static void CheckEnemyStatus(class UWorld* World);
+	
+private:
+	// Run tracking
+	static TArray<ERoomType> CurrentRunOrder;
+	static int32 CurrentRunIndex;
+	static AActor* CurrentSpawnedEnemy;
+	static FTimerHandle EnemyCheckTimer;
 	
 	// ========================================
 	// ENEMY AI COMMANDS

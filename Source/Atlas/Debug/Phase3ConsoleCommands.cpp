@@ -5,17 +5,27 @@
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "Atlas/Characters/GameCharacterBase.h"
+#include "Atlas/Characters/EnemyCharacter.h"
 #include "Atlas/Components/SlotManagerComponent.h"
 #include "Atlas/Components/RunManagerComponent.h"
 #include "Atlas/Components/RunManagerSubsystem.h"
 #include "Atlas/Components/RewardSelectionComponent.h"
 #include "Atlas/Data/RewardDataAsset.h"
 #include "Atlas/Data/RoomDataAsset.h"
+#include "Atlas/Rooms/RoomBase.h"
 #include "Atlas/AtlasGameMode.h"
 #include "GlobalRunManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
 
 #define PHASE3_LOG(Message) LogPhase3(Message, false)
 #define PHASE3_ERROR(Message) LogPhase3(Message, true)
+
+// Static run tracking variables
+TArray<ERoomType> UPhase3ConsoleCommands::CurrentRunOrder;
+int32 UPhase3ConsoleCommands::CurrentRunIndex = 0;
+AActor* UPhase3ConsoleCommands::CurrentSpawnedEnemy = nullptr;
+FTimerHandle UPhase3ConsoleCommands::EnemyCheckTimer;
 
 // ========================================
 // REGISTRATION
@@ -99,6 +109,56 @@ void UPhase3ConsoleCommands::RegisterCommands()
 		TEXT("Atlas.Phase3.ShowRunProgress"),
 		TEXT("Show current run progress"),
 		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::ShowRunProgress),
+		ECVF_Cheat
+	);
+	
+	// Room Teleport Commands
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Atlas.Phase3.GoToRoom"),
+		TEXT("Teleport to specific room. Usage: GoToRoom [RoomName]"),
+		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::GoToRoom),
+		ECVF_Cheat
+	);
+	
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Atlas.Phase3.ResetRooms"),
+		TEXT("Reset all rooms in test arena"),
+		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::ResetRooms),
+		ECVF_Cheat
+	);
+	
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Atlas.Phase3.DebugRooms"),
+		TEXT("Show debug info for all rooms"),
+		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::DebugRooms),
+		ECVF_Cheat
+	);
+	
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Atlas.Phase3.StartTestRun"),
+		TEXT("Start a complete 5-room run with randomized order"),
+		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::StartTestRun),
+		ECVF_Cheat
+	);
+	
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Atlas.Phase3.NextRoom"),
+		TEXT("Progress to next room in current run"),
+		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::NextRoom),
+		ECVF_Cheat
+	);
+	
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Atlas.Phase3.CompleteAndProgress"),
+		TEXT("Complete current room and auto-progress to next"),
+		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::CompleteAndProgress),
+		ECVF_Cheat
+	);
+	
+	IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Atlas.Phase3.CheckSetup"),
+		TEXT("Check if game setup is correct for testing"),
+		FConsoleCommandWithArgsDelegate::CreateStatic(&UPhase3ConsoleCommands::CheckSetup),
 		ECVF_Cheat
 	);
 	
@@ -981,5 +1041,590 @@ void UPhase3ConsoleCommands::LogPhase3(const FString& Message, bool bError)
 	{
 		FColor Color = bError ? FColor::Red : FColor::Green;
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, Color, FString::Printf(TEXT("[PHASE3] %s"), *Message));
+	}
+}
+
+// ========================================
+// ROOM TELEPORT COMMANDS IMPLEMENTATION
+// ========================================
+
+void UPhase3ConsoleCommands::GoToRoom(const TArray<FString>& Args)
+{
+	if (Args.Num() < 1)
+	{
+		PHASE3_ERROR("Usage: Atlas.Phase3.GoToRoom [RoomName]");
+		PHASE3_LOG("Valid rooms: EngineeringBay, CombatArena, MedicalBay, CargoHold, Bridge");
+		return;
+	}
+	
+	FString RoomName = Args[0];
+	
+	// Get the RunManager
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->GoToRoom(RoomName);
+		PHASE3_LOG(FString::Printf(TEXT("Attempting to teleport to room: %s"), *RoomName));
+	}
+	else
+	{
+		// Try to find room actors directly
+		if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+		{
+			TArray<AActor*> FoundActors;
+			UGameplayStatics::GetAllActorsOfClass(World, ARoomBase::StaticClass(), FoundActors);
+			
+			// Map room name to type
+			ERoomType TargetType = ERoomType::EngineeringBay;
+			if (RoomName.Equals("MedicalBay", ESearchCase::IgnoreCase))
+				TargetType = ERoomType::MedicalBay;
+			else if (RoomName.Equals("EngineeringBay", ESearchCase::IgnoreCase))
+				TargetType = ERoomType::EngineeringBay;
+			else if (RoomName.Equals("CombatArena", ESearchCase::IgnoreCase))
+				TargetType = ERoomType::CombatArena;
+			else if (RoomName.Equals("CargoHold", ESearchCase::IgnoreCase))
+				TargetType = ERoomType::CargoHold;
+			else if (RoomName.Equals("Bridge", ESearchCase::IgnoreCase))
+				TargetType = ERoomType::Bridge;
+			
+			// Find and teleport to room
+			for (AActor* Actor : FoundActors)
+			{
+				if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+				{
+					if (Room->RoomTypeForTesting == TargetType)
+					{
+						Room->TeleportPlayerToRoom();
+						
+						// Spawn enemy after teleport
+						FTimerHandle SpawnTimer;
+						World->GetTimerManager().SetTimer(SpawnTimer, [Room, World]()
+						{
+							Room->SpawnRoomEnemy();
+							PHASE3_LOG("Enemy spawned in room");
+						}, 1.0f, false);
+						
+						PHASE3_LOG(FString::Printf(TEXT("Teleported to %s!"), *RoomName));
+						return;
+					}
+				}
+			}
+			
+			PHASE3_ERROR(FString::Printf(TEXT("Room '%s' not found in level"), *RoomName));
+		}
+	}
+}
+
+void UPhase3ConsoleCommands::ResetRooms(const TArray<FString>& Args)
+{
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->ResetAllRooms();
+		PHASE3_LOG("All rooms reset");
+	}
+	else
+	{
+		// Reset rooms directly
+		if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+		{
+			TArray<AActor*> FoundActors;
+			UGameplayStatics::GetAllActorsOfClass(World, ARoomBase::StaticClass(), FoundActors);
+			
+			int32 RoomCount = 0;
+			for (AActor* Actor : FoundActors)
+			{
+				if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+				{
+					Room->ResetRoom();
+					RoomCount++;
+				}
+			}
+			
+			PHASE3_LOG(FString::Printf(TEXT("Reset %d rooms"), RoomCount));
+		}
+	}
+}
+
+void UPhase3ConsoleCommands::DebugRooms(const TArray<FString>& Args)
+{
+	if (URunManagerComponent* RunManager = GetRunManager())
+	{
+		RunManager->DebugRooms();
+	}
+	else
+	{
+		// Debug rooms directly
+		if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GetWorldContexts()[0].World(), EGetWorldErrorMode::ReturnNull))
+		{
+			TArray<AActor*> FoundActors;
+			UGameplayStatics::GetAllActorsOfClass(World, ARoomBase::StaticClass(), FoundActors);
+			
+			PHASE3_LOG(FString::Printf(TEXT("=== ROOM DEBUG INFO ===")));
+			PHASE3_LOG(FString::Printf(TEXT("Found %d rooms in level"), FoundActors.Num()));
+			
+			for (AActor* Actor : FoundActors)
+			{
+				if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+				{
+					const UEnum* EnumPtr = StaticEnum<ERoomType>();
+					FString RoomTypeName = EnumPtr ? EnumPtr->GetNameStringByValue((int64)Room->RoomTypeForTesting) : TEXT("Unknown");
+					
+					PHASE3_LOG(FString::Printf(TEXT("Room: %s"), *RoomTypeName));
+					PHASE3_LOG(FString::Printf(TEXT("  - Position: %s"), *Room->GetActorLocation().ToString()));
+					PHASE3_LOG(FString::Printf(TEXT("  - Active: %s"), Room->IsRoomActive() ? TEXT("YES") : TEXT("NO")));
+					PHASE3_LOG(FString::Printf(TEXT("  - Completed: %s"), Room->bTestRoomCompleted ? TEXT("YES") : TEXT("NO")));
+				}
+			}
+		}
+	}
+}
+
+// ========================================
+// RUN SYSTEM IMPLEMENTATION
+// ========================================
+
+void UPhase3ConsoleCommands::StartTestRun(const TArray<FString>& Args)
+{
+	// Reset run tracking
+	CurrentRunIndex = 0;
+	CurrentSpawnedEnemy = nullptr;
+	
+	// Clear any existing enemy check timer
+	if (GEngine)
+	{
+		for (const FWorldContext& Context : GEngine->GetWorldContexts())
+		{
+			if ((Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::Game) && Context.World())
+			{
+				if (EnemyCheckTimer.IsValid())
+				{
+					Context.World()->GetTimerManager().ClearTimer(EnemyCheckTimer);
+				}
+				break;
+			}
+		}
+	}
+	
+	// Create randomized room order
+	CurrentRunOrder.Empty();
+	CurrentRunOrder.Add(ERoomType::EngineeringBay);
+	CurrentRunOrder.Add(ERoomType::CombatArena);
+	CurrentRunOrder.Add(ERoomType::MedicalBay);
+	CurrentRunOrder.Add(ERoomType::CargoHold);
+	CurrentRunOrder.Add(ERoomType::Bridge);
+	
+	// Shuffle the array (Fisher-Yates shuffle)
+	for (int32 i = CurrentRunOrder.Num() - 1; i > 0; i--)
+	{
+		int32 j = FMath::RandRange(0, i);
+		CurrentRunOrder.Swap(i, j);
+	}
+	
+	// Display run order
+	PHASE3_LOG("=== STARTING NEW RUN ===");
+	PHASE3_LOG("Room Order:");
+	for (int32 i = 0; i < CurrentRunOrder.Num(); i++)
+	{
+		const UEnum* EnumPtr = StaticEnum<ERoomType>();
+		FString RoomName = EnumPtr ? EnumPtr->GetNameStringByValue((int64)CurrentRunOrder[i]) : TEXT("Unknown");
+		PHASE3_LOG(FString::Printf(TEXT("  Level %d: %s"), i + 1, *RoomName));
+	}
+	
+	// Start in first room
+	PHASE3_LOG("Teleporting to first room...");
+	NextRoom(TArray<FString>());
+}
+
+void UPhase3ConsoleCommands::NextRoom(const TArray<FString>& Args)
+{
+	if (CurrentRunOrder.Num() == 0)
+	{
+		PHASE3_ERROR("No run in progress! Use Atlas.Phase3.StartTestRun first");
+		return;
+	}
+	
+	if (CurrentRunIndex >= CurrentRunOrder.Num())
+	{
+		PHASE3_LOG("=== RUN COMPLETE! ===");
+		PHASE3_LOG("Congratulations! You completed all 5 rooms!");
+		CurrentRunOrder.Empty();
+		CurrentRunIndex = 0;
+		return;
+	}
+	
+	// Get current room type
+	ERoomType CurrentRoomType = CurrentRunOrder[CurrentRunIndex];
+	const UEnum* EnumPtr = StaticEnum<ERoomType>();
+	FString RoomName = EnumPtr ? EnumPtr->GetNameStringByValue((int64)CurrentRoomType) : TEXT("Unknown");
+	
+	PHASE3_LOG(FString::Printf(TEXT("=== LEVEL %d of 5 ==="), CurrentRunIndex + 1));
+	PHASE3_LOG(FString::Printf(TEXT("Entering: %s"), *RoomName));
+	
+	// Find and teleport to room - use improved world detection
+	UWorld* World = nullptr;
+	if (GEngine)
+	{
+		for (const FWorldContext& Context : GEngine->GetWorldContexts())
+		{
+			if ((Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::Game) && Context.World())
+			{
+				World = Context.World();
+				break;
+			}
+		}
+	}
+	
+	if (World)
+	{
+		// Check for player controller first
+		APlayerController* PC = World->GetFirstPlayerController();
+		if (!PC)
+		{
+			PHASE3_ERROR("No player controller found! Make sure you're in PIE (Play In Editor) mode.");
+			PHASE3_ERROR("Press Play in the editor first, then use console commands.");
+			CurrentRunOrder.Empty();
+			CurrentRunIndex = 0;
+			return;
+		}
+		
+		APawn* PlayerPawn = PC->GetPawn();
+		if (!PlayerPawn)
+		{
+			PHASE3_ERROR("No player pawn found! Make sure your GameMode spawns a player character.");
+			CurrentRunOrder.Empty();
+			CurrentRunIndex = 0;
+			return;
+		}
+		
+		// Clean up previous enemy if exists
+		if (CurrentSpawnedEnemy && IsValid(CurrentSpawnedEnemy))
+		{
+			CurrentSpawnedEnemy->Destroy();
+			CurrentSpawnedEnemy = nullptr;
+		}
+		
+		// Find room and teleport
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(World, ARoomBase::StaticClass(), FoundActors);
+		
+		for (AActor* Actor : FoundActors)
+		{
+			if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+			{
+				if (Room->RoomTypeForTesting == CurrentRoomType)
+				{
+					// Teleport player
+					Room->TeleportPlayerToRoom();
+					
+					// Spawn enemy after delay
+					FTimerHandle SpawnTimer;
+					FTimerDelegate SpawnDelegate;
+					SpawnDelegate.BindLambda([Room, World, RoomName]()
+					{
+						// Spawn a default enemy (you can customize per room)
+						if (APawn* PlayerPawn = World->GetFirstPlayerController()->GetPawn())
+						{
+							FVector SpawnLocation = Room->GetActorLocation() + FVector(0, 500, 200);
+							FRotator SpawnRotation = FRotator::ZeroRotator;
+							
+							// Try to spawn an enemy character
+							FActorSpawnParameters SpawnParams;
+							SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+							
+							// Spawn BP_Enemy blueprint
+							UClass* EnemyBP = LoadClass<APawn>(nullptr, TEXT("/Game/blueprints/BP_Enemy.BP_Enemy_C"));
+							if (EnemyBP)
+							{
+								if (AActor* Enemy = World->SpawnActor<AActor>(EnemyBP, SpawnLocation, SpawnRotation, SpawnParams))
+								{
+									UPhase3ConsoleCommands::CurrentSpawnedEnemy = Enemy;
+									PHASE3_LOG(FString::Printf(TEXT("Enemy spawned in %s!"), *RoomName));
+									PHASE3_LOG("Defeat the enemy to progress!");
+									
+									// Start checking for enemy death
+									FTimerDelegate EnemyCheckDelegate;
+									EnemyCheckDelegate.BindLambda([World]()
+									{
+										UPhase3ConsoleCommands::CheckEnemyStatus(World);
+									});
+									World->GetTimerManager().SetTimer(UPhase3ConsoleCommands::EnemyCheckTimer, EnemyCheckDelegate, 1.0f, true);
+								}
+							}
+							else
+							{
+								PHASE3_ERROR("Failed to load BP_Enemy blueprint! Check path: /Game/blueprints/BP_Enemy");
+							}
+						}
+					});
+					World->GetTimerManager().SetTimer(SpawnTimer, SpawnDelegate, 1.5f, false);
+					
+					return;
+				}
+			}
+		}
+		
+		PHASE3_ERROR("Could not find room for current level!");
+	}
+}
+
+void UPhase3ConsoleCommands::CheckSetup(const TArray<FString>& Args)
+{
+	PHASE3_LOG("=== CHECKING GAME SETUP ===");
+	
+	// Check world - try multiple methods
+	UWorld* World = nullptr;
+	
+	// Method 1: Get current PIE world
+	if (GEngine)
+	{
+		for (const FWorldContext& Context : GEngine->GetWorldContexts())
+		{
+			if (Context.WorldType == EWorldType::PIE && Context.World())
+			{
+				World = Context.World();
+				PHASE3_LOG("✓ Found PIE World");
+				break;
+			}
+		}
+		
+		// Method 2: Try game world if PIE not found
+		if (!World)
+		{
+			for (const FWorldContext& Context : GEngine->GetWorldContexts())
+			{
+				if (Context.WorldType == EWorldType::Game && Context.World())
+				{
+					World = Context.World();
+					PHASE3_LOG("✓ Found Game World");
+					break;
+				}
+			}
+		}
+		
+		// Method 3: Fallback to any world
+		if (!World && GEngine->GetWorldContexts().Num() > 0)
+		{
+			World = GEngine->GetWorldContexts()[0].World();
+			PHASE3_LOG("✓ Found World (fallback)");
+		}
+	}
+	
+	if (!World)
+	{
+		PHASE3_ERROR("✗ No World found! Are you in the editor?");
+		return;
+	}
+	
+	PHASE3_LOG(FString::Printf(TEXT("✓ World found: %s"), *World->GetName()));
+	PHASE3_LOG(FString::Printf(TEXT("  World Type: %d"), (int32)World->WorldType));
+	
+	// Check player controller
+	APlayerController* PC = World->GetFirstPlayerController();
+	
+	// Debug info about controllers
+	TArray<APlayerController*> AllControllers;
+	for (FConstPlayerControllerIterator Iterator = World->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		if (APlayerController* Controller = Iterator->Get())
+		{
+			AllControllers.Add(Controller);
+		}
+	}
+	
+	PHASE3_LOG(FString::Printf(TEXT("Found %d player controllers total"), AllControllers.Num()));
+	
+	if (!PC)
+	{
+		PHASE3_ERROR("✗ No Player Controller found!");
+		PHASE3_ERROR("  → You need to press PLAY in the editor first");
+		PHASE3_ERROR("  → Then open console with ~ key");
+		
+		if (AllControllers.Num() > 0)
+		{
+			PHASE3_LOG("Available controllers:");
+			for (int32 i = 0; i < AllControllers.Num(); i++)
+			{
+				PHASE3_LOG(FString::Printf(TEXT("  %d: %s"), i, *AllControllers[i]->GetName()));
+			}
+			PC = AllControllers[0]; // Use first available
+			PHASE3_LOG("Using first available controller for testing");
+		}
+	}
+	else
+	{
+		PHASE3_LOG("✓ Player Controller found");
+		
+		// Check player pawn
+		APawn* PlayerPawn = PC->GetPawn();
+		if (!PlayerPawn)
+		{
+			PHASE3_ERROR("✗ No Player Pawn found!");
+			PHASE3_ERROR("  → Make sure your GameMode spawns a player character");
+			PHASE3_ERROR("  → Check World Settings -> GameMode Override");
+		}
+		else
+		{
+			PHASE3_LOG(FString::Printf(TEXT("✓ Player Pawn found: %s"), *PlayerPawn->GetName()));
+			
+			// Check if it's a character
+			if (AGameCharacterBase* PlayerChar = Cast<AGameCharacterBase>(PlayerPawn))
+			{
+				PHASE3_LOG("✓ Player is GameCharacterBase");
+			}
+			else if (ACharacter* Char = Cast<ACharacter>(PlayerPawn))
+			{
+				PHASE3_LOG("✓ Player is Character (not GameCharacterBase)");
+			}
+			else
+			{
+				PHASE3_LOG("⚠ Player is Pawn but not Character");
+			}
+		}
+	}
+	
+	// Check rooms
+	TArray<AActor*> FoundRooms;
+	UGameplayStatics::GetAllActorsOfClass(World, ARoomBase::StaticClass(), FoundRooms);
+	
+	if (FoundRooms.Num() == 0)
+	{
+		PHASE3_ERROR("✗ No rooms found in level!");
+		PHASE3_ERROR("  → Add room blueprints to your level");
+		PHASE3_ERROR("  → Make sure they inherit from RoomBase");
+	}
+	else
+	{
+		PHASE3_LOG(FString::Printf(TEXT("✓ Found %d rooms:"), FoundRooms.Num()));
+		
+		// List all rooms
+		for (AActor* Actor : FoundRooms)
+		{
+			if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+			{
+				const UEnum* EnumPtr = StaticEnum<ERoomType>();
+				FString RoomName = EnumPtr ? EnumPtr->GetNameStringByValue((int64)Room->RoomTypeForTesting) : TEXT("Unknown");
+				PHASE3_LOG(FString::Printf(TEXT("  - %s at %s"), *RoomName, *Room->GetActorLocation().ToString()));
+			}
+		}
+	}
+	
+	// Summary
+	PHASE3_LOG("=== SETUP SUMMARY ===");
+	bool bCanRun = World && PC && PC->GetPawn() && (FoundRooms.Num() > 0);
+	if (bCanRun)
+	{
+		PHASE3_LOG("✓ Setup is READY! You can use Atlas.Phase3.StartTestRun");
+	}
+	else
+	{
+		PHASE3_ERROR("✗ Setup is NOT ready. Fix the issues above.");
+		PHASE3_ERROR("Common fixes:");
+		PHASE3_ERROR("  1. Press PLAY button in editor");
+		PHASE3_ERROR("  2. Open console with ~ key");
+		PHASE3_ERROR("  3. Type: Atlas.Phase3.StartTestRun");
+	}
+}
+
+void UPhase3ConsoleCommands::CompleteAndProgress(const TArray<FString>& Args)
+{
+	if (CurrentRunOrder.Num() == 0)
+	{
+		PHASE3_ERROR("No run in progress!");
+		return;
+	}
+	
+	// Clean up current enemy and timer
+	if (CurrentSpawnedEnemy && IsValid(CurrentSpawnedEnemy))
+	{
+		CurrentSpawnedEnemy->Destroy();
+		CurrentSpawnedEnemy = nullptr;
+	}
+	
+	// Clear enemy check timer
+	if (GEngine)
+	{
+		for (const FWorldContext& Context : GEngine->GetWorldContexts())
+		{
+			if ((Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::Game) && Context.World())
+			{
+				if (EnemyCheckTimer.IsValid())
+				{
+					Context.World()->GetTimerManager().ClearTimer(EnemyCheckTimer);
+				}
+				break;
+			}
+		}
+	}
+	
+	// Mark current room complete
+	const UEnum* EnumPtr = StaticEnum<ERoomType>();
+	FString CompletedRoom = EnumPtr ? EnumPtr->GetNameStringByValue((int64)CurrentRunOrder[CurrentRunIndex]) : TEXT("Unknown");
+	PHASE3_LOG(FString::Printf(TEXT("Room Complete: %s"), *CompletedRoom));
+	
+	// Progress to next room
+	CurrentRunIndex++;
+	
+	if (CurrentRunIndex >= CurrentRunOrder.Num())
+	{
+		// Run complete!
+		PHASE3_LOG("=== RUN COMPLETE! ===");
+		PHASE3_LOG("Congratulations! You defeated all 5 enemies!");
+		PHASE3_LOG("Final Stats:");
+		PHASE3_LOG(FString::Printf(TEXT("  Rooms Cleared: %d"), CurrentRunOrder.Num()));
+		PHASE3_LOG("  Status: VICTORIOUS!");
+		
+		// Reset for next run
+		CurrentRunOrder.Empty();
+		CurrentRunIndex = 0;
+		CurrentSpawnedEnemy = nullptr;
+	}
+	else
+	{
+		// Show progress
+		PHASE3_LOG(FString::Printf(TEXT("Progress: %d/%d rooms complete"), CurrentRunIndex, CurrentRunOrder.Num()));
+		PHASE3_LOG("Transitioning to next room in 2 seconds...");
+		
+		// Auto-progress to next room after delay - use improved world detection
+		UWorld* World = nullptr;
+		if (GEngine)
+		{
+			for (const FWorldContext& Context : GEngine->GetWorldContexts())
+			{
+				if ((Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::Game) && Context.World())
+				{
+					World = Context.World();
+					break;
+				}
+			}
+		}
+		
+		if (World)
+		{
+			FTimerHandle TransitionTimer;
+			FTimerDelegate TransitionDelegate;
+			TransitionDelegate.BindLambda([]()
+			{
+				UPhase3ConsoleCommands::NextRoom(TArray<FString>());
+			});
+			World->GetTimerManager().SetTimer(TransitionTimer, TransitionDelegate, 2.0f, false);
+		}
+	}
+}
+
+void UPhase3ConsoleCommands::CheckEnemyStatus(UWorld* World)
+{
+	// Check if enemy is still alive
+	if (!CurrentSpawnedEnemy || !IsValid(CurrentSpawnedEnemy))
+	{
+		// Enemy is dead/destroyed - auto progress!
+		PHASE3_LOG("Enemy defeated! Auto-progressing to next room...");
+		
+		// Clear the timer
+		if (World && EnemyCheckTimer.IsValid())
+		{
+			World->GetTimerManager().ClearTimer(EnemyCheckTimer);
+		}
+		
+		// Auto-progress to next room
+		CompleteAndProgress(TArray<FString>());
 	}
 }

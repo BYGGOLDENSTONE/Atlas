@@ -87,6 +87,34 @@ public:
 	virtual void ClearSpawnedEntities();
 	
 	// ========================================
+	// TEST ARENA SUPPORT
+	// ========================================
+	
+	/**
+	 * Teleport player to this room's spawn point (for testing)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Room|Testing")
+	virtual void TeleportPlayerToRoom();
+	
+	/**
+	 * Reset this room to initial state
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Room|Testing")
+	virtual void ResetRoom();
+	
+	/**
+	 * Get room's world position in test arena
+	 */
+	UFUNCTION(BlueprintPure, Category = "Room|Testing")
+	FVector GetTestArenaPosition() const { return TestArenaPosition; }
+	
+	/**
+	 * Check if player is currently in this room's bounds
+	 */
+	UFUNCTION(BlueprintPure, Category = "Room|Testing")
+	bool IsPlayerInRoom() const;
+	
+	// ========================================
 	// SPAWN POINTS
 	// ========================================
 	
@@ -306,4 +334,29 @@ protected:
 	/** Override ambient sound for this specific room */
 	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
 	class USoundBase* OverrideAmbientSound;
+	
+	// ========================================
+	// TEST ARENA CONFIGURATION
+	// ========================================
+	
+	/** Position in test arena world space */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test Arena")
+	FVector TestArenaPosition;
+	
+	/** Radius of room for bounds checking */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test Arena")
+	float RoomRadius = 2000.0f;
+
+public:
+	// ========================================
+	// TEST ARENA PUBLIC PROPERTIES
+	// ========================================
+	
+	/** Room type for test identification */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test Arena")
+	ERoomType RoomTypeForTesting = ERoomType::EngineeringBay;
+	
+	/** Whether room has been completed in current test run */
+	UPROPERTY(BlueprintReadOnly, Category = "Test Arena")
+	bool bTestRoomCompleted = false;
 };

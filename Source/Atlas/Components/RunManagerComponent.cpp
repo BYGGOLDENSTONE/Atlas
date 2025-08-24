@@ -502,9 +502,10 @@ void URunManagerComponent::SetRunState(ERunState NewState)
 	ERunState OldState = CurrentRunState;
 	CurrentRunState = NewState;
 	
-	UE_LOG(LogTemp, Log, TEXT("Run state changed: %s -> %s"), 
-		*UEnum::GetValueAsString(OldState), 
-		*UEnum::GetValueAsString(NewState));
+	const UEnum* StateEnum = StaticEnum<ERunState>();
+	FString OldStateName = StateEnum ? StateEnum->GetNameStringByValue((int64)OldState) : TEXT("Unknown");
+	FString NewStateName = StateEnum ? StateEnum->GetNameStringByValue((int64)NewState) : TEXT("Unknown");
+	UE_LOG(LogTemp, Log, TEXT("Run state changed: %s -> %s"), *OldStateName, *NewStateName);
 	
 	// Handle state-specific logic
 	switch (NewState)
@@ -706,4 +707,267 @@ void URunManagerComponent::UpdateRunStats()
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("Run stats updated - Enemies defeated: %d"), RunProgress.TotalEnemiesDefeated);
+}
+
+// ========================================
+// TEST ARENA SUPPORT IMPLEMENTATION
+// ========================================
+
+void URunManagerComponent::GoToRoom(const FString& RoomName)
+{
+	// Find all room actors in the world if not already cached
+	if (TestArenaRooms.Num() == 0)
+	{
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARoomBase::StaticClass(), FoundActors);
+		
+		for (AActor* Actor : FoundActors)
+		{
+			if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+			{
+				TestArenaRooms.Add(Room);
+			}
+		}
+	}
+	
+	// Map room names to types
+	ERoomType TargetType = ERoomType::EngineeringBay;
+	if (RoomName.Equals("EngineeringBay", ESearchCase::IgnoreCase))
+		TargetType = ERoomType::EngineeringBay;
+	else if (RoomName.Equals("CombatArena", ESearchCase::IgnoreCase))
+		TargetType = ERoomType::CombatArena;
+	else if (RoomName.Equals("MedicalBay", ESearchCase::IgnoreCase))
+		TargetType = ERoomType::MedicalBay;
+	else if (RoomName.Equals("CargoHold", ESearchCase::IgnoreCase))
+		TargetType = ERoomType::CargoHold;
+	else if (RoomName.Equals("Bridge", ESearchCase::IgnoreCase))
+		TargetType = ERoomType::Bridge;
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Unknown room name: %s"), *RoomName);
+		UE_LOG(LogTemp, Warning, TEXT("Valid names: EngineeringBay, CombatArena, MedicalBay, CargoHold, Bridge"));
+		return;
+	}
+	
+	// Find the room actor
+	ARoomBase* TargetRoom = GetRoomActorByType(TargetType);
+	if (TargetRoom)
+	{
+		// Reset previous room if exists
+		if (CurrentRoomInstance && CurrentRoomInstance != TargetRoom)
+		{
+			CurrentRoomInstance->ResetRoom();
+		}
+		
+		// Set as current room
+		CurrentRoomInstance = TargetRoom;
+		bTestArenaMode = true;
+		
+		// Teleport player to room
+		TargetRoom->TeleportPlayerToRoom();
+		
+		// Update state
+		SetRunState(ERunState::RoomIntro);
+		
+		UE_LOG(LogTemp, Log, TEXT("Teleported to room: %s"), *RoomName);
+		
+		// Start combat after delay
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			SetRunState(ERunState::Combat);
+		}, 2.0f, false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Could not find room actor for: %s"), *RoomName);
+		UE_LOG(LogTemp, Warning, TEXT("Make sure room actors are placed in the test arena level"));
+	}
+}
+
+void URunManagerComponent::CompleteRoomTest()
+{
+	if (!CurrentRoomInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No current room to complete"));
+		return;
+	}
+	
+	// Mark room as completed
+	CurrentRoomInstance->CompleteRoom();
+	CurrentRoomInstance->bTestRoomCompleted = true;
+	
+	// Clear any enemies
+	if (CurrentRoomEnemy)
+	{
+		CurrentRoomEnemy->Destroy();
+		CurrentRoomEnemy = nullptr;
+	}
+	
+	const UEnum* RoomEnum = StaticEnum<ERoomType>();
+	FString RoomName = RoomEnum ? RoomEnum->GetNameStringByValue((int64)CurrentRoomInstance->RoomTypeForTesting) : TEXT("Unknown");
+	UE_LOG(LogTemp, Log, TEXT("Room completed: %s"), *RoomName);
+	
+	// Update progress
+	CurrentLevel++;
+	if (CurrentLevel > 5)
+	{
+		UE_LOG(LogTemp, Log, TEXT("All 5 rooms complete! Run successful!"));
+		SetRunState(ERunState::RunComplete);
+		CurrentLevel = 5;
+	}
+	else
+	{
+		SetRunState(ERunState::RoomComplete);
+		UE_LOG(LogTemp, Log, TEXT("Ready for next room. Current level: %d/5"), CurrentLevel);
+	}
+}
+
+void URunManagerComponent::ResetAllRooms()
+{
+	// Find all room actors
+	if (TestArenaRooms.Num() == 0)
+	{
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARoomBase::StaticClass(), FoundActors);
+		
+		for (AActor* Actor : FoundActors)
+		{
+			if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+			{
+				TestArenaRooms.Add(Room);
+			}
+		}
+	}
+	
+	// Reset each room
+	for (ARoomBase* Room : TestArenaRooms)
+	{
+		if (Room)
+		{
+			Room->ResetRoom();
+		}
+	}
+	
+	// Reset run state
+	CurrentLevel = 1;
+	TestSequenceIndex = 0;
+	CurrentRoomInstance = nullptr;
+	CurrentRoomEnemy = nullptr;
+	SetRunState(ERunState::PreRun);
+	
+	UE_LOG(LogTemp, Log, TEXT("All rooms reset. Ready for new test run."));
+}
+
+void URunManagerComponent::DebugRooms()
+{
+	UE_LOG(LogTemp, Warning, TEXT("=== ROOM DEBUG INFO ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Current Level: %d/5"), CurrentLevel);
+	const UEnum* StateEnum2 = StaticEnum<ERunState>();
+	FString StateName = StateEnum2 ? StateEnum2->GetNameStringByValue((int64)CurrentRunState) : TEXT("Unknown");
+	UE_LOG(LogTemp, Warning, TEXT("Current State: %s"), *StateName);
+	UE_LOG(LogTemp, Warning, TEXT("Test Arena Mode: %s"), bTestArenaMode ? TEXT("YES") : TEXT("NO"));
+	
+	if (CurrentRoomInstance)
+	{
+		const UEnum* RoomEnum2 = StaticEnum<ERoomType>();
+		FString CurrentRoomName = RoomEnum2 ? RoomEnum2->GetNameStringByValue((int64)CurrentRoomInstance->RoomTypeForTesting) : TEXT("Unknown");
+		UE_LOG(LogTemp, Warning, TEXT("Current Room: %s"), *CurrentRoomName);
+		UE_LOG(LogTemp, Warning, TEXT("  - Active: %s"), CurrentRoomInstance->IsRoomActive() ? TEXT("YES") : TEXT("NO"));
+		UE_LOG(LogTemp, Warning, TEXT("  - Completed: %s"), CurrentRoomInstance->bTestRoomCompleted ? TEXT("YES") : TEXT("NO"));
+		UE_LOG(LogTemp, Warning, TEXT("  - Player In Room: %s"), CurrentRoomInstance->IsPlayerInRoom() ? TEXT("YES") : TEXT("NO"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No current room instance"));
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Test Arena Rooms Found: %d"), TestArenaRooms.Num());
+	for (ARoomBase* Room : TestArenaRooms)
+	{
+		if (Room)
+		{
+			const UEnum* RoomEnum3 = StaticEnum<ERoomType>();
+			FString RoomTypeName = RoomEnum3 ? RoomEnum3->GetNameStringByValue((int64)Room->RoomTypeForTesting) : TEXT("Unknown");
+			UE_LOG(LogTemp, Warning, TEXT("  - %s (Completed: %s)"), 
+				*RoomTypeName,
+				Room->bTestRoomCompleted ? TEXT("YES") : TEXT("NO"));
+		}
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("======================"));
+}
+
+void URunManagerComponent::TestRoomSequence()
+{
+	UE_LOG(LogTemp, Log, TEXT("Starting test room sequence..."));
+	
+	// Reset everything first
+	ResetAllRooms();
+	
+	// Start with first room
+	TestSequenceIndex = 0;
+	TArray<FString> RoomNames = {
+		TEXT("EngineeringBay"),
+		TEXT("CombatArena"),
+		TEXT("MedicalBay"),
+		TEXT("CargoHold"),
+		TEXT("Bridge")
+	};
+	
+	if (RoomNames.IsValidIndex(TestSequenceIndex))
+	{
+		GoToRoom(RoomNames[TestSequenceIndex]);
+		
+		// Set up timer to auto-complete rooms
+		FTimerHandle SequenceTimer;
+		GetWorld()->GetTimerManager().SetTimer(SequenceTimer, [this, RoomNames]()
+		{
+			// Complete current room
+			CompleteRoomTest();
+			
+			// Move to next room
+			TestSequenceIndex++;
+			if (TestSequenceIndex < RoomNames.Num())
+			{
+				FTimerHandle NextRoomTimer;
+				GetWorld()->GetTimerManager().SetTimer(NextRoomTimer, [this, RoomNames]()
+				{
+					GoToRoom(RoomNames[TestSequenceIndex]);
+				}, 2.0f, false);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("Test sequence complete!"));
+			}
+		}, 5.0f, true); // Auto-complete every 5 seconds
+	}
+}
+
+ARoomBase* URunManagerComponent::GetRoomActorByType(ERoomType RoomType) const
+{
+	for (ARoomBase* Room : TestArenaRooms)
+	{
+		if (Room && Room->RoomTypeForTesting == RoomType)
+		{
+			return Room;
+		}
+	}
+	
+	// If not in cache, try to find in world
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARoomBase::StaticClass(), FoundActors);
+	
+	for (AActor* Actor : FoundActors)
+	{
+		if (ARoomBase* Room = Cast<ARoomBase>(Actor))
+		{
+			if (Room->RoomTypeForTesting == RoomType)
+			{
+				return Room;
+			}
+		}
+	}
+	
+	return nullptr;
 }
