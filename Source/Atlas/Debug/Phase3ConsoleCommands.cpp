@@ -8,7 +8,6 @@
 #include "Atlas/Characters/EnemyCharacter.h"
 #include "Atlas/Components/SlotManagerComponent.h"
 #include "Atlas/Components/RunManagerComponent.h"
-#include "Atlas/Components/RunManagerSubsystem.h"
 #include "Atlas/Components/RewardSelectionComponent.h"
 #include "Atlas/Components/HealthComponent.h"
 #include "Atlas/Interfaces/IHealthInterface.h"
@@ -955,8 +954,8 @@ URunManagerComponent* UPhase3ConsoleCommands::GetRunManager()
 		}
 	}
 	
-	// Method 2: Try the subsystem approach
-	UE_LOG(LogTemp, Warning, TEXT("[PHASE3] Trying subsystem approach..."));
+	// Method 2: Try GameInstance-based approach (simplified - no subsystem needed)
+	UE_LOG(LogTemp, Warning, TEXT("[PHASE3] Checking GameInstance..."));
 	
 	UGameInstance* GameInstance = World->GetGameInstance();
 	if (!GameInstance)
@@ -966,26 +965,7 @@ URunManagerComponent* UPhase3ConsoleCommands::GetRunManager()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[PHASE3] GameInstance found: %s"), *GameInstance->GetClass()->GetName());
-		
-		URunManagerSubsystem* Subsystem = GameInstance->GetSubsystem<URunManagerSubsystem>();
-		if (!Subsystem)
-		{
-			UE_LOG(LogTemp, Error, TEXT("[PHASE3] RunManagerSubsystem not found! Subsystem might not be registered."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("[PHASE3] RunManagerSubsystem found, getting RunManager..."));
-			URunManagerComponent* RunManager = Subsystem->GetRunManager();
-			if (RunManager)
-			{
-				UE_LOG(LogTemp, Log, TEXT("[PHASE3] Got RunManager from Subsystem"));
-				return RunManager;
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("[PHASE3] Subsystem->GetRunManager() returned null"));
-			}
-		}
+		// Note: No subsystem needed - GameMode approach should be sufficient
 	}
 	
 	// Method 3: Use global singleton as last resort
