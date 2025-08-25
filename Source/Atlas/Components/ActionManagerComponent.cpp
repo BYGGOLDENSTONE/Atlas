@@ -246,6 +246,8 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 	if (Action->CanExecute(OwnerCharacter))
 	{
 		CurrentAction = Action;
+		// Set the current action data for damage calculations
+		SetCurrentActionData(Action->GetActionData());
 		Action->Execute(OwnerCharacter);
 		OnActionActivated.Broadcast(SlotName, Action);
 	}

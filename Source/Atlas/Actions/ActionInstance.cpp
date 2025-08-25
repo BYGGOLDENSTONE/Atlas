@@ -7,11 +7,6 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
-#include "Engine/EngineTypes.h"
-#include "Engine/OverlapResult.h"
-#include "CollisionQueryParams.h"
-#include "Components/PrimitiveComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 UActionInstance::UActionInstance()
 {
@@ -265,46 +260,16 @@ void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 	if (ActionData && ActionData->ActionMontage && Owner)
 	{
 		Owner->PlayAnimMontage(ActionData->ActionMontage, ActionData->MontagePlayRate);
+		UE_LOG(LogTemp, Log, TEXT("ActionInstance: Executing Attack - Damage: %.1f"), 
+			ActionData->MeleeDamage);
 	}
-
-	// Apply damage in range (using melee attack range)
-	float AttackRange = 200.0f; // Default melee range
-	if (AttackRange > 0.0f)
+	else
 	{
-		TArray<FOverlapResult> OverlapResults;
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(Owner);
-
-		FVector StartLocation = Owner->GetActorLocation();
-
-		if (Owner->GetWorld()->OverlapMultiByChannel(
-			OverlapResults,
-			StartLocation,
-			FQuat::Identity,
-			ECC_Pawn,
-			FCollisionShape::MakeSphere(AttackRange),
-			QueryParams))
-		{
-			for (const FOverlapResult& Result : OverlapResults)
-			{
-				if (AGameCharacterBase* Target = Cast<AGameCharacterBase>(Result.GetActor()))
-				{
-					if (Target != Owner)
-					{
-						// Apply damage
-						UGameplayStatics::ApplyDamage(Target, ActionData->MeleeDamage, 
-							Owner->GetController(), Owner, UDamageType::StaticClass());
-						
-						UE_LOG(LogTemp, Log, TEXT("ActionInstance: Hit %s for %.1f damage"), 
-							*Target->GetName(), ActionData->MeleeDamage);
-					}
-				}
-			}
-		}
+		UE_LOG(LogTemp, Warning, TEXT("ActionInstance: No montage available for attack"));
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("ActionInstance: Executing Melee Attack - Damage: %.1f, Range: %.1f"), 
-		ActionData->MeleeDamage, AttackRange);
+	// Note: Actual damage is applied by AttackNotify during the animation
+	// when it detects hits and calls ProcessHitFromAnimation
 }
 
 void UActionInstance::ExecuteUtilityAction(AGameCharacterBase* Owner)

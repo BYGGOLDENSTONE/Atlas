@@ -63,6 +63,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Action")
 	EActionState GetCurrentState() const { return CurrentState; }
 
+	UFUNCTION(BlueprintPure, Category = "Action")
+	UActionDataAsset* GetActionData() const { return ActionData; }
+
 	// Configuration
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	void Initialize(UActionDataAsset* InActionData);
