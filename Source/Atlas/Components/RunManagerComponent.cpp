@@ -8,6 +8,7 @@
 #include "Atlas/Components/RewardSelectionComponent.h"
 #include "Atlas/UI/SRewardSelectionWidget.h"
 #include "Atlas/UI/SRunProgressWidget.h"
+#include "Atlas/UI/SEnemyHealthWidget.h"
 #include "Atlas/Rooms/RoomBase.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -250,11 +251,19 @@ void URunManagerComponent::StartNewRun()
 				if (HealthComp)
 				{
 					RunProgressWidget->UpdateHealth(HealthComp->GetCurrentHealth(), HealthComp->GetMaxHealth());
+					RunProgressWidget->UpdatePoise(HealthComp->GetCurrentPoise(), HealthComp->GetMaxPoise());
+					
+					// Subscribe to health and poise changes
+					HealthComp->OnHealthChanged.AddDynamic(this, &URunManagerComponent::OnPlayerHealthChanged);
+					HealthComp->OnPoiseChanged.AddDynamic(this, &URunManagerComponent::OnPlayerPoiseChanged);
 				}
 				
 				if (IntegrityComp)
 				{
 					RunProgressWidget->UpdateIntegrity(IntegrityComp->GetCurrentIntegrity(), IntegrityComp->GetMaxIntegrity());
+					
+					// Subscribe to integrity changes
+					IntegrityComp->OnIntegrityChanged.AddDynamic(this, &URunManagerComponent::OnPlayerIntegrityChanged);
 				}
 			}
 		}
@@ -605,6 +614,12 @@ void URunManagerComponent::LoadRoom(URoomDataAsset* Room)
 	CurrentRoom = Room;
 	RoomStartTime = GetWorld()->GetTimeSeconds();
 	
+	// Update the RunProgressWidget with current room info
+	if (RunProgressWidget.IsValid())
+	{
+		RunProgressWidget->UpdateCurrentRoomInfo(CurrentRoom);
+	}
+	
 	// Remove from remaining rooms if not repeatable
 	if (!Room->bCanRepeat)
 	{
@@ -680,6 +695,9 @@ void URunManagerComponent::SpawnRoomEnemy()
 		
 		// Apply difficulty scaling
 		ApplyEnemyScaling(CurrentRoomEnemy);
+		
+		// Show enemy health widget
+		ShowEnemyHealthWidget(CurrentRoomEnemy);
 		
 		// Subscribe to enemy death event
 		if (UHealthComponent* EnemyHealth = CurrentRoomEnemy->GetHealthComponent())
@@ -940,6 +958,9 @@ void URunManagerComponent::OnEnemyDefeated(AActor* KilledBy)
 	// KilledBy parameter indicates who killed the enemy (usually the player)
 	UE_LOG(LogTemp, Log, TEXT("Enemy defeated by %s!"), KilledBy ? *KilledBy->GetName() : TEXT("Unknown"));
 	
+	// Hide enemy health widget
+	HideEnemyHealthWidget();
+	
 	CurrentRoomEnemy = nullptr;
 	SetRunState(ERunState::Victory);
 	
@@ -1052,6 +1073,32 @@ void URunManagerComponent::GoToRoom(const FString& RoomName)
 		}
 	}
 	
+	// First ensure RunProgressWidget exists
+	if (!RunProgressWidget.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RunProgressWidget not created - creating now"));
+		// Get player components for the widget
+		AGameCharacterBase* PlayerChar = Cast<AGameCharacterBase>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		if (PlayerChar)
+		{
+			UHealthComponent* HealthComp = PlayerChar->FindComponentByClass<UHealthComponent>();
+			UStationIntegrityComponent* IntegrityComp = PlayerChar->FindComponentByClass<UStationIntegrityComponent>();
+			
+			// Create the widget
+			RunProgressWidget = SNew(SRunProgressWidget)
+				.RunManager(this)
+				.HealthComponent(HealthComp)
+				.IntegrityComponent(IntegrityComp);
+			
+			// Add to viewport
+			if (GEngine && GEngine->GameViewport && RunProgressWidget.IsValid())
+			{
+				GEngine->GameViewport->AddViewportWidgetContent(RunProgressWidget.ToSharedRef(), 10);
+				UE_LOG(LogTemp, Log, TEXT("RunProgressWidget created in GoToRoom"));
+			}
+		}
+	}
+	
 	// Map room names to types
 	ERoomType TargetType = ERoomType::EngineeringBay;
 	if (RoomName.Equals("EngineeringBay", ESearchCase::IgnoreCase))
@@ -1085,6 +1132,63 @@ void URunManagerComponent::GoToRoom(const FString& RoomName)
 		CurrentRoomInstance = TargetRoom;
 		bTestArenaMode = true;
 		
+		// Debug logging for room data assets
+		UE_LOG(LogTemp, Warning, TEXT("=== ROOM DATA DEBUG ==="));
+		UE_LOG(LogTemp, Warning, TEXT("AllRoomDataAssets count: %d"), AllRoomDataAssets.Num());
+		
+		// Get the room data asset for this room type
+		bool bFoundRoomData = false;
+		if (AllRoomDataAssets.Num() > 0)
+		{
+			for (URoomDataAsset* RoomData : AllRoomDataAssets)
+			{
+				if (RoomData)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Checking RoomData: %s, Type: %d"), 
+						*RoomData->RoomName.ToString(), (int32)RoomData->RoomType);
+					
+					if (RoomData->RoomType == TargetType)
+					{
+						CurrentRoom = RoomData;
+						bFoundRoomData = true;
+						UE_LOG(LogTemp, Warning, TEXT("FOUND matching room data: %s"), *CurrentRoom->RoomName.ToString());
+						break;
+					}
+				}
+			}
+		}
+		
+		if (!bFoundRoomData)
+		{
+			// Create a temporary room data asset for testing if none exist
+			UE_LOG(LogTemp, Warning, TEXT("No room data assets found, creating temporary data for: %s"), *RoomName);
+			URoomDataAsset* TempRoomData = NewObject<URoomDataAsset>(this);
+			TempRoomData->RoomName = FText::FromString(RoomName);
+			TempRoomData->RoomType = TargetType;
+			TempRoomData->EnemyName = FText::FromString(FString::Printf(TEXT("%s Enemy"), *RoomName));
+			CurrentRoom = TempRoomData;
+		}
+		
+		// Update the RunProgressWidget with current room info
+		if (CurrentRoom)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CurrentRoom set to: %s"), *CurrentRoom->RoomName.ToString());
+			
+			if (RunProgressWidget.IsValid())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Updating RunProgressWidget with room: %s"), *CurrentRoom->RoomName.ToString());
+				RunProgressWidget->UpdateCurrentRoomInfo(CurrentRoom);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("RunProgressWidget is not valid!"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CurrentRoom is null!"));
+		}
+		
 		// Teleport player to room
 		TargetRoom->TeleportPlayerToRoom();
 		
@@ -1093,12 +1197,73 @@ void URunManagerComponent::GoToRoom(const FString& RoomName)
 		
 		UE_LOG(LogTemp, Log, TEXT("Teleported to room: %s"), *RoomName);
 		
-		// Start combat after delay
+		// Start combat and spawn enemy after delay
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([this, TargetRoom]()
 		{
 			SetRunState(ERunState::Combat);
-		}, 2.0f, false);
+			
+			// Spawn enemy for this room
+			if (CurrentRoom)
+			{
+				if (CurrentRoom->UniqueEnemy)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Spawning enemy class: %s"), *CurrentRoom->UniqueEnemy->GetName());
+					
+					FTransform SpawnTransform = TargetRoom->GetEnemySpawnPoint();
+					FActorSpawnParameters SpawnParams;
+					SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+					
+					CurrentRoomEnemy = GetWorld()->SpawnActor<AGameCharacterBase>(
+						CurrentRoom->UniqueEnemy,
+						SpawnTransform.GetLocation(),
+						SpawnTransform.GetRotation().Rotator(),
+						SpawnParams
+					);
+					
+					if (CurrentRoomEnemy)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("=== ENEMY SPAWNED ==="));
+						UE_LOG(LogTemp, Warning, TEXT("Enemy: %s at %s"), 
+							*CurrentRoom->EnemyName.ToString(), 
+							*CurrentRoomEnemy->GetActorLocation().ToString());
+						
+						// Apply difficulty scaling
+						ApplyEnemyScaling(CurrentRoomEnemy);
+						
+						// Show enemy health widget
+						UE_LOG(LogTemp, Warning, TEXT("Calling ShowEnemyHealthWidget..."));
+						ShowEnemyHealthWidget(CurrentRoomEnemy);
+						
+						// Subscribe to enemy death event
+						if (UHealthComponent* EnemyHealth = CurrentRoomEnemy->GetHealthComponent())
+						{
+							UE_LOG(LogTemp, Warning, TEXT("Enemy health component found, subscribing to death event"));
+							EnemyHealth->OnDeath.AddDynamic(this, &URunManagerComponent::OnEnemyDefeated);
+						}
+						else
+						{
+							UE_LOG(LogTemp, Error, TEXT("Enemy has no health component!"));
+						}
+					}
+					else
+					{
+						UE_LOG(LogTemp, Error, TEXT("Failed to spawn enemy!"));
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("CurrentRoom->UniqueEnemy is null - using fallback enemy spawn"));
+					
+					// Try to spawn a default enemy if no unique enemy is set
+					// This would need to be configured in Blueprint or we create a test enemy
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("CurrentRoom is null when trying to spawn enemy!"));
+			}
+		}), 2.0f, false);
 	}
 	else
 	{
@@ -2167,5 +2332,180 @@ void URunManagerComponent::CloseRewardSelectionUI()
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
 		
 		UE_LOG(LogTemp, Log, TEXT("Closed Slate reward selection UI"));
+	}
+}
+
+void URunManagerComponent::UpdateEnemyHealthDisplay(float CurrentHealth, float MaxHealth, float CurrentPoise, float MaxPoise)
+{
+	if (EnemyHealthWidget.IsValid())
+	{
+		EnemyHealthWidget->UpdateEnemyHealth(CurrentHealth, MaxHealth);
+		EnemyHealthWidget->UpdateEnemyPoise(CurrentPoise, MaxPoise);
+		
+		// Log updates periodically
+		static int32 UpdateCounter = 0;
+		if (++UpdateCounter % 30 == 0)  // Log every 30 updates
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UpdateEnemyHealthDisplay: Health %.0f/%.0f, Poise %.0f/%.0f"),
+				CurrentHealth, MaxHealth, CurrentPoise, MaxPoise);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("UpdateEnemyHealthDisplay: EnemyHealthWidget is not valid!"));
+	}
+}
+
+void URunManagerComponent::ShowEnemyHealthWidget(AGameCharacterBase* Enemy)
+{
+	UE_LOG(LogTemp, Warning, TEXT("=== ShowEnemyHealthWidget called ==="));
+	
+	if (!Enemy)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy is null, hiding widget"));
+		HideEnemyHealthWidget();
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Enemy is valid: %s"), *Enemy->GetName());
+	
+	// Create enemy health widget if it doesn't exist
+	if (!EnemyHealthWidget.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Creating new enemy health widget"));
+		
+		FText EnemyName = CurrentRoom ? CurrentRoom->EnemyName : FText::FromString("Enemy");
+		UE_LOG(LogTemp, Warning, TEXT("Enemy name: %s"), *EnemyName.ToString());
+		
+		UHealthComponent* EnemyHealthComp = Enemy->GetHealthComponent();
+		if (!EnemyHealthComp)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Enemy has no health component! Cannot create widget."));
+			return;
+		}
+		
+		UE_LOG(LogTemp, Warning, TEXT("Creating SEnemyHealthWidget..."));
+		EnemyHealthWidget = SNew(SEnemyHealthWidget)
+			.EnemyHealthComponent(EnemyHealthComp)
+			.EnemyName(EnemyName);
+		
+		// Add to viewport at top-center
+		if (GEngine && GEngine->GameViewport && EnemyHealthWidget.IsValid())
+		{
+			GEngine->GameViewport->AddViewportWidgetContent(EnemyHealthWidget.ToSharedRef(), 15);
+			UE_LOG(LogTemp, Warning, TEXT("Enemy health widget added to viewport!"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to add enemy health widget to viewport!"));
+			if (!GEngine) UE_LOG(LogTemp, Error, TEXT("GEngine is null"));
+			if (!GEngine->GameViewport) UE_LOG(LogTemp, Error, TEXT("GameViewport is null"));
+			if (!EnemyHealthWidget.IsValid()) UE_LOG(LogTemp, Error, TEXT("EnemyHealthWidget is invalid after creation"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy health widget already exists, updating it"));
+		
+		// Update existing widget with new enemy
+		if (UHealthComponent* HealthComp = Enemy->GetHealthComponent())
+		{
+			FText EnemyName = CurrentRoom ? CurrentRoom->EnemyName : FText::FromString("Enemy");
+			EnemyHealthWidget->SetEnemyName(EnemyName);
+			EnemyHealthWidget->SetEnemyHealthComponent(HealthComp);
+			
+			UE_LOG(LogTemp, Warning, TEXT("Subscribing to health/poise events"));
+			// Subscribe to health changes
+			HealthComp->OnHealthChanged.AddDynamic(this, &URunManagerComponent::OnEnemyHealthChanged);
+			HealthComp->OnPoiseChanged.AddDynamic(this, &URunManagerComponent::OnEnemyPoiseChanged);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Enemy has no health component for update!"));
+		}
+	}
+	
+	// Show the widget
+	if (EnemyHealthWidget.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Calling ShowWidget on EnemyHealthWidget"));
+		EnemyHealthWidget->ShowWidget();
+		
+		// Force update with current values
+		if (UHealthComponent* HealthComp = Enemy->GetHealthComponent())
+		{
+			UpdateEnemyHealthDisplay(
+				HealthComp->GetCurrentHealth(),
+				HealthComp->GetMaxHealth(),
+				HealthComp->GetCurrentPoise(),
+				HealthComp->GetMaxPoise());
+			UE_LOG(LogTemp, Warning, TEXT("Updated enemy display - Health: %.0f/%.0f, Poise: %.0f/%.0f"),
+				HealthComp->GetCurrentHealth(), HealthComp->GetMaxHealth(),
+				HealthComp->GetCurrentPoise(), HealthComp->GetMaxPoise());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EnemyHealthWidget is not valid after all attempts!"));
+	}
+}
+
+void URunManagerComponent::HideEnemyHealthWidget()
+{
+	if (EnemyHealthWidget.IsValid())
+	{
+		EnemyHealthWidget->HideWidget();
+		
+		// Optionally remove from viewport completely
+		if (GEngine && GEngine->GameViewport)
+		{
+			GEngine->GameViewport->RemoveViewportWidgetContent(EnemyHealthWidget.ToSharedRef());
+		}
+		EnemyHealthWidget.Reset();
+	}
+}
+
+void URunManagerComponent::OnPlayerHealthChanged(float CurrentHealth, float MaxHealth, float HealthDelta)
+{
+	if (RunProgressWidget.IsValid())
+	{
+		RunProgressWidget->UpdateHealth(CurrentHealth, MaxHealth);
+	}
+}
+
+void URunManagerComponent::OnPlayerPoiseChanged(float CurrentPoise, float MaxPoise, float PoiseDelta)
+{
+	if (RunProgressWidget.IsValid())
+	{
+		RunProgressWidget->UpdatePoise(CurrentPoise, MaxPoise);
+	}
+}
+
+void URunManagerComponent::OnPlayerIntegrityChanged(float CurrentIntegrity, float MaxIntegrity, float IntegrityDelta)
+{
+	if (RunProgressWidget.IsValid())
+	{
+		RunProgressWidget->UpdateIntegrity(CurrentIntegrity, MaxIntegrity);
+	}
+}
+
+void URunManagerComponent::OnEnemyHealthChanged(float CurrentHealth, float MaxHealth, float HealthDelta)
+{
+	if (CurrentRoomEnemy && CurrentRoomEnemy->GetHealthComponent())
+	{
+		UpdateEnemyHealthDisplay(CurrentHealth, MaxHealth,
+			CurrentRoomEnemy->GetHealthComponent()->GetCurrentPoise(),
+			CurrentRoomEnemy->GetHealthComponent()->GetMaxPoise());
+	}
+}
+
+void URunManagerComponent::OnEnemyPoiseChanged(float CurrentPoise, float MaxPoise, float PoiseDelta)
+{
+	if (CurrentRoomEnemy && CurrentRoomEnemy->GetHealthComponent())
+	{
+		UpdateEnemyHealthDisplay(
+			CurrentRoomEnemy->GetHealthComponent()->GetCurrentHealth(),
+			CurrentRoomEnemy->GetHealthComponent()->GetMaxHealth(),
+			CurrentPoise, MaxPoise);
 	}
 }

@@ -249,6 +249,43 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Run Manager|Queries")
 	AGameCharacterBase* GetCurrentEnemy() const { return CurrentRoomEnemy; }
 	
+	/**
+	 * Update enemy health UI when enemy takes damage
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|UI")
+	void UpdateEnemyHealthDisplay(float CurrentHealth, float MaxHealth, float CurrentPoise, float MaxPoise);
+	
+	/**
+	 * Show enemy health widget for current enemy
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|UI")
+	void ShowEnemyHealthWidget(AGameCharacterBase* Enemy);
+	
+	/**
+	 * Hide enemy health widget
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|UI")
+	void HideEnemyHealthWidget();
+
+protected:
+	// UI Update callbacks
+	UFUNCTION()
+	void OnPlayerHealthChanged(float CurrentHealth, float MaxHealth, float HealthDelta);
+	
+	UFUNCTION()
+	void OnPlayerPoiseChanged(float CurrentPoise, float MaxPoise, float PoiseDelta);
+	
+	UFUNCTION()
+	void OnPlayerIntegrityChanged(float CurrentIntegrity, float MaxIntegrity, float IntegrityDelta);
+	
+	UFUNCTION()
+	void OnEnemyHealthChanged(float CurrentHealth, float MaxHealth, float HealthDelta);
+	
+	UFUNCTION()
+	void OnEnemyPoiseChanged(float CurrentPoise, float MaxPoise, float PoiseDelta);
+
+public:
+	
 	// ========================================
 	// TEST ARENA SUPPORT
 	// ========================================
@@ -555,4 +592,7 @@ protected:
 	
 	/** Slate widget for run progress display */
 	TSharedPtr<class SRunProgressWidget> RunProgressWidget;
+	
+	/** Slate widget for enemy health display */
+	TSharedPtr<class SEnemyHealthWidget> EnemyHealthWidget;
 };

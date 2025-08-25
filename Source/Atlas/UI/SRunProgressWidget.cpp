@@ -21,6 +21,8 @@ void SRunProgressWidget::Construct(const FArguments& InArgs)
 	CurrentRoomIndex = 0;
 	CurrentHealth = 100.0f;
 	MaxHealth = 100.0f;
+	CurrentPoise = 100.0f;
+	MaxPoise = 100.0f;
 	CurrentIntegrity = 100.0f;
 	MaxIntegrity = 100.0f;
 	
@@ -34,7 +36,7 @@ void SRunProgressWidget::Construct(const FArguments& InArgs)
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.HAlign(HAlign_Left)
-		.VAlign(VAlign_Top)
+		.VAlign(VAlign_Bottom)
 		.Padding(10.0f)
 		[
 			SNew(SBorder)
@@ -44,7 +46,7 @@ void SRunProgressWidget::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Top)
 			[
 				SNew(SBox)
-				.WidthOverride(400)
+				.WidthOverride(350)
 				[
 					SNew(SVerticalBox)
 			
@@ -90,6 +92,23 @@ void SRunProgressWidget::Construct(const FArguments& InArgs)
 			.Padding(0, 0, 0, 5)
 			[
 				CreateHealthBar()
+			]
+			
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0, 5, 0, 5)
+			[
+				SNew(STextBlock)
+				.Text(FText::FromString(TEXT("POISE")))
+				.Font(FCoreStyle::GetDefaultFontStyle("Bold", 10))
+				.ColorAndOpacity(FSlateColor(FLinearColor(0.7f, 0.7f, 0.7f)))
+			]
+			
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0, 0, 0, 5)
+			[
+				CreatePoiseBar()
 			]
 			
 			+ SVerticalBox::Slot()
@@ -186,6 +205,18 @@ TSharedRef<SWidget> SRunProgressWidget::CreateHealthBar()
 		];
 }
 
+TSharedRef<SWidget> SRunProgressWidget::CreatePoiseBar()
+{
+	return SNew(SBox)
+		.HeightOverride(20)
+		[
+			SNew(SProgressBar)
+			.Percent(this, &SRunProgressWidget::GetPoisePercent)
+			.FillColorAndOpacity(this, &SRunProgressWidget::GetPoiseBarColor)
+			.BackgroundImage(FAppStyle::GetBrush("ProgressBar.Background"))
+		];
+}
+
 TSharedRef<SWidget> SRunProgressWidget::CreateIntegrityBar()
 {
 	return SNew(SBox)
@@ -212,6 +243,12 @@ void SRunProgressWidget::UpdateHealth(float InCurrentHealth, float InMaxHealth)
 {
 	CurrentHealth = InCurrentHealth;
 	MaxHealth = InMaxHealth;
+}
+
+void SRunProgressWidget::UpdatePoise(float InCurrentPoise, float InMaxPoise)
+{
+	CurrentPoise = InCurrentPoise;
+	MaxPoise = InMaxPoise;
 }
 
 void SRunProgressWidget::UpdateIntegrity(float InCurrentIntegrity, float InMaxIntegrity)
@@ -254,6 +291,13 @@ FText SRunProgressWidget::GetHealthText() const
 	return FText::Format(NSLOCTEXT("RunProgress", "Health", "{0}/{1}"), 
 		FText::AsNumber(FMath::RoundToInt(CurrentHealth)), 
 		FText::AsNumber(FMath::RoundToInt(MaxHealth)));
+}
+
+FText SRunProgressWidget::GetPoiseText() const
+{
+	return FText::Format(NSLOCTEXT("RunProgress", "Poise", "{0}/{1}"), 
+		FText::AsNumber(FMath::RoundToInt(CurrentPoise)), 
+		FText::AsNumber(FMath::RoundToInt(MaxPoise)));
 }
 
 FText SRunProgressWidget::GetIntegrityText() const
@@ -301,6 +345,24 @@ FSlateColor SRunProgressWidget::GetHealthBarColor() const
 	return FSlateColor(FLinearColor(0.2f, 1.0f, 0.2f));
 }
 
+FSlateColor SRunProgressWidget::GetPoiseBarColor() const
+{
+	float PoisePercent = MaxPoise > 0 ? CurrentPoise / MaxPoise : 0.0f;
+	if (CurrentPoise <= 0.0f)
+	{
+		return FSlateColor(FLinearColor(0.5f, 0.0f, 0.5f));
+	}
+	else if (PoisePercent <= 0.25f)
+	{
+		return FSlateColor(FLinearColor(0.8f, 0.4f, 0.8f));
+	}
+	else if (PoisePercent <= 0.5f)
+	{
+		return FSlateColor(FLinearColor(0.6f, 0.2f, 0.8f));
+	}
+	return FSlateColor(FLinearColor(0.8f, 0.6f, 1.0f));
+}
+
 FSlateColor SRunProgressWidget::GetIntegrityBarColor() const
 {
 	float IntegrityPercent = MaxIntegrity > 0 ? CurrentIntegrity / MaxIntegrity : 0.0f;
@@ -343,6 +405,11 @@ FSlateColor SRunProgressWidget::GetRoomIconColor(int32 RoomIndex) const
 TOptional<float> SRunProgressWidget::GetHealthPercent() const
 {
 	return MaxHealth > 0 ? CurrentHealth / MaxHealth : 0.0f;
+}
+
+TOptional<float> SRunProgressWidget::GetPoisePercent() const
+{
+	return MaxPoise > 0 ? CurrentPoise / MaxPoise : 0.0f;
 }
 
 TOptional<float> SRunProgressWidget::GetIntegrityPercent() const
