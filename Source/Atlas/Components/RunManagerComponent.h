@@ -583,10 +583,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rewards")
 	bool bRewardSelectionActive = false;
 	
-	/** Reference to reward selection component */
-	UPROPERTY()
-	class URewardSelectionComponent* RewardSelectionComponent;
-	
 	/** Slate widget for reward selection */
 	TSharedPtr<SWidget> RewardSelectionWidget;
 	

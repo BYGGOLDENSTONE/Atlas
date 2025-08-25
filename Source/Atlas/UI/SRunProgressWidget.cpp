@@ -1,6 +1,7 @@
 #include "SRunProgressWidget.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SBorder.h"
+#include "Widgets/SOverlay.h"
 #include "Widgets/Layout/SGridPanel.h"
 #include "Widgets/Layout/SSpacer.h"
 #include "Widgets/Text/STextBlock.h"
@@ -25,25 +26,24 @@ void SRunProgressWidget::Construct(const FArguments& InArgs)
 	MaxPoise = 100.0f;
 	CurrentIntegrity = 100.0f;
 	MaxIntegrity = 100.0f;
+	CurrentRoomData = nullptr;
 	
 	RoomCompletionStatus.SetNum(TotalRooms);
 	RoomFailureStatus.SetNum(TotalRooms);
 	
 	ChildSlot
 	[
-		SNew(SVerticalBox)
+		SNew(SOverlay)
 		
-		+ SVerticalBox::Slot()
-		.AutoHeight()
+		+ SOverlay::Slot()
 		.HAlign(HAlign_Left)
 		.VAlign(VAlign_Bottom)
-		.Padding(10.0f)
+		.Padding(20.0f)
 		[
 			SNew(SBorder)
 			.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
-			.Padding(FMargin(10.0f))
-			.HAlign(HAlign_Left)
-			.VAlign(VAlign_Top)
+			.BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.8f))
+			.Padding(FMargin(15.0f))
 			[
 				SNew(SBox)
 				.WidthOverride(350)
@@ -128,12 +128,6 @@ void SRunProgressWidget::Construct(const FArguments& InArgs)
 			]
 				]
 			]
-		]
-		
-		+ SVerticalBox::Slot()
-		.FillHeight(1.0f)
-		[
-			SNullWidget::NullWidget
 		]
 	];
 }
@@ -260,6 +254,15 @@ void SRunProgressWidget::UpdateIntegrity(float InCurrentIntegrity, float InMaxIn
 void SRunProgressWidget::UpdateCurrentRoomInfo(URoomDataAsset* RoomData)
 {
 	CurrentRoomData = RoomData;
+	
+	// Force widget to refresh with new room data
+	if (CurrentRoomData)
+	{
+		Invalidate(EInvalidateWidgetReason::Paint);
+	}
+	else
+	{
+	}
 }
 
 void SRunProgressWidget::SetRoomCompleted(int32 RoomIndex)

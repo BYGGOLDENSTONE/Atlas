@@ -1,6 +1,7 @@
 #include "SEnemyHealthWidget.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SBorder.h"
+#include "Widgets/SOverlay.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Notifications/SProgressBar.h"
@@ -13,21 +14,38 @@ void SEnemyHealthWidget::Construct(const FArguments& InArgs)
     EnemyHealthComponentRef = InArgs._EnemyHealthComponent;
     EnemyName = InArgs._EnemyName;
     
+    // Initialize health values if component is valid
+    if (UHealthComponent* HealthComp = EnemyHealthComponentRef.Get())
+    {
+        CurrentEnemyHealth = HealthComp->GetCurrentHealth();
+        MaxEnemyHealth = HealthComp->GetMaxHealth();
+        CurrentEnemyPoise = HealthComp->GetCurrentPoise();
+        MaxEnemyPoise = HealthComp->GetMaxPoise();
+        bIsVisible = true;
+        
+    }
+    else
+    {
+    }
+    
     ChildSlot
     [
-        SNew(SBox)
+        SNew(SOverlay)
+        
+        + SOverlay::Slot()
         .HAlign(HAlign_Center)
         .VAlign(VAlign_Top)
-        .Padding(FMargin(0, 20, 0, 0))
-        .Visibility(this, &SEnemyHealthWidget::GetWidgetVisibility)
+        .Padding(0, 100, 0, 0)
         [
-            SNew(SBorder)
-            .BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
-            .BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.8f))
-            .Padding(FMargin(15.0f, 10.0f))
+            SNew(SBox)
+            .WidthOverride(500)
+            .HeightOverride(220)
+            .Visibility(this, &SEnemyHealthWidget::GetWidgetVisibility)
             [
-                SNew(SBox)
-                .WidthOverride(400)
+                SNew(SBorder)
+                .BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+                .BorderBackgroundColor(FLinearColor(0.05f, 0.05f, 0.05f, 0.95f))  // Dark background
+                .Padding(FMargin(20.0f, 15.0f))
                 [
                     SNew(SVerticalBox)
                     
@@ -155,12 +173,14 @@ void SEnemyHealthWidget::UpdateEnemyHealth(float CurrentHealth, float MaxHealth)
 {
     CurrentEnemyHealth = CurrentHealth;
     MaxEnemyHealth = MaxHealth;
+    Invalidate(EInvalidateWidgetReason::Paint);
 }
 
 void SEnemyHealthWidget::UpdateEnemyPoise(float CurrentPoise, float MaxPoise)
 {
     CurrentEnemyPoise = CurrentPoise;
     MaxEnemyPoise = MaxPoise;
+    Invalidate(EInvalidateWidgetReason::Paint);
 }
 
 void SEnemyHealthWidget::SetEnemyName(const FText& Name)
@@ -180,26 +200,25 @@ void SEnemyHealthWidget::SetEnemyHealthComponent(UHealthComponent* HealthComp)
         MaxEnemyPoise = HealthComp->GetMaxPoise();
         bIsVisible = true;
         
-        UE_LOG(LogTemp, Warning, TEXT("SEnemyHealthWidget: Set health component - Health: %.0f/%.0f, Poise: %.0f/%.0f"),
-            CurrentEnemyHealth, MaxEnemyHealth, CurrentEnemyPoise, MaxEnemyPoise);
+        Invalidate(EInvalidateWidgetReason::Paint);
     }
     else
     {
         bIsVisible = false;
-        UE_LOG(LogTemp, Warning, TEXT("SEnemyHealthWidget: Health component is null"));
+        Invalidate(EInvalidateWidgetReason::Visibility);
     }
 }
 
 void SEnemyHealthWidget::ShowWidget()
 {
     bIsVisible = true;
-    UE_LOG(LogTemp, Warning, TEXT("SEnemyHealthWidget: ShowWidget called - now visible"));
+    Invalidate(EInvalidateWidgetReason::Visibility);
 }
 
 void SEnemyHealthWidget::HideWidget()
 {
     bIsVisible = false;
-    UE_LOG(LogTemp, Warning, TEXT("SEnemyHealthWidget: HideWidget called - now hidden"));
+    Invalidate(EInvalidateWidgetReason::Visibility);
 }
 
 FText SEnemyHealthWidget::GetEnemyNameText() const
@@ -279,14 +298,13 @@ FSlateColor SEnemyHealthWidget::GetPoiseBarColor() const
 
 EVisibility SEnemyHealthWidget::GetWidgetVisibility() const
 {
-    EVisibility Vis = bIsVisible ? EVisibility::Visible : EVisibility::Collapsed;
-    // Debug log every few frames to avoid spam
-    static int32 FrameCounter = 0;
-    if (++FrameCounter % 60 == 0)  // Log once per second at 60 FPS
+    // Always visible if we have health data
+    if (CurrentEnemyHealth > 0 || MaxEnemyHealth > 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("SEnemyHealthWidget: Visibility = %s, Health: %.0f/%.0f"),
-            bIsVisible ? TEXT("Visible") : TEXT("Collapsed"),
-            CurrentEnemyHealth, MaxEnemyHealth);
+        return EVisibility::SelfHitTestInvisible;
     }
+    
+    EVisibility Vis = bIsVisible ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed;
+    
     return Vis;
 }

@@ -3,11 +3,13 @@
 #include "Components/ArrowComponent.h"
 #include "Atlas/Characters/GameCharacterBase.h"
 #include "Atlas/Components/HealthComponent.h"
+#include "Atlas/Components/RunManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameModeBase.h"
 
 ARoomBase::ARoomBase()
 {
@@ -107,7 +109,6 @@ void ARoomBase::ActivateRoom(URoomDataAsset* RoomData)
 {
 	if (!RoomData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ARoomBase::ActivateRoom - No RoomData provided"));
 		return;
 	}
 
@@ -183,15 +184,12 @@ void ARoomBase::CompleteRoom()
 	OnRoomCompleted.Broadcast(this);
 	BP_OnRoomCompleted();
 
-	// Log completion
-	UE_LOG(LogTemp, Log, TEXT("Room Completed: %s"), CurrentRoomData ? *CurrentRoomData->RoomName.ToString() : TEXT("Unknown"));
 }
 
 void ARoomBase::SpawnRoomEnemy()
 {
 	if (!CurrentRoomData || !CurrentRoomData->UniqueEnemy)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ARoomBase::SpawnRoomEnemy - No enemy class defined"));
 		return;
 	}
 
@@ -215,7 +213,14 @@ void ARoomBase::SpawnRoomEnemy()
 		// Fire custom spawn event
 		BP_CustomEnemySpawn(SpawnedEnemy);
 
-		UE_LOG(LogTemp, Log, TEXT("Spawned Enemy: %s"), *CurrentRoomData->EnemyName.ToString());
+		// Notify RunManagerComponent about the spawned enemy
+		if (AGameModeBase* GameMode = GetWorld()->GetAuthGameMode())
+		{
+			if (URunManagerComponent* RunManager = GameMode->FindComponentByClass<URunManagerComponent>())
+			{
+				RunManager->ShowEnemyHealthWidget(SpawnedEnemy);
+			}
+		}
 	}
 }
 
@@ -365,9 +370,6 @@ void ARoomBase::OnEnemyDefeated(AActor* KilledBy)
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Enemy defeated in room: %s by %s"), 
-		CurrentRoomData ? *CurrentRoomData->RoomName.ToString() : TEXT("Unknown"),
-		KilledBy ? *KilledBy->GetName() : TEXT("Unknown"));
 
 	// Clear the enemy reference
 	SpawnedEnemy = nullptr;
@@ -390,8 +392,6 @@ void ARoomBase::OnExitTriggerOverlap(UPrimitiveComponent* OverlappedComponent, A
 	if (OtherActor == PlayerPawn)
 	{
 		// Notify that player wants to exit
-		UE_LOG(LogTemp, Log, TEXT("Player entered exit trigger for room: %s"), 
-			CurrentRoomData ? *CurrentRoomData->RoomName.ToString() : TEXT("Unknown"));
 		
 		// Room manager will handle the transition
 	}
@@ -521,9 +521,6 @@ void ARoomBase::TeleportPlayerToRoom()
 	
 	const UEnum* EnumPtr = StaticEnum<ERoomType>();
 	FString RoomName = EnumPtr ? EnumPtr->GetNameStringByValue((int64)RoomTypeForTesting) : TEXT("Unknown");
-	UE_LOG(LogTemp, Log, TEXT("Teleported player to room: %s at position %s"), 
-		*RoomName,
-		*SpawnLocation.ToString());
 	
 	// Activate this room if not already active
 	if (!bIsRoomActive && CurrentRoomData)
@@ -556,7 +553,6 @@ void ARoomBase::ResetRoom()
 	
 	const UEnum* EnumPtr2 = StaticEnum<ERoomType>();
 	FString RoomName2 = EnumPtr2 ? EnumPtr2->GetNameStringByValue((int64)RoomTypeForTesting) : TEXT("Unknown");
-	UE_LOG(LogTemp, Log, TEXT("Room reset: %s"), *RoomName2);
 }
 
 bool ARoomBase::IsPlayerInRoom() const

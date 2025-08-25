@@ -300,9 +300,31 @@ void URunManagerComponent::StartNewRun()
 			if (DataAsset && DataAsset->RoomType == CurrentRoomActor->RoomTypeForTesting)
 			{
 				CurrentRoom = DataAsset;
-				UE_LOG(LogTemp, Log, TEXT("Matched room actor with data asset: %s"), *DataAsset->RoomName.ToString());
+				
+				// Update the RunProgressWidget with the current room
+				if (RunProgressWidget.IsValid())
+				{
+					RunProgressWidget->UpdateCurrentRoomInfo(CurrentRoom);
+					RunProgressWidget->UpdateRoomProgress(0, CompletedRooms);
+				}
 				break;
 			}
+		}
+	}
+	
+	// If no room data was found, create a temporary one
+	if (!CurrentRoom)
+	{
+		URoomDataAsset* TempRoom = NewObject<URoomDataAsset>(this);
+		TempRoom->RoomName = FText::FromString(TEXT("Combat Arena"));
+		TempRoom->RoomType = CurrentRoomActor->RoomTypeForTesting;
+		TempRoom->EnemyName = FText::FromString(TEXT("Arena Champion"));
+		CurrentRoom = TempRoom;
+		
+		if (RunProgressWidget.IsValid())
+		{
+			RunProgressWidget->UpdateCurrentRoomInfo(CurrentRoom);
+			RunProgressWidget->UpdateRoomProgress(0, CompletedRooms);
 		}
 	}
 	
@@ -469,6 +491,12 @@ void URunManagerComponent::TransitionToNextRoom()
 				if (DataAsset && DataAsset->RoomType == CurrentRoomActor->RoomTypeForTesting)
 				{
 					CurrentRoom = DataAsset;
+					
+					// Update the widget with the matched room data
+					if (RunProgressWidget.IsValid())
+					{
+						RunProgressWidget->UpdateCurrentRoomInfo(CurrentRoom);
+					}
 					break;
 				}
 			}
@@ -2358,16 +2386,14 @@ void URunManagerComponent::UpdateEnemyHealthDisplay(float CurrentHealth, float M
 
 void URunManagerComponent::ShowEnemyHealthWidget(AGameCharacterBase* Enemy)
 {
-	UE_LOG(LogTemp, Warning, TEXT("=== ShowEnemyHealthWidget called ==="));
-	
 	if (!Enemy)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy is null, hiding widget"));
 		HideEnemyHealthWidget();
 		return;
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("Enemy is valid: %s"), *Enemy->GetName());
+	// Store the current enemy reference
+	CurrentRoomEnemy = Enemy;
 	
 	// Create enemy health widget if it doesn't exist
 	if (!EnemyHealthWidget.IsValid())
@@ -2393,7 +2419,21 @@ void URunManagerComponent::ShowEnemyHealthWidget(AGameCharacterBase* Enemy)
 		if (GEngine && GEngine->GameViewport && EnemyHealthWidget.IsValid())
 		{
 			GEngine->GameViewport->AddViewportWidgetContent(EnemyHealthWidget.ToSharedRef(), 15);
-			UE_LOG(LogTemp, Warning, TEXT("Enemy health widget added to viewport!"));
+			
+			// Subscribe to health changes
+			if (!EnemyHealthComp->OnHealthChanged.IsAlreadyBound(this, &URunManagerComponent::OnEnemyHealthChanged))
+			{
+				EnemyHealthComp->OnHealthChanged.AddDynamic(this, &URunManagerComponent::OnEnemyHealthChanged);
+			}
+			if (!EnemyHealthComp->OnPoiseChanged.IsAlreadyBound(this, &URunManagerComponent::OnEnemyPoiseChanged))
+			{
+				EnemyHealthComp->OnPoiseChanged.AddDynamic(this, &URunManagerComponent::OnEnemyPoiseChanged);
+			}
+			// Subscribe to death event
+			if (!EnemyHealthComp->OnDeath.IsAlreadyBound(this, &URunManagerComponent::OnEnemyDefeated))
+			{
+				EnemyHealthComp->OnDeath.AddDynamic(this, &URunManagerComponent::OnEnemyDefeated);
+			}
 		}
 		else
 		{
@@ -2414,10 +2454,20 @@ void URunManagerComponent::ShowEnemyHealthWidget(AGameCharacterBase* Enemy)
 			EnemyHealthWidget->SetEnemyName(EnemyName);
 			EnemyHealthWidget->SetEnemyHealthComponent(HealthComp);
 			
-			UE_LOG(LogTemp, Warning, TEXT("Subscribing to health/poise events"));
 			// Subscribe to health changes
-			HealthComp->OnHealthChanged.AddDynamic(this, &URunManagerComponent::OnEnemyHealthChanged);
-			HealthComp->OnPoiseChanged.AddDynamic(this, &URunManagerComponent::OnEnemyPoiseChanged);
+			if (!HealthComp->OnHealthChanged.IsAlreadyBound(this, &URunManagerComponent::OnEnemyHealthChanged))
+			{
+				HealthComp->OnHealthChanged.AddDynamic(this, &URunManagerComponent::OnEnemyHealthChanged);
+			}
+			if (!HealthComp->OnPoiseChanged.IsAlreadyBound(this, &URunManagerComponent::OnEnemyPoiseChanged))
+			{
+				HealthComp->OnPoiseChanged.AddDynamic(this, &URunManagerComponent::OnEnemyPoiseChanged);
+			}
+			// Subscribe to death event
+			if (!HealthComp->OnDeath.IsAlreadyBound(this, &URunManagerComponent::OnEnemyDefeated))
+			{
+				HealthComp->OnDeath.AddDynamic(this, &URunManagerComponent::OnEnemyDefeated);
+			}
 		}
 		else
 		{
@@ -2491,21 +2541,18 @@ void URunManagerComponent::OnPlayerIntegrityChanged(float CurrentIntegrity, floa
 
 void URunManagerComponent::OnEnemyHealthChanged(float CurrentHealth, float MaxHealth, float HealthDelta)
 {
-	if (CurrentRoomEnemy && CurrentRoomEnemy->GetHealthComponent())
+	// Update the widget directly with the values from the event
+	if (EnemyHealthWidget.IsValid())
 	{
-		UpdateEnemyHealthDisplay(CurrentHealth, MaxHealth,
-			CurrentRoomEnemy->GetHealthComponent()->GetCurrentPoise(),
-			CurrentRoomEnemy->GetHealthComponent()->GetMaxPoise());
+		EnemyHealthWidget->UpdateEnemyHealth(CurrentHealth, MaxHealth);
 	}
 }
 
 void URunManagerComponent::OnEnemyPoiseChanged(float CurrentPoise, float MaxPoise, float PoiseDelta)
 {
-	if (CurrentRoomEnemy && CurrentRoomEnemy->GetHealthComponent())
+	// Update the widget directly with the values from the event
+	if (EnemyHealthWidget.IsValid())
 	{
-		UpdateEnemyHealthDisplay(
-			CurrentRoomEnemy->GetHealthComponent()->GetCurrentHealth(),
-			CurrentRoomEnemy->GetHealthComponent()->GetMaxHealth(),
-			CurrentPoise, MaxPoise);
+		EnemyHealthWidget->UpdateEnemyPoise(CurrentPoise, MaxPoise);
 	}
 }
