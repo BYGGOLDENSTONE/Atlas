@@ -21,7 +21,8 @@
       "Bash(sed:*)",
       "Bash(cmd /c:*)",
       "Bash(grep:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

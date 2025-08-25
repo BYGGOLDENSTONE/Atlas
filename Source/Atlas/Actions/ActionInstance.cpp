@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
+#include "Engine/EngineTypes.h"
 #include "Kismet/GameplayStatics.h"
 
 UActionInstance::UActionInstance()
@@ -86,7 +87,7 @@ void UActionInstance::Execute(AGameCharacterBase* Owner)
 	// Consume integrity cost
 	if (UStationIntegrityComponent* Integrity = GetStationIntegrity(Owner))
 	{
-		Integrity->DamageIntegrity(ActionData->IntegrityCost, Owner);
+		Integrity->ApplyIntegrityDamage(ActionData->IntegrityCost, Owner);
 	}
 
 	// Execute based on action type
@@ -258,23 +259,22 @@ void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
 	}
 
-	// Apply damage in range
-	if (ActionData->AttackRange > 0.0f)
+	// Apply damage in range (using melee attack range)
+	float AttackRange = 200.0f; // Default melee range
+	if (AttackRange > 0.0f)
 	{
 		TArray<FOverlapResult> OverlapResults;
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(Owner);
 
 		FVector StartLocation = Owner->GetActorLocation();
-		FVector EndLocation = StartLocation + Owner->GetActorForwardVector() * ActionData->AttackRange;
 
-		if (Owner->GetWorld()->SweepMultiByChannel(
+		if (Owner->GetWorld()->OverlapMultiByChannel(
 			OverlapResults,
 			StartLocation,
-			EndLocation,
 			FQuat::Identity,
 			ECC_Pawn,
-			FCollisionShape::MakeSphere(50.0f),
+			FCollisionShape::MakeSphere(AttackRange),
 			QueryParams))
 		{
 			for (const FOverlapResult& Result : OverlapResults)
@@ -284,11 +284,11 @@ void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 					if (Target != Owner)
 					{
 						// Apply damage
-						UGameplayStatics::ApplyDamage(Target, ActionData->BaseDamage, 
-							Owner->GetController(), Owner, nullptr);
+						UGameplayStatics::ApplyDamage(Target, ActionData->MeleeDamage, 
+							Owner->GetController(), Owner, UDamageType::StaticClass());
 						
 						UE_LOG(LogTemp, Log, TEXT("ActionInstance: Hit %s for %.1f damage"), 
-							*Target->GetName(), ActionData->BaseDamage);
+							*Target->GetName(), ActionData->MeleeDamage);
 					}
 				}
 			}
