@@ -148,6 +148,21 @@ void UHealthComponent::HandleDeath(AActor* KilledBy)
         FString DebugMessage = FString::Printf(TEXT("%s DIED!"), *GetOwner()->GetName());
         GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, DebugMessage);
     }
+    
+    // Destroy the actor after a delay (to allow death animations)
+    // Don't destroy player characters
+    if (AActor* Owner = GetOwner())
+    {
+        // Check if this is a player-controlled pawn
+        APawn* Pawn = Cast<APawn>(Owner);
+        bool bIsPlayer = Pawn && Pawn->IsPlayerControlled();
+        
+        if (!bIsPlayer)
+        {
+            // Destroy after 3 seconds to allow death animations
+            Owner->SetLifeSpan(3.0f);
+        }
+    }
 }
 
 void UHealthComponent::BroadcastHealthChange(float HealthDelta)

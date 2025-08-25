@@ -223,7 +223,7 @@ protected:
 	
 	/** Handle enemy death */
 	UFUNCTION()
-	virtual void OnEnemyDefeated(AActor* DefeatedActor);
+	virtual void OnEnemyDefeated(AActor* KilledBy);
 	
 	/** Handle exit trigger overlap */
 	UFUNCTION()

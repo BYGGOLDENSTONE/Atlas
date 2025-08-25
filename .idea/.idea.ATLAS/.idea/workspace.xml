@@ -14,13 +14,34 @@
   <component name="ChangeListManager">
     <list default="true" id="5a259638-0692-439c-a363-7f7e758e0349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ATLAS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/blueprints/NewWorld.umap" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BLUEPRINT_IMPLEMENTATION_ROADMAP.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/6/HF/9H7TKAXH9DD8KI3TIXGI2I.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/6/HF/9H7TKAXH9DD8KI3TIXGI2I.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/rooms/BP_EngineeringBayRoom.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/blueprints/rooms/DA_Room_EngineeringBay.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PHASE2_CPP_IMPLEMENTATION_COMPLETE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README_PHASE2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Atlas.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Atlas.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AtlasCharacter.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/AtlasCharacter.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/AtlasGameMode.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/ActionManagerComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/HealthComponent.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/RunManagerComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/RunManagerComponent.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Atlas/Components/RunManagerComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Components/RunManagerComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/AtlasDebugCommands.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/ConsoleCommandSubsystem.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/ConsoleCommandSubsystem.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/GlobalRunManager.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/GlobalRunManager.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/Phase3ConsoleCommands.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/Phase4ConsoleCommands.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/Phase4ConsoleCommands.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Debug/TestConsoleCommand.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Rooms/RoomBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Rooms/RoomBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Atlas/Rooms/RoomBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Atlas/Rooms/RoomBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEST_ATLAS_SYSTEMS.bat" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +55,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://1" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://4" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.5/Engine/Source/Runtime/CoreUObject/Public/UObject/Class.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UnrealEditor/Inc/Atlas/UHT/ICombatInterface.gen.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -215,6 +236,7 @@
       <workItem from="1755852662151" duration="2483000" />
       <workItem from="1755857335981" duration="7319000" />
       <workItem from="1755865845113" duration="411000" />
+      <workItem from="1756109469383" duration="3520000" />
     </task>
     <servers />
   </component>

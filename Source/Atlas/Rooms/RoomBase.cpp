@@ -356,15 +356,22 @@ TArray<FTransform> ARoomBase::GetInteractableSpawnPoints() const
 	return Transforms;
 }
 
-void ARoomBase::OnEnemyDefeated(AActor* DefeatedActor)
+void ARoomBase::OnEnemyDefeated(AActor* KilledBy)
 {
-	if (DefeatedActor != SpawnedEnemy)
+	// OnDeath passes who killed the enemy, not the enemy itself
+	// We just need to check if we had a spawned enemy
+	if (!SpawnedEnemy)
 	{
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Enemy defeated in room: %s"), CurrentRoomData ? *CurrentRoomData->RoomName.ToString() : TEXT("Unknown"));
+	UE_LOG(LogTemp, Log, TEXT("Enemy defeated in room: %s by %s"), 
+		CurrentRoomData ? *CurrentRoomData->RoomName.ToString() : TEXT("Unknown"),
+		KilledBy ? *KilledBy->GetName() : TEXT("Unknown"));
 
+	// Clear the enemy reference
+	SpawnedEnemy = nullptr;
+	
 	// Complete the room
 	CompleteRoom();
 }

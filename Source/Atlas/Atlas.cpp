@@ -3,14 +3,14 @@
 #include "Atlas.h"
 #include "Modules/ModuleManager.h"
 #include "Core/AtlasGameplayTags.h"
-#include "Debug/AtlasDebugCommands.h"
+#include "Debug/AtlasConsoleCommands.h"
 
 class FAtlasModule : public FDefaultGameModuleImpl
 {
     virtual void StartupModule() override
     {
         FAtlasGameplayTags::InitializeNativeTags();
-        FAtlasDebugCommands::RegisterAllCommands();
+        FAtlasConsoleCommands::RegisterCommands();
     }
 };
 

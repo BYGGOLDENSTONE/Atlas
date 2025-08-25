@@ -68,6 +68,14 @@ void UActionManagerComponent::InitializeSlots()
 	ActionSlots.Add(TEXT("Slot3"), nullptr);
 	ActionSlots.Add(TEXT("Slot4"), nullptr);
 	ActionSlots.Add(TEXT("Slot5"), nullptr);
+	
+	// Set up default combat ability assignments (only for actions that exist)
+	DefaultSlotAssignments.Add(TEXT("Slot1"), FGameplayTag::RequestGameplayTag(FName("Action.Combat.BasicAttack")));
+	DefaultSlotAssignments.Add(TEXT("Slot2"), FGameplayTag::RequestGameplayTag(FName("Action.Combat.HeavyAttack")));
+	// Slots 3-5 will remain empty until more actions are created
+	// DefaultSlotAssignments.Add(TEXT("Slot3"), FGameplayTag::RequestGameplayTag(FName("Action.Combat.Dash")));
+	// DefaultSlotAssignments.Add(TEXT("Slot4"), FGameplayTag::RequestGameplayTag(FName("Action.Combat.Block")));
+	// DefaultSlotAssignments.Add(TEXT("Slot5"), FGameplayTag::RequestGameplayTag(FName("Action.Combat.FocusMode")));
 }
 
 bool UActionManagerComponent::AssignActionToSlot(FName SlotName, FGameplayTag ActionTag)
@@ -274,31 +282,18 @@ void UActionManagerComponent::InterruptCurrentAction()
 
 void UActionManagerComponent::LoadAvailableActions()
 {
-	// If actions were already set in editor, keep them
+	// If actions were already set in editor, keep them but still try to load defaults
 	if (AvailableActionDataAssets.Num() > 0)
 	{
 		UE_LOG(LogTemp, Log, TEXT("ActionManager: Using %d pre-configured action data assets"), AvailableActionDataAssets.Num());
-		return;
+		// Don't return early - continue to load missing default actions
 	}
 	
-	// Manually load known action data assets
-	// In production, this would use asset registry to scan the directory
+	// Load action data assets from the actual Content/Dataassets/Actions/ folder
 	const TArray<FString> ActionAssetPaths = {
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_BasicAttack"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_HeavyAttack"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_Block"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_Dash"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_FocusMode"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_KineticPulse"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_DebrisPull"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_CoolantSpray"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_SystemHack"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_FloorDestabilizer"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_ImpactGauntlet"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_LocalizedEMP"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_SeismicStamp"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_GravityAnchor"),
-		TEXT("/Game/Atlas/DataAssets/Actions/DA_AirlockBreach")
+		// Currently available actions
+		TEXT("/Game/Dataassets/Actions/DA_BasicAttack"),
+		TEXT("/Game/Dataassets/Actions/DA_HeavyAttack")
 	};
 	
 	for (const FString& AssetPath : ActionAssetPaths)

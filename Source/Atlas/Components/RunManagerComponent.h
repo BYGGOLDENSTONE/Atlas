@@ -222,6 +222,13 @@ public:
 	TArray<URoomDataAsset*> GetRemainingRooms() const { return RemainingRooms; }
 	
 	/**
+	 * Get all loaded room data assets
+	 * @return All available rooms
+	 */
+	UFUNCTION(BlueprintPure, Category = "Run Manager|Queries")
+	TArray<URoomDataAsset*> GetAllRoomDataAssets() const { return AllRoomDataAssets; }
+	
+	/**
 	 * Get completed rooms
 	 * @return Array of completed rooms
 	 */
@@ -338,7 +345,11 @@ protected:
 	
 	/** Handle enemy defeat */
 	UFUNCTION()
-	void OnEnemyDefeated(AActor* DefeatedEnemy);
+	void OnEnemyDefeated(AActor* KilledBy);
+	
+	/** Handle room completion from room actor */
+	UFUNCTION()
+	void OnRoomActorCompleted(class ARoomBase* CompletedRoom);
 	
 	/** Handle player death */
 	UFUNCTION()
@@ -367,6 +378,18 @@ protected:
 	/** Currently active room */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	URoomDataAsset* CurrentRoom;
+	
+	/** All room actors placed in the world */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	TArray<class ARoomBase*> AllRoomActors;
+	
+	/** Current active room actor */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	class ARoomBase* CurrentRoomActor;
+	
+	/** Randomized room order for current run */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	TArray<class ARoomBase*> RandomizedRoomOrder;
 	
 	/** Rooms remaining in this run */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")

@@ -1,6 +1,6 @@
 # Atlas - Quick Reference
 
-**Engine**: UE 5.5 | **Genre**: 1v1 Roguelite Dueler | **Updated**: 2025-01-22
+**Engine**: UE 5.5 | **Genre**: 1v1 Roguelite Dueler | **Updated**: 2025-01-25
 
 ## Overview
 Single-player roguelite dueling game. 5 rooms per run, persistent rewards, dual fail-states (health/integrity).
@@ -8,6 +8,9 @@ Single-player roguelite dueling game. 5 rooms per run, persistent rewards, dual 
 ## Current Status
 ✅ **Phase 1-4 Complete**: Core systems, rewards, enemies, environment  
 ✅ **GameplayTag Migration Complete**: All tags updated to `Action.Combat.*` structure  
+✅ **Code Cleanup Complete**: Removed ~7000 lines of duplicate code, consolidated commands  
+✅ **Room System Fixed**: Equal randomization, automatic progression, proper teleportation  
+✅ **Combat Abilities**: Auto-assigned to slots on startup  
 🔧 **Next**: Blueprint implementation in Unreal Editor
 
 ## Key Systems Implemented
@@ -28,15 +31,22 @@ Single-player roguelite dueling game. 5 rooms per run, persistent rewards, dual 
 
 ## Important Console Commands
 ```
+# Run Management
+Atlas.StartRun            # Start a new 5-room run
+Atlas.CompleteRoom         # Complete current room (testing)
+Atlas.GoToRoom [name]      # Teleport to specific room
+
 # Combat Testing
 Atlas_AssignAction [Slot] [ActionTag]
 Atlas_ShowSlots
 
-# Phase Testing
-Atlas.Phase3.StartRun
-Atlas.Phase3.GiveReward [name]
-Atlas.Phase4.TestAll
-Atlas.Phase4.SpawnHazard [Type]
+# Reward Testing  
+Atlas.GiveReward [name]
+Atlas.ShowRewards
+
+# Environment Testing
+Atlas.SpawnHazard [Type]
+Atlas.TestEmergency [Type]
 ```
 
 ## Architecture
@@ -68,6 +78,14 @@ GameCharacterBase
 - `BLUEPRINT_IMPLEMENTATION_ROADMAP.md` - Blueprint guide
 - `ATLAS_CONSOLE_COMMANDS.txt` - All 100+ commands
 - `GAMEPLAYTAG_MIGRATION_STATUS.md` - Tag migration (COMPLETE)
+
+## Recent Changes (2025-01-25)
+- Deleted 7 duplicate/unused files (Phase3/4Commands, GlobalRunManager, etc.)
+- Fixed player abilities auto-assignment on startup
+- Fixed room progression with automatic enemy death tracking
+- Implemented equal room randomization (not level-based)
+- Consolidated all console commands into AtlasConsoleCommands
+- Fixed enemy spawning at correct room spawn points
 
 ## Next Steps
 1. Create Blueprint assets in Editor

@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/LevelStreaming.h"
 #include "TimerManager.h"
+#include "EngineUtils.h"
 
 URunManagerComponent::URunManagerComponent()
 {
@@ -28,34 +29,106 @@ void URunManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// TEMPORARY: Create test rooms if none configured
+	// Find all room actors placed in the world
+	AllRoomActors.Empty();
+	for (TActorIterator<ARoomBase> It(GetWorld()); It; ++It)
+	{
+		ARoomBase* RoomActor = *It;
+		if (RoomActor)
+		{
+			AllRoomActors.Add(RoomActor);
+			UE_LOG(LogTemp, Log, TEXT("Found room actor: %s at location %s"), 
+				*RoomActor->GetName(), *RoomActor->GetActorLocation().ToString());
+		}
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("RunManagerComponent: Found %d room actors in world"), AllRoomActors.Num());
+	
+	// Try to load room data assets if none configured
 	if (AllRoomDataAssets.Num() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("RunManagerComponent: No rooms configured, creating 5 test rooms"));
+		UE_LOG(LogTemp, Warning, TEXT("RunManagerComponent: No rooms configured in Blueprint, attempting to load from content"));
 		
-		for (int32 i = 1; i <= 5; i++)
+		// Load room data assets from the actual Content/Dataassets/rooms/ folder
+		const TArray<FString> RoomAssetPaths = {
+			TEXT("/Game/Dataassets/rooms/DA_Room_EngineeringBay"),
+			TEXT("/Game/Dataassets/rooms/DA_Room_CombatArena"),
+			TEXT("/Game/Dataassets/rooms/DA_Room_MedicalBay"),
+			TEXT("/Game/Dataassets/rooms/DA_Room_Cargohold"), // Note: Cargohold not CargoHold
+			TEXT("/Game/Dataassets/rooms/DA_Room_Bridge")
+		};
+		
+		for (const FString& AssetPath : RoomAssetPaths)
 		{
-			URoomDataAsset* TestRoom = NewObject<URoomDataAsset>(this, *FString::Printf(TEXT("TestRoom_%d"), i));
-			TestRoom->RoomID = FName(*FString::Printf(TEXT("TestRoom%d"), i));
-			TestRoom->RoomName = FText::FromString(FString::Printf(TEXT("Test Room %d"), i));
-			TestRoom->Difficulty = ERoomDifficulty::Easy;
-			TestRoom->RoomTheme = ERewardCategory::Defense;
-			TestRoom->bCanRepeat = (i <= 2); // First 2 rooms can repeat
-			TestRoom->RoomSelectionWeight = 1.0f;
-			TestRoom->EnemyBasePower = i; // Increasing difficulty
-			
-			// All test rooms appear on all levels for testing
-			TestRoom->AppearOnLevels = {1, 2, 3, 4, 5};
-			
-			AllRoomDataAssets.Add(TestRoom);
-			UE_LOG(LogTemp, Log, TEXT("  Created test room: %s"), *TestRoom->RoomName.ToString());
+			if (URoomDataAsset* RoomData = LoadObject<URoomDataAsset>(nullptr, *AssetPath))
+			{
+				// Fix missing AppearOnLevels configuration
+				if (RoomData->AppearOnLevels.Num() == 0)
+				{
+					// Default: All rooms appear on levels 1-4, Bridge only on level 5
+					if (RoomData->RoomName.ToString().Contains("Bridge"))
+					{
+						RoomData->AppearOnLevels = {5};
+					}
+					else
+					{
+						RoomData->AppearOnLevels = {1, 2, 3, 4};
+					}
+					UE_LOG(LogTemp, Warning, TEXT("  Room %s had no AppearOnLevels, set defaults"), *RoomData->RoomName.ToString());
+				}
+				
+				AllRoomDataAssets.Add(RoomData);
+				UE_LOG(LogTemp, Log, TEXT("  Loaded room: %s"), *RoomData->RoomName.ToString());
+			}
 		}
 		
-		UE_LOG(LogTemp, Log, TEXT("RunManagerComponent: Created %d test rooms for testing"), AllRoomDataAssets.Num());
+		// If still no rooms, create test rooms
+		if (AllRoomDataAssets.Num() == 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("RunManagerComponent: Creating 5 test rooms for testing"));
+			
+			for (int32 i = 1; i <= 5; i++)
+			{
+				URoomDataAsset* TestRoom = NewObject<URoomDataAsset>(this, *FString::Printf(TEXT("TestRoom_%d"), i));
+				TestRoom->RoomID = FName(*FString::Printf(TEXT("TestRoom%d"), i));
+				TestRoom->RoomName = FText::FromString(FString::Printf(TEXT("Test Room %d"), i));
+				TestRoom->Difficulty = ERoomDifficulty::Easy;
+				TestRoom->RoomTheme = ERewardCategory::Defense;
+				TestRoom->bCanRepeat = (i <= 2); // First 2 rooms can repeat
+				TestRoom->RoomSelectionWeight = 1.0f;
+				TestRoom->EnemyBasePower = i; // Increasing difficulty
+				
+				// All test rooms appear on all levels for testing
+				TestRoom->AppearOnLevels = {1, 2, 3, 4, 5};
+				
+				AllRoomDataAssets.Add(TestRoom);
+				UE_LOG(LogTemp, Log, TEXT("  Created test room: %s"), *TestRoom->RoomName.ToString());
+			}
+		}
+		
+		UE_LOG(LogTemp, Log, TEXT("RunManagerComponent: Total rooms available: %d"), AllRoomDataAssets.Num());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("RunManagerComponent: Loaded %d room data assets"), AllRoomDataAssets.Num());
+		UE_LOG(LogTemp, Log, TEXT("RunManagerComponent: Loaded %d room data assets from Blueprint"), AllRoomDataAssets.Num());
+		
+		// Fix any rooms that don't have AppearOnLevels configured
+		for (URoomDataAsset* Room : AllRoomDataAssets)
+		{
+			if (Room && Room->AppearOnLevels.Num() == 0)
+			{
+				// Default: All rooms appear on levels 1-4, Bridge only on level 5
+				if (Room->RoomName.ToString().Contains("Bridge"))
+				{
+					Room->AppearOnLevels = {5};
+				}
+				else
+				{
+					Room->AppearOnLevels = {1, 2, 3, 4};
+				}
+				UE_LOG(LogTemp, Warning, TEXT("  Fixed room %s - added default AppearOnLevels"), *Room->RoomName.ToString());
+			}
+		}
 	}
 	
 	// Get player references
@@ -86,8 +159,21 @@ void URunManagerComponent::InitializeRun()
 	RunProgress = FRunProgressData();
 	CurrentLevel = 1;
 	CompletedRooms.Empty();
+	CurrentRoomActor = nullptr;
 	
-	// Randomize room order
+	// Randomize room actors order (all rooms have equal importance)
+	RandomizedRoomOrder = AllRoomActors;
+	
+	// Shuffle the rooms randomly
+	for (int32 i = RandomizedRoomOrder.Num() - 1; i > 0; i--)
+	{
+		int32 j = FMath::RandRange(0, i);
+		RandomizedRoomOrder.Swap(i, j);
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("Randomized %d rooms for run"), RandomizedRoomOrder.Num());
+	
+	// Also randomize data assets for compatibility
 	RandomizeRoomOrder();
 	
 	// Set initial state
@@ -100,25 +186,60 @@ void URunManagerComponent::StartNewRun()
 	
 	InitializeRun();
 	
-	// Select and load first room
-	if (URoomDataAsset* FirstRoom = SelectNextRoom())
+	// Check if we have room actors
+	if (RandomizedRoomOrder.Num() == 0)
 	{
-		LoadRoom(FirstRoom);
-		SetRunState(ERunState::RoomIntro);
-		
-		// Start combat after delay
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		UE_LOG(LogTemp, Error, TEXT("No room actors found in world"));
+		EndRun(false, FText::FromString(TEXT("No rooms available")));
+		return;
+	}
+	
+	// Get first room actor from randomized order
+	CurrentRoomActor = RandomizedRoomOrder[0];
+	if (!CurrentRoomActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("First room actor is null"));
+		EndRun(false, FText::FromString(TEXT("Invalid room configuration")));
+		return;
+	}
+	
+	// Match with a data asset based on room type
+	CurrentRoom = nullptr;
+	if (AllRoomDataAssets.Num() > 0)
+	{
+		for (URoomDataAsset* DataAsset : AllRoomDataAssets)
 		{
-			SetRunState(ERunState::Combat);
-			SpawnRoomEnemy();
-		}, CombatStartDelay, false);
+			if (DataAsset && DataAsset->RoomType == CurrentRoomActor->RoomTypeForTesting)
+			{
+				CurrentRoom = DataAsset;
+				UE_LOG(LogTemp, Log, TEXT("Matched room actor with data asset: %s"), *DataAsset->RoomName.ToString());
+				break;
+			}
+		}
 	}
-	else
+	
+	// Teleport player to first room
+	CurrentRoomActor->TeleportPlayerToRoom();
+	
+	// Activate the room
+	if (CurrentRoom)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to select first room"));
-		EndRun(false, FText::FromString(TEXT("Failed to initialize rooms")));
+		CurrentRoomActor->ActivateRoom(CurrentRoom);
 	}
+	
+	// Subscribe to room completion event
+	CurrentRoomActor->OnRoomCompleted.AddDynamic(this, &URunManagerComponent::OnRoomActorCompleted);
+	
+	SetRunState(ERunState::RoomIntro);
+	
+	// The room will handle enemy spawning after its delay
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+	{
+		SetRunState(ERunState::Combat);
+	}, CombatStartDelay, false);
+	
+	UE_LOG(LogTemp, Warning, TEXT("Started run in room: %s"), *CurrentRoomActor->GetName());
 }
 
 void URunManagerComponent::ResumeRun(const FRunProgressData& SavedProgress)
@@ -212,25 +333,65 @@ void URunManagerComponent::TransitionToNextRoom()
 	{
 		CompleteRoomTransition();
 		
-		// Select and load next room
-		if (URoomDataAsset* NextRoom = SelectNextRoom())
+		// Deactivate current room
+		if (CurrentRoomActor)
 		{
-			LoadRoom(NextRoom);
-			SetRunState(ERunState::RoomIntro);
-			
-			// Start combat after intro
-			FTimerHandle CombatTimer;
-			GetWorld()->GetTimerManager().SetTimer(CombatTimer, [this]()
+			CurrentRoomActor->DeactivateRoom();
+		}
+		
+		// Check if we have a next room (CurrentLevel gets incremented after room completion)
+		if (CurrentLevel > RandomizedRoomOrder.Num())
+		{
+			UE_LOG(LogTemp, Error, TEXT("No more rooms available"));
+			EndRun(false, FText::FromString(TEXT("Room progression error")));
+			return;
+		}
+		
+		// Get next room actor from randomized order (CurrentLevel is 1-based)
+		CurrentRoomActor = RandomizedRoomOrder[CurrentLevel - 1];
+		if (!CurrentRoomActor)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Next room actor is null"));
+			EndRun(false, FText::FromString(TEXT("Invalid room configuration")));
+			return;
+		}
+		
+		// Match with a data asset if available based on room type
+		CurrentRoom = nullptr;
+		if (AllRoomDataAssets.Num() > 0)
+		{
+			for (URoomDataAsset* DataAsset : AllRoomDataAssets)
 			{
-				SetRunState(ERunState::Combat);
-				SpawnRoomEnemy();
-			}, CombatStartDelay, false);
+				if (DataAsset && DataAsset->RoomType == CurrentRoomActor->RoomTypeForTesting)
+				{
+					CurrentRoom = DataAsset;
+					break;
+				}
+			}
 		}
-		else
+		
+		// Teleport player to next room
+		CurrentRoomActor->TeleportPlayerToRoom();
+		
+		// Activate the room
+		if (CurrentRoom)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to select next room"));
-			EndRun(false, FText::FromString(TEXT("Room selection failed")));
+			CurrentRoomActor->ActivateRoom(CurrentRoom);
 		}
+		
+		// Subscribe to room completion event
+		CurrentRoomActor->OnRoomCompleted.AddDynamic(this, &URunManagerComponent::OnRoomActorCompleted);
+		
+		SetRunState(ERunState::RoomIntro);
+		
+		// The room will handle enemy spawning after its delay
+		FTimerHandle CombatTimer;
+		GetWorld()->GetTimerManager().SetTimer(CombatTimer, [this]()
+		{
+			SetRunState(ERunState::Combat);
+		}, CombatStartDelay, false);
+		
+		UE_LOG(LogTemp, Warning, TEXT("Transitioned to room %d: %s"), CurrentLevel, *CurrentRoomActor->GetName());
 		
 	}, RoomTransitionDuration, false);
 }
@@ -413,8 +574,8 @@ void URunManagerComponent::SpawnRoomEnemy()
 		// Subscribe to enemy death event
 		if (UHealthComponent* EnemyHealth = CurrentRoomEnemy->GetHealthComponent())
 		{
-			// TODO: Subscribe to death event
-			// For now, we'll check manually in tick or use a different approach
+			// Subscribe to the OnDeath event to track when enemy is defeated
+			EnemyHealth->OnDeath.AddDynamic(this, &URunManagerComponent::OnEnemyDefeated);
 		}
 		
 		// Start combat music
@@ -663,22 +824,52 @@ void URunManagerComponent::UnloadRoomLevel(URoomDataAsset* Room)
 	UE_LOG(LogTemp, Log, TEXT("Unloading room level: %s"), *Room->RoomLevel.GetAssetName());
 }
 
-void URunManagerComponent::OnEnemyDefeated(AActor* DefeatedEnemy)
+void URunManagerComponent::OnEnemyDefeated(AActor* KilledBy)
 {
-	if (DefeatedEnemy != CurrentRoomEnemy)
-		return;
-		
-	UE_LOG(LogTemp, Log, TEXT("Enemy defeated!"));
+	// This is called when the current room enemy dies
+	// KilledBy parameter indicates who killed the enemy (usually the player)
+	UE_LOG(LogTemp, Log, TEXT("Enemy defeated by %s!"), KilledBy ? *KilledBy->GetName() : TEXT("Unknown"));
 	
 	CurrentRoomEnemy = nullptr;
 	SetRunState(ERunState::Victory);
 	
-	// Move to reward selection after a brief delay
+	// Auto-complete the room and move to next after delay
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 	{
-		SetRunState(ERunState::RewardSelection);
-		// TODO: Present reward choices
+		CompleteCurrentRoom();
+		
+		// If run is not complete, transition to next room
+		if (!IsRunComplete())
+		{
+			TransitionToNextRoom();
+		}
+	}, 2.0f, false);
+}
+
+void URunManagerComponent::OnRoomActorCompleted(ARoomBase* CompletedRoom)
+{
+	// This is called when a room completes (enemy defeated)
+	if (CompletedRoom != CurrentRoomActor)
+	{
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Room completed: %s"), *CompletedRoom->GetName());
+	
+	SetRunState(ERunState::Victory);
+	
+	// Auto-complete the room and move to next after delay
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+	{
+		CompleteCurrentRoom();
+		
+		// If run is not complete, transition to next room
+		if (!IsRunComplete())
+		{
+			TransitionToNextRoom();
+		}
 	}, 2.0f, false);
 }
 
