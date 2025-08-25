@@ -221,7 +221,7 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 		return;
 	}
 
-	UBaseAction* Action = GetActionInSlot(SlotName);
+	UActionInstance* Action = GetActionInSlot(SlotName);
 	if (!Action)
 	{
 		return;
@@ -257,7 +257,7 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 
 void UActionManagerComponent::OnSlotReleased(FName SlotName)
 {
-	UBaseAction* Action = GetActionInSlot(SlotName);
+	UActionInstance* Action = GetActionInSlot(SlotName);
 	if (!Action)
 	{
 		return;

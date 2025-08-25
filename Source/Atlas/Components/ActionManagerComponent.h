@@ -223,11 +223,11 @@ protected:
 protected:
 	// The 5 universal action slots
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Action Manager")
-	TMap<FName, UBaseAction*> ActionSlots;
+	TMap<FName, UActionInstance*> ActionSlots;
 
 	// Currently active action
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Action Manager")
-	UBaseAction* CurrentAction;
+	UActionInstance* CurrentAction;
 
 	// Owner reference
 	UPROPERTY()

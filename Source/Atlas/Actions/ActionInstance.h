@@ -21,7 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActionStateChanged, EActionState,
 
 /**
  * Simplified action instance that handles all action types through data configuration.
- * Replaces the complex BaseAction/UniversalAction hierarchy with a single, efficient class.
+ * Single, efficient class for all action types without complex inheritance.
  */
 UCLASS(BlueprintType)
 class ATLAS_API UActionInstance : public UObject
