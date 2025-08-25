@@ -280,7 +280,7 @@ void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 		{
 			for (const FOverlapResult& Result : OverlapResults)
 			{
-				if (AGameCharacterBase* Target = Cast<AGameCharacterBase>(Result.Actor.Get())
+				if (AGameCharacterBase* Target = Cast<AGameCharacterBase>(Result.Actor.Get()))
 				{
 					if (Target != Owner)
 					{
