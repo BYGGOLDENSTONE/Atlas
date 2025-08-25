@@ -23,6 +23,7 @@ UActionInstance::UActionInstance()
 	bIsExecuting = false;
 	bIsBlocking = false;
 	bIsDashing = false;
+	bIsAttacking = false;
 }
 
 void UActionInstance::Initialize(UActionDataAsset* InActionData)
@@ -167,6 +168,16 @@ void UActionInstance::Stop()
 		}
 	}
 
+	if (bIsAttacking)
+	{
+		bIsAttacking = false;
+		// Remove attacking state
+		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent(CurrentOwner))
+		{
+			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
+		}
+	}
+
 	bIsExecuting = false;
 	CurrentOwner = nullptr;
 	StartCooldown();
@@ -179,6 +190,7 @@ void UActionInstance::Interrupt()
 		bIsExecuting = false;
 		bIsBlocking = false;
 		bIsDashing = false;
+		bIsAttacking = false;
 		CurrentOwner = nullptr;
 		SetActionState(EActionState::Idle);
 	}
@@ -257,6 +269,7 @@ void UActionInstance::ExecuteDefenseAction(AGameCharacterBase* Owner)
 
 void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 {
+	bIsAttacking = true;
 	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent(Owner))
 	{
 		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));

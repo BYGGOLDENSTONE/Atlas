@@ -118,4 +118,5 @@ protected:
 	bool bIsExecuting;
 	bool bIsBlocking;
 	bool bIsDashing;
+	bool bIsAttacking;
 };
