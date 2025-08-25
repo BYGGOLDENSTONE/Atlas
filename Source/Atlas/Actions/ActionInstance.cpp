@@ -8,7 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
 #include "Engine/EngineTypes.h"
-#include "Engine/HitResult.h"
+#include "Engine/OverlapResult.h"
 #include "CollisionQueryParams.h"
 #include "Components/PrimitiveComponent.h"
 #include "Kismet/GameplayStatics.h"
