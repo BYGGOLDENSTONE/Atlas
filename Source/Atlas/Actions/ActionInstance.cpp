@@ -23,7 +23,6 @@ UActionInstance::UActionInstance()
 	bIsExecuting = false;
 	bIsBlocking = false;
 	bIsDashing = false;
-	bIsAttacking = false;
 }
 
 void UActionInstance::Initialize(UActionDataAsset* InActionData)
@@ -168,16 +167,6 @@ void UActionInstance::Stop()
 		}
 	}
 
-	if (bIsAttacking)
-	{
-		bIsAttacking = false;
-		// Remove attacking state
-		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent(CurrentOwner))
-		{
-			ActionManager->RemoveCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
-		}
-	}
-
 	bIsExecuting = false;
 	CurrentOwner = nullptr;
 	StartCooldown();
@@ -190,7 +179,6 @@ void UActionInstance::Interrupt()
 		bIsExecuting = false;
 		bIsBlocking = false;
 		bIsDashing = false;
-		bIsAttacking = false;
 		CurrentOwner = nullptr;
 		SetActionState(EActionState::Idle);
 	}
@@ -225,15 +213,17 @@ void UActionInstance::StartCooldown()
 
 void UActionInstance::ExecuteMovementAction(AGameCharacterBase* Owner)
 {
+	// Play movement animation montage if available
+	if (ActionData && ActionData->ActionMontage && Owner)
+	{
+		Owner->PlayAnimMontage(ActionData->ActionMontage, ActionData->MontagePlayRate);
+	}
+
 	// Handle dash
 	if (ActionData->ActionTag.MatchesTag(FGameplayTag::RequestGameplayTag("Action.Combat.Dash")))
 	{
 		bIsDashing = true;
-		
-		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent(Owner))
-		{
-			ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Dashing"));
-		}
+		// Note: State.Combat.Dashing tag is managed by animation notifies
 
 		// Apply dash movement
 		if (ACharacter* Character = Cast<ACharacter>(Owner))
@@ -253,15 +243,17 @@ void UActionInstance::ExecuteMovementAction(AGameCharacterBase* Owner)
 
 void UActionInstance::ExecuteDefenseAction(AGameCharacterBase* Owner)
 {
+	// Play defense animation montage if available
+	if (ActionData && ActionData->ActionMontage && Owner)
+	{
+		Owner->PlayAnimMontage(ActionData->ActionMontage, ActionData->MontagePlayRate);
+	}
+
 	// Handle block
 	if (ActionData->ActionTag.MatchesTag(FGameplayTag::RequestGameplayTag("Action.Combat.Block")))
 	{
 		bIsBlocking = true;
-		
-		if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent(Owner))
-		{
-			ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Blocking"));
-		}
+		// Note: State.Combat.Blocking tag is managed by animation notifies
 
 		UE_LOG(LogTemp, Log, TEXT("ActionInstance: Executing Block - Reduction: %.1f%%"), ActionData->DamageReduction);
 	}
@@ -269,10 +261,10 @@ void UActionInstance::ExecuteDefenseAction(AGameCharacterBase* Owner)
 
 void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 {
-	bIsAttacking = true;
-	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent(Owner))
+	// Play attack animation montage if available
+	if (ActionData && ActionData->ActionMontage && Owner)
 	{
-		ActionManager->AddCombatStateTag(FGameplayTag::RequestGameplayTag("State.Combat.Attacking"));
+		Owner->PlayAnimMontage(ActionData->ActionMontage, ActionData->MontagePlayRate);
 	}
 
 	// Apply damage in range (using melee attack range)
