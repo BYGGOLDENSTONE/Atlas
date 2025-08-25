@@ -1,6 +1,6 @@
 # Atlas - Quick Reference
 
-**Engine**: UE 5.5 | **Genre**: 1v1 Roguelite Dueler | **Updated**: 2025-01-25
+**Engine**: UE 5.5 | **Genre**: 1v1 Roguelite Dueler | **Updated**: 2025-01-26
 
 ## Overview
 Single-player roguelite dueling game. 5 rooms per run, persistent rewards, dual fail-states (health/integrity).
@@ -8,9 +8,10 @@ Single-player roguelite dueling game. 5 rooms per run, persistent rewards, dual 
 ## Current Status
 ✅ **Phase 1-4 Complete**: Core systems, rewards, enemies, environment  
 ✅ **GameplayTag Migration Complete**: All tags updated to `Action.Combat.*` structure  
-✅ **Code Cleanup Complete**: Removed ~7000 lines of duplicate code, consolidated commands  
+✅ **Code Cleanup Complete**: Removed ~10,000 lines of obsolete code  
+✅ **Action System Refactored**: Single ActionInstance class replacing complex inheritance  
+✅ **Combat System Fixed**: Animation-driven state management and damage application  
 ✅ **Room System Fixed**: Equal randomization, automatic progression, proper teleportation  
-✅ **Combat Abilities**: Auto-assigned to slots on startup  
 🔧 **Next**: Blueprint implementation in Unreal Editor
 
 ## Key Systems Implemented
@@ -79,13 +80,19 @@ GameCharacterBase
 - `ATLAS_CONSOLE_COMMANDS.txt` - All 100+ commands
 - `GAMEPLAYTAG_MIGRATION_STATUS.md` - Tag migration (COMPLETE)
 
-## Recent Changes (2025-01-25)
-- Deleted 7 duplicate/unused files (Phase3/4Commands, GlobalRunManager, etc.)
-- Fixed player abilities auto-assignment on startup
-- Fixed room progression with automatic enemy death tracking
-- Implemented equal room randomization (not level-based)
-- Consolidated all console commands into AtlasConsoleCommands
-- Fixed enemy spawning at correct room spawn points
+## Recent Changes (2025-01-26)
+- **Major Code Cleanup**: Removed ~10,000 lines of obsolete code
+  - Deleted BaseAction/UniversalAction classes (replaced by ActionInstance)
+  - Removed unused Core subsystems (EmergencyEventManager, SaveManager, etc.)
+  - Eliminated duplicate CheatManager system
+- **Action System Refactoring**: Simplified to single ActionInstance class
+  - Fixed all type mismatches and compilation errors
+  - Proper animation montage playback for all action types
+- **Combat System Fixes**:
+  - Fixed stuck attacking state - now properly managed by animation notifies
+  - Moved damage application to AttackNotify (correct animation frame)
+  - Connected action data to ProcessHitFromAnimation for proper damage values
+- **Previous fixes from 2025-01-25**: Room system, auto-assignment, enemy spawning
 
 ## Next Steps
 1. Create Blueprint assets in Editor
