@@ -342,6 +342,18 @@ public:
 	void CloseRewardSelectionUI();
 	
 	/**
+	 * Create test rewards for the current room type
+	 * @param Count Number of rewards to create
+	 * @return Array of test rewards
+	 */
+	TArray<class URewardDataAsset*> CreateTestRewardsForRoom(int32 Count);
+	
+	/**
+	 * Helper to create a single test reward
+	 */
+	class URewardDataAsset* CreateTestReward(const FString& Name, const FString& Description, ERewardCategory Category);
+	
+	/**
 	 * Display the run map showing all 5 rooms in order
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Run Manager|UI")
