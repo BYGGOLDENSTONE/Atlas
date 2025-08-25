@@ -98,8 +98,8 @@ public:
 	virtual bool TryPerformAction_Implementation(const FGameplayTag& ActionTag) override;
 	virtual void InterruptCurrentAction_Implementation() override;
 	virtual bool IsPerformingAction_Implementation() const override;
-	virtual UBaseAction* GetCurrentAction_Implementation() const override;
+	virtual UActionInstance* GetCurrentAction_Implementation() const override;
 	virtual bool AssignActionToSlot_Implementation(FName SlotName, const FGameplayTag& ActionTag) override;
 	virtual void ClearActionSlot_Implementation(FName SlotName) override;
-	virtual UBaseAction* GetActionInSlot_Implementation(FName SlotName) const override;
+	virtual UActionInstance* GetActionInSlot_Implementation(FName SlotName) const override;
 };

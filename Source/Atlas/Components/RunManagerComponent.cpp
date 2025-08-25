@@ -5,9 +5,7 @@
 #include "Atlas/Components/SlotManagerComponent.h"
 #include "Atlas/Components/HealthComponent.h"
 #include "Atlas/Components/StationIntegrityComponent.h"
-#include "Atlas/Rooms/RoomStreamingManager.h"
 #include "Atlas/Rooms/RoomBase.h"
-#include "Atlas/Rooms/EngineeringBayRoom.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
@@ -484,6 +482,15 @@ void URunManagerComponent::LoadRoom(URoomDataAsset* Room)
 	
 	UE_LOG(LogTemp, Log, TEXT("Loading room: %s"), *Room->RoomName.ToString());
 	
+	// Clean up previous room if it exists
+	if (CurrentRoomInstance)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Destroying previous room instance"));
+		CurrentRoomInstance->DeactivateRoom();
+		CurrentRoomInstance->Destroy();
+		CurrentRoomInstance = nullptr;
+	}
+	
 	CurrentRoom = Room;
 	RoomStartTime = GetWorld()->GetTimeSeconds();
 	
@@ -493,32 +500,24 @@ void URunManagerComponent::LoadRoom(URoomDataAsset* Room)
 		RemainingRooms.Remove(Room);
 	}
 	
-	// Initialize streaming manager if needed
-	if (!StreamingManager)
-	{
-		StreamingManager = NewObject<URoomStreamingManager>(this);
-		StreamingManager->Initialize(GetWorld());
-	}
+	// Direct room spawning - no complex streaming needed
+	TSubclassOf<ARoomBase> RoomClass = ARoomBase::StaticClass();
 	
-	// Load room level using streaming manager
-	StreamingManager->LoadRoomLevel(Room, true);
-	
-	// Determine room class based on RoomID
-	TSubclassOf<ARoomBase> RoomClass = nullptr;
-	
-	if (Room->RoomID == "EngineeringBay")
-	{
-		RoomClass = AEngineeringBayRoom::StaticClass();
-	}
-	// For test rooms or unknown rooms, use EngineeringBayRoom as default
-	else
-	{
-		RoomClass = AEngineeringBayRoom::StaticClass();
-		UE_LOG(LogTemp, Warning, TEXT("Using EngineeringBayRoom as default for room: %s"), *Room->RoomName.ToString());
-	}
+	UE_LOG(LogTemp, Log, TEXT("Spawning room directly: %s"), *Room->RoomName.ToString());
 	
 	// Spawn the room actor with appropriate class
-	CurrentRoomInstance = StreamingManager->SpawnRoomActor(Room, RoomClass);
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	SpawnParams.Name = FName(*FString::Printf(TEXT("Room_%s"), *Room->RoomName.ToString()));
+	
+	CurrentRoomInstance = GetWorld()->SpawnActor<ARoomBase>(RoomClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	
+	if (!CurrentRoomInstance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn room actor for: %s"), *Room->RoomName.ToString());
+		EndRun(false, FText::FromString(TEXT("Room spawn failed")));
+		return;
+	}
 	
 	// Apply environmental hazards through room instance
 	if (CurrentRoomInstance)

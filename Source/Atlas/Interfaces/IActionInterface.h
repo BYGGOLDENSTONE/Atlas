@@ -6,7 +6,7 @@
 #include "IActionInterface.generated.h"
 
 // Forward declarations
-class UBaseAction;
+class UActionInstance;
 class UActionDataAsset;
 
 UINTERFACE(MinimalAPI, Blueprintable)
@@ -43,8 +43,8 @@ public:
 	virtual bool IsPerformingAction_Implementation() const { return false; }
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Actions")
-	UBaseAction* GetCurrentAction() const;
-	virtual UBaseAction* GetCurrentAction_Implementation() const { return nullptr; }
+	UActionInstance* GetCurrentAction() const;
+	virtual UActionInstance* GetCurrentAction_Implementation() const { return nullptr; }
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Actions")
 	FGameplayTag GetCurrentActionTag() const;
@@ -60,8 +60,8 @@ public:
 	virtual void ClearActionSlot_Implementation(FName SlotName) {}
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Actions")
-	UBaseAction* GetActionInSlot(FName SlotName) const;
-	virtual UBaseAction* GetActionInSlot_Implementation(FName SlotName) const { return nullptr; }
+	UActionInstance* GetActionInSlot(FName SlotName) const;
+	virtual UActionInstance* GetActionInSlot_Implementation(FName SlotName) const { return nullptr; }
 	
 	// Cooldown management
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Actions")

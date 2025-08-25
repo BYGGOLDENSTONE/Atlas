@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameplayTagContainer.h"
-#include "Atlas/Actions/BaseAction.h"
+#include "Atlas/Actions/ActionInstance.h"
 #include "ActionManagerComponent.generated.h"
 
 // Forward declarations
@@ -13,8 +13,8 @@ class UHealthComponent;
 class UVulnerabilityComponent;
 class UCombatRulesDataAsset;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionSlotChanged, FName, SlotName, UBaseAction*, NewAction);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionActivated, FName, SlotName, UBaseAction*, Action);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionSlotChanged, FName, SlotName, UActionInstance*, NewAction);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionActivated, FName, SlotName, UActionInstance*, Action);
 
 // Combat events
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttackStarted, const FGameplayTag&, AttackTag);
@@ -55,7 +55,7 @@ public:
 	void SwapSlots(FName Slot1, FName Slot2);
 
 	UFUNCTION(BlueprintPure, Category = "Action Manager")
-	UBaseAction* GetActionInSlot(FName SlotName) const;
+	UActionInstance* GetActionInSlot(FName SlotName) const;
 
 	UFUNCTION(BlueprintPure, Category = "Action Manager")
 	TArray<FName> GetAllSlotNames() const;
@@ -84,7 +84,7 @@ public:
 	void InterruptCurrentAction();
 
 	UFUNCTION(BlueprintPure, Category = "Action Manager")
-	UBaseAction* GetCurrentAction() const { return CurrentAction; }
+	UActionInstance* GetCurrentAction() const { return CurrentAction; }
 
 	UFUNCTION(BlueprintPure, Category = "Action Manager")
 	bool IsActionActive() const { return CurrentAction != nullptr && CurrentAction->IsActive(); }
@@ -216,7 +216,7 @@ public:
 
 protected:
 	// Helper functions
-	UBaseAction* CreateActionInstance(UActionDataAsset* ActionData);
+	UActionInstance* CreateActionInstance(UActionDataAsset* ActionData);
 	void InitializeSlots();
 	void TickActions(float DeltaTime);
 

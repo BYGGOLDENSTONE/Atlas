@@ -9,7 +9,6 @@
 // Forward declarations
 class AGameCharacterBase;
 class USlotManagerComponent;
-class URoomStreamingManager;
 class ARoomBase;
 
 /**
@@ -439,9 +438,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
 	bool bAutoSaveProgress = true;
 	
-	/** Room streaming manager instance */
-	UPROPERTY()
-	URoomStreamingManager* StreamingManager;
 	
 	/** Current room actor instance */
 	UPROPERTY()

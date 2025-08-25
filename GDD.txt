@@ -10,6 +10,12 @@ Of course. Here is a comprehensive Game Design Document (GDD) based on all the i
    - Auto-progression to next room now works correctly
    - Timer-based enemy death checking fixed - CheckEnemyStatus function properly detects enemy death via HealthComponent
    - Enhanced debug logging shows detailed status during death detection process
+✅ REFACTOR: Simplified architecture for better maintainability
+   - Removed redundant room management classes (RunManagerSubsystem, RoomStreamingManager)
+   - Consolidated room logic into single RunManagerComponent with direct spawning
+   - Simplified Action system from BaseAction/UniversalAction hierarchy to single ActionInstance class
+   - Eliminated over-engineered abstraction layers (~1200+ lines of code removed)
+   - Improved performance and debugging experience with cleaner, direct code paths
 
 ***
 
