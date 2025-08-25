@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
 #include "Engine/EngineTypes.h"
+#include "Components/PrimitiveComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 UActionInstance::UActionInstance()
@@ -295,8 +296,8 @@ void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 		}
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("ActionInstance: Executing Attack - Damage: %.1f, Range: %.1f"), 
-		ActionData->BaseDamage, ActionData->AttackRange);
+	UE_LOG(LogTemp, Log, TEXT("ActionInstance: Executing Melee Attack - Damage: %.1f, Range: %.1f"), 
+		ActionData->MeleeDamage, AttackRange);
 }
 
 void UActionInstance::ExecuteUtilityAction(AGameCharacterBase* Owner)
