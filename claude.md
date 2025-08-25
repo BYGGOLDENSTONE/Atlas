@@ -29,11 +29,19 @@ Single-player roguelite dueling game with 5-room runs, persistent rewards, and d
 - **SlotManagerComponent**: Reward equipment system
 
 ### Reward System
-- **25 Unique Rewards**: Across 5 categories (Offensive, Defensive, Utility, Movement, Special)
+- **Target: 25 Unique Rewards**: 5 per room type (currently 3 test rewards per room)
 - **Slot-Based Equipment**: Head, Body, Arms, Legs, Accessory slots
 - **Persistent Upgrades**: Rewards carry between runs
-- **Data-Driven**: All rewards defined via DataAssets
 - ✅ **Reward Selection UI**: Pure Slate modal UI after enemy defeat with mouse/console input
+- ✅ **Room-Specific Pools**: Each room type offers themed rewards:
+  - Bridge → Interactables (3 test rewards)
+  - Cargo Hold → Defense (3 test rewards)
+  - Medical Bay → Passive Abilities (3 test rewards)
+  - Engineering Bay → Passive Stats (3 test rewards)
+  - Combat Arena → Offense (3 test rewards)
+- ✅ **Selection Blocking**: Room progression blocked until reward selected/cancelled
+- ✅ **Test System**: Dynamic reward generation working without DataAssets
+- ⏳ **Next Session**: Create proper DataAssets for all 25 rewards (5 per room)
 
 ### Environment Systems  
 - **Hazards**: Fire, Electric, Toxic, Explosive, Gravity types
@@ -128,6 +136,12 @@ GameCharacterBase
 - **Parry Windows**: Perfect (100% reduction, 0.2s) / Late (50%, 0.1s)
 - **Vulnerability Multipliers**: 2x/4x/8x based on stacks
 - **Dash**: 400 units distance, 0.3s duration, 2s cooldown
+
+## Next Session Plans
+1. **Design Final 25 Rewards**: Define 5 unique rewards per room type
+2. **Create Reward DataAssets**: Implement all rewards as UE5 DataAssets
+3. **Room Reward Pools**: Configure each room's DataAsset with its 5 rewards
+4. **Remove Test Rewards**: Replace temporary code with DataAsset references
 
 ## Next Steps
 1. Create Blueprint assets in Editor
