@@ -365,6 +365,16 @@ public:
 	void CancelRewardSelection();
 	
 	/**
+	 * Complete the reward selection process and move to next room
+	 */
+	void CompleteRewardSelection();
+	
+	/**
+	 * Handle going back to reward selection from slot manager
+	 */
+	void BackToRewardSelection();
+	
+	/**
 	 * Create and show the Slate reward selection UI
 	 */
 	void CreateRewardSelectionUI();
@@ -378,6 +388,11 @@ public:
 	 * Close the Slate reward selection UI
 	 */
 	void CloseRewardSelectionUI();
+	
+	/**
+	 * Close the inventory widget
+	 */
+	void CloseInventoryWidget();
 	
 	/**
 	 * Create test rewards for the current room type
@@ -591,4 +606,10 @@ protected:
 	
 	/** Slate widget for enemy health display */
 	TSharedPtr<class SEnemyHealthWidget> EnemyHealthWidget;
+	
+	/** Slate widget for slot manager display (always visible) */
+	TSharedPtr<class SSimpleSlotManagerWidget> SlotManagerWidget;
+	
+	/** Slate widget for inventory (modal for reward equipping) */
+	TSharedPtr<class SInventoryWidget> InventoryWidget;
 };

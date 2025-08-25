@@ -1,9 +1,13 @@
-# Atlas - Implementation Status
+# Atlas - Quick Reference
 
-**Engine**: UE 5.5 | **Genre**: 1v1 Roguelite Dueler | **Target**: GDD.txt
+**Goal**: Build 1v1 Roguelite Dueler from GDD.txt | **Engine**: UE 5.5
 
-## Overview
-Single-player roguelite dueling game with 5-room runs, persistent rewards, and dual fail-states (health/integrity).
+## Target (per GDD.txt)
+- 5-room runs with persistent rewards between runs
+- Dual fail-states: Health (player dies) & Integrity (station destroyed)
+- 25 unique rewards (5 per room type)
+- Combat: Action-based with combos, vulnerability stacking
+- Rooms: Bridge, Medical Bay, Engineering, Cargo Hold, Combat Arena
 
 ## ✅ Implemented Features
 
@@ -32,7 +36,10 @@ Single-player roguelite dueling game with 5-room runs, persistent rewards, and d
 - **Target: 25 Unique Rewards**: 5 per room type (currently 3 test rewards per room)
 - **Slot-Based Equipment**: Head, Body, Arms, Legs, Accessory slots
 - **Persistent Upgrades**: Rewards carry between runs
-- ✅ **Reward Selection UI**: Pure Slate modal UI after enemy defeat with mouse/console input
+- ✅ **Reward Selection UI**: Pure Slate modal UI after enemy defeat (SRewardSelectionWidget)
+- ✅ **Inventory System**: Separated slot manager (compact display) and inventory (modal) widgets
+  - **SSimpleSlotManagerWidget**: Always visible at bottom-right, shows equipped rewards
+  - **SInventoryWidget**: Modal for reward slot selection after choosing reward
 - ✅ **Room-Specific Pools**: Each room type offers themed rewards:
   - Bridge → Interactables (3 test rewards)
   - Cargo Hold → Defense (3 test rewards)
@@ -48,34 +55,39 @@ Single-player roguelite dueling game with 5-room runs, persistent rewards, and d
 - **Destructible Objects**: Multi-stage destruction with debris
 - **Interactables**: Valves, vents, terminals with gameplay effects
 
+## UI System (Pure Slate - No UMG/Blueprint Dependencies)
+
+### ✅ Implemented
+- **SRewardSelectionWidget**: Modal reward selection after enemy defeat
+- **SRunProgressWidget**: Room progression, health/poise/integrity bars (bottom-left, appears on Atlas.StartRun)
+- **SEnemyHealthWidget**: Enemy name, health, and poise bars (top-center, working correctly)
+- **SSimpleSlotManagerWidget**: Compact equipment display (bottom-right, always visible during run)
+- **SInventoryWidget**: Modal for equipping rewards to slots (appears after reward selection)
+- **Pure C++ Implementation**: All widgets created directly via SNew() and added with GEngine->GameViewport->AddViewportWidgetContent()
+- **No Blueprint Setup Required**: Works entirely from C++ without any engine configuration
+
 ## ⏳ Not Yet Implemented
 
-### UI System
-- Health/Integrity bars
-- Action slot indicators  
+### Priority (Next Session)
+1. **25 Final Rewards**: Design & create DataAssets (5 per room)
+2. **Enemy Blueprints**: 5 room-specific enemies with AI
+3. **Fix Slot Replacement**: Rewards should replace existing items in slots (currently not working)
+
+### UI
+- Action slot indicators
 - Combo window display
-- Room progression UI
-- ✅ **Reward selection system** - Pure Slate UI for choosing rewards after enemy defeat
 
-### Enemies
-- 5 room-specific enemy types (defined but need BP implementation)
-- AI behavior trees
-- Adaptive difficulty scaling
-
-### Visual Effects
-- Combat VFX (hits, blocks, parries)
-- Environmental effects
-- Ability visuals
-
-### Audio
-- Combat sounds
-- Environmental audio
-- Music system
+### Other Systems
+- **Enemies**: 5 room-specific types (need BP implementation)
+- **AI**: Behavior trees, adaptive difficulty
+- **VFX**: Combat effects, environmental visuals
+- **Audio**: Combat sounds, music system
+- **Soul Attack**: 50 unblockable damage (not yet assigned)
 
 ## Important Console Commands
 ```
 # Run Management
-Atlas.StartRun            # Start a new 5-room run
+Atlas.StartRun            # Start a new 5-room run (shows UI)
 Atlas.CompleteRoom        # Complete current room and trigger reward selection
 Atlas.GoToRoom [name]      # Teleport to specific room
 Atlas.ShowMap             # Display current run progress
@@ -137,14 +149,81 @@ GameCharacterBase
 - **Vulnerability Multipliers**: 2x/4x/8x based on stacks
 - **Dash**: 400 units distance, 0.3s duration, 2s cooldown
 
-## Next Session Plans
-1. **Design Final 25 Rewards**: Define 5 unique rewards per room type
-2. **Create Reward DataAssets**: Implement all rewards as UE5 DataAssets
-3. **Room Reward Pools**: Configure each room's DataAsset with its 5 rewards
-4. **Remove Test Rewards**: Replace temporary code with DataAsset references
+## Recent Changes (Session 2025-02-01)
+1. **Separated Slot Manager and Inventory Systems**:
+   - Split SSlotManagerWidget into two distinct widgets
+   - **SSimpleSlotManagerWidget**: Compact display at bottom-right (always visible)
+   - **SInventoryWidget**: Modal for reward equipment (temporary)
+   - Removed all mode-switching complexity
+2. **Improved Widget Architecture**:
+   - Single responsibility for each widget
+   - Cleaner separation of persistent UI vs modals
+   - Better flow: Reward Selection → Inventory → Equipment
+3. **Fixed Critical Crashes**:
+   - Added safety checks for delegate binding/unbinding
+   - Fixed CurrentRoomActor validation issues
+   - Added IsValid() checks throughout transition flow
+4. **Known Issues**:
+   - Slot replacement not working (rewards don't override existing items)
+   - Enhancement system needs implementation
 
-## Next Steps
-1. Create Blueprint assets in Editor
-2. Set up test map and player character
-3. Implement UI widgets from C++ base classes
-4. Create enemy blueprints for 5 room types
+## Previous Session (2025-01-31)
+1. **Fixed Critical UI Issues After Log Cleanup**:
+   - Restored enemy health widget functionality that was accidentally removed
+   - Fixed `CurrentRoomEnemy` not being set in RunManagerComponent
+   - Enemy health/poise bars now properly update when enemy takes damage
+   - Enemy health widget correctly hides when enemy is defeated
+2. **Fixed Room Name Display**:
+   - Restored `UpdateCurrentRoomInfo` calls in StartNewRun and TransitionToNextRoom
+   - Run progress widget now shows actual room names instead of "Unknown Room"
+   - Added fallback room data creation when no DataAsset match is found
+3. **Improved Event Binding**:
+   - Fixed health/poise change event subscriptions with IsAlreadyBound checks
+   - Added OnDeath event subscription for proper enemy defeat handling
+   - Simplified event handlers to update widgets directly with event values
+4. **Cleaned Debug Output**:
+   - Removed all LogTemp debug messages for cleaner console output
+   - Preserved all functionality while removing debug clutter
+5. **Fixed Enemy Name Display**:
+   - Added smart fallback logic for enemy names
+   - If DataAsset has EnemyName filled: uses that name
+   - If DataAsset exists but EnemyName is empty: generates "[RoomType] Enemy"
+   - If no DataAsset exists: creates temporary data with generated name
+   - **Note**: DataAssets in Content/Dataassets/rooms/ need EnemyName field populated
+
+**IMPORTANT: Compile in Unreal Editor (Ctrl+Alt+F11) or use Live Coding (Ctrl+Alt+F11) to see changes**
+
+## Session (2025-01-30)
+1. **Added Enemy Health UI System**:
+   - Created SEnemyHealthWidget: Shows enemy name, health bar, and poise bar at top-center
+   - Enemy health widget appears when enemy spawns, hides on defeat
+   - Color-coded health/poise bars with stagger state display
+2. **Enhanced Player HUD**:
+   - Added player poise bar to SRunProgressWidget between health and integrity
+   - Repositioned player stats to bottom-left (was top-left)
+   - Player HUD shows: Room progress, Health, Poise, Station Integrity
+3. **Fixed UI Update System**:
+   - RunProgressWidget now properly created on GoToRoom if missing
+   - Fixed delegate bindings (AddDynamic instead of lambdas)
+   - Fixed timer lambda syntax with FTimerDelegate::CreateLambda
+4. **Pure Slate Implementation**:
+   - Removed all UMG dependencies
+   - All UI widgets use SNew() and AddViewportWidgetContent()
+   - No Blueprint setup required - works entirely from C++
+
+## Session (2025-01-29)
+1. **Removed all UMG widgets** - Converted to pure Slate
+2. **Created Slate UI widgets**:
+   - SRunProgressWidget: Shows room progress (1-5), health, integrity
+   - SSlotManagerWidget: Equipment management (ready for integration)
+3. **UI appears on run start** - No UI clutter before Atlas.StartRun
+4. **Cleaned debug messages** - Removed all on-screen debug text
+
+
+## Quick Status
+- ✅ Core combat system working
+- ✅ 5-room progression with reward selection
+- ✅ UI system (Pure Slate, no UMG)
+- ⏳ Need 25 final rewards (have 3 test per room)
+- ⏳ Need enemy blueprints with AI
+- ⏳ Need environment hazards/interactables

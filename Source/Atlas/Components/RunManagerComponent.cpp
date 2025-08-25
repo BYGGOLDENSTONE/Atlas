@@ -5,10 +5,11 @@
 #include "Atlas/Components/SlotManagerComponent.h"
 #include "Atlas/Components/HealthComponent.h"
 #include "Atlas/Components/StationIntegrityComponent.h"
-#include "Atlas/Components/RewardSelectionComponent.h"
 #include "Atlas/UI/SRewardSelectionWidget.h"
 #include "Atlas/UI/SRunProgressWidget.h"
 #include "Atlas/UI/SEnemyHealthWidget.h"
+#include "Atlas/UI/SSimpleSlotManagerWidget.h"
+#include "Atlas/UI/SInventoryWidget.h"
 #include "Atlas/Rooms/RoomBase.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -85,7 +86,9 @@ void URunManagerComponent::BeginPlay()
 				}
 				
 				AllRoomDataAssets.Add(RoomData);
-				UE_LOG(LogTemp, Log, TEXT("  Loaded room: %s"), *RoomData->RoomName.ToString());
+				UE_LOG(LogTemp, Log, TEXT("  Loaded room: %s, EnemyName: %s"), 
+					*RoomData->RoomName.ToString(), 
+					RoomData->EnemyName.IsEmpty() ? TEXT("[EMPTY]") : *RoomData->EnemyName.ToString());
 			}
 		}
 		
@@ -266,6 +269,20 @@ void URunManagerComponent::StartNewRun()
 					IntegrityComp->OnIntegrityChanged.AddDynamic(this, &URunManagerComponent::OnPlayerIntegrityChanged);
 				}
 			}
+			
+			// Create the slot manager widget (compact display)
+			if (USlotManagerComponent* SlotManager = PlayerChar->GetSlotManagerComponent())
+			{
+				SlotManagerWidget = SNew(SSimpleSlotManagerWidget)
+					.SlotManager(SlotManager);
+				
+				// Add to viewport
+				if (GEngine && GEngine->GameViewport && SlotManagerWidget.IsValid())
+				{
+					GEngine->GameViewport->AddViewportWidgetContent(SlotManagerWidget.ToSharedRef(), 15);
+					UE_LOG(LogTemp, Log, TEXT("SlotManagerWidget created and added to viewport"));
+				}
+			}
 		}
 	}
 	
@@ -300,6 +317,9 @@ void URunManagerComponent::StartNewRun()
 			if (DataAsset && DataAsset->RoomType == CurrentRoomActor->RoomTypeForTesting)
 			{
 				CurrentRoom = DataAsset;
+				UE_LOG(LogTemp, Warning, TEXT("Matched room DataAsset: %s, EnemyName: %s"), 
+					*DataAsset->RoomName.ToString(),
+					DataAsset->EnemyName.IsEmpty() ? TEXT("[EMPTY]") : *DataAsset->EnemyName.ToString());
 				
 				// Update the RunProgressWidget with the current room
 				if (RunProgressWidget.IsValid())
@@ -313,12 +333,15 @@ void URunManagerComponent::StartNewRun()
 	}
 	
 	// If no room data was found, create a temporary one
-	if (!CurrentRoom)
+	if (!CurrentRoom && CurrentRoomActor)
 	{
+		const UEnum* RoomEnum = StaticEnum<ERoomType>();
+		FString RoomName = RoomEnum ? RoomEnum->GetNameStringByValue((int64)CurrentRoomActor->RoomTypeForTesting) : TEXT("Unknown");
+		
 		URoomDataAsset* TempRoom = NewObject<URoomDataAsset>(this);
-		TempRoom->RoomName = FText::FromString(TEXT("Combat Arena"));
+		TempRoom->RoomName = FText::FromString(RoomName);
 		TempRoom->RoomType = CurrentRoomActor->RoomTypeForTesting;
-		TempRoom->EnemyName = FText::FromString(TEXT("Arena Champion"));
+		TempRoom->EnemyName = FText::FromString(FString::Printf(TEXT("%s Enemy"), *RoomName));
 		CurrentRoom = TempRoom;
 		
 		if (RunProgressWidget.IsValid())
@@ -450,8 +473,13 @@ void URunManagerComponent::TransitionToNextRoom()
 		CompleteRoomTransition();
 		
 		// Deactivate current room
-		if (CurrentRoomActor)
+		if (CurrentRoomActor && IsValid(CurrentRoomActor))
 		{
+			// Unbind from previous room's completion event to avoid crashes
+			if (CurrentRoomActor->OnRoomCompleted.IsAlreadyBound(this, &URunManagerComponent::OnRoomActorCompleted))
+			{
+				CurrentRoomActor->OnRoomCompleted.RemoveDynamic(this, &URunManagerComponent::OnRoomActorCompleted);
+			}
 			CurrentRoomActor->DeactivateRoom();
 		}
 		
@@ -491,6 +519,9 @@ void URunManagerComponent::TransitionToNextRoom()
 				if (DataAsset && DataAsset->RoomType == CurrentRoomActor->RoomTypeForTesting)
 				{
 					CurrentRoom = DataAsset;
+					UE_LOG(LogTemp, Warning, TEXT("Matched room DataAsset: %s, EnemyName: %s"), 
+						*DataAsset->RoomName.ToString(),
+						DataAsset->EnemyName.IsEmpty() ? TEXT("[EMPTY]") : *DataAsset->EnemyName.ToString());
 					
 					// Update the widget with the matched room data
 					if (RunProgressWidget.IsValid())
@@ -502,17 +533,49 @@ void URunManagerComponent::TransitionToNextRoom()
 			}
 		}
 		
-		// Teleport player to next room
-		CurrentRoomActor->TeleportPlayerToRoom();
-		
-		// Activate the room
-		if (CurrentRoom)
+		// Create fallback room data if no matching DataAsset was found
+		if (!CurrentRoom && CurrentRoomActor)
 		{
-			CurrentRoomActor->ActivateRoom(CurrentRoom);
+			const UEnum* RoomEnum = StaticEnum<ERoomType>();
+			FString RoomName = RoomEnum ? RoomEnum->GetNameStringByValue((int64)CurrentRoomActor->RoomTypeForTesting) : TEXT("Unknown");
+			
+			URoomDataAsset* TempRoomData = NewObject<URoomDataAsset>(this);
+			TempRoomData->RoomName = FText::FromString(RoomName);
+			TempRoomData->RoomType = CurrentRoomActor->RoomTypeForTesting;
+			TempRoomData->EnemyName = FText::FromString(FString::Printf(TEXT("%s Enemy"), *RoomName));
+			CurrentRoom = TempRoomData;
+			
+			// Update the widget with the temporary room data
+			if (RunProgressWidget.IsValid())
+			{
+				RunProgressWidget->UpdateCurrentRoomInfo(CurrentRoom);
+			}
 		}
 		
-		// Subscribe to room completion event
-		CurrentRoomActor->OnRoomCompleted.AddDynamic(this, &URunManagerComponent::OnRoomActorCompleted);
+		// Teleport player to next room
+		if (CurrentRoomActor && IsValid(CurrentRoomActor))
+		{
+			CurrentRoomActor->TeleportPlayerToRoom();
+			
+			// Activate the room
+			if (CurrentRoom)
+			{
+				CurrentRoomActor->ActivateRoom(CurrentRoom);
+			}
+			
+			// Subscribe to room completion event
+			// Check if already bound to avoid duplicate bindings
+			if (!CurrentRoomActor->OnRoomCompleted.IsAlreadyBound(this, &URunManagerComponent::OnRoomActorCompleted))
+			{
+				CurrentRoomActor->OnRoomCompleted.AddDynamic(this, &URunManagerComponent::OnRoomActorCompleted);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CurrentRoomActor is invalid when trying to activate room"));
+			EndRun(false, FText::FromString(TEXT("Room actor invalid")));
+			return;
+		}
 		
 		SetRunState(ERunState::RoomIntro);
 		
@@ -1123,6 +1186,23 @@ void URunManagerComponent::GoToRoom(const FString& RoomName)
 			{
 				GEngine->GameViewport->AddViewportWidgetContent(RunProgressWidget.ToSharedRef(), 10);
 				UE_LOG(LogTemp, Log, TEXT("RunProgressWidget created in GoToRoom"));
+			}
+			
+			// Create the slot manager widget if not exists (compact display)
+			if (!SlotManagerWidget.IsValid())
+			{
+				if (USlotManagerComponent* SlotManager = PlayerChar->GetSlotManagerComponent())
+				{
+					SlotManagerWidget = SNew(SSimpleSlotManagerWidget)
+						.SlotManager(SlotManager);
+					
+					// Add to viewport
+					if (GEngine && GEngine->GameViewport && SlotManagerWidget.IsValid())
+					{
+						GEngine->GameViewport->AddViewportWidgetContent(SlotManagerWidget.ToSharedRef(), 15);
+						UE_LOG(LogTemp, Log, TEXT("SlotManagerWidget created in GoToRoom"));
+					}
+				}
 			}
 		}
 	}
@@ -1825,7 +1905,7 @@ void URunManagerComponent::SelectReward(int32 RewardIndex)
 	UE_LOG(LogTemp, Warning, TEXT("    Effect: %s"), *SelectedRewardEffect);
 	UE_LOG(LogTemp, Warning, TEXT(""));
 	
-	// Clear on-screen messages and close UI
+	// Clear on-screen messages
 	if (GEngine)
 	{
 		GEngine->ClearOnScreenDebugMessages();
@@ -1833,23 +1913,85 @@ void URunManagerComponent::SelectReward(int32 RewardIndex)
 			FString::Printf(TEXT("Reward Selected: %s"), *SelectedRewardName));
 	}
 	
-	// Close the Slate UI
-	CloseRewardSelectionUI();
-	
-	// Apply the reward to the player (integrate with slot manager if available)
-	if (SelectedReward && PlayerSlotManager)
+	// Close ONLY the reward selection widget, not the slot manager
+	if (RewardSelectionWidget.IsValid())
 	{
-		// Try to equip the reward
-		// PlayerSlotManager->EquipReward(SelectedReward);
-		UE_LOG(LogTemp, Log, TEXT("Would equip reward: %s"), *SelectedRewardName);
+		// Remove from viewport
+		if (GEngine && GEngine->GameViewport)
+		{
+			GEngine->GameViewport->RemoveViewportWidgetContent(RewardSelectionWidget.ToSharedRef());
+		}
+		
+		// Reset widget reference
+		RewardSelectionWidget.Reset();
+		
+		UE_LOG(LogTemp, Log, TEXT("Closed reward selection widget"));
 	}
 	
-	// Log that we applied the reward
-	UE_LOG(LogTemp, Log, TEXT("Applied reward: %s - %s"), *SelectedRewardName, *SelectedRewardEffect);
-	
-	// Clean up reward selection
-	bRewardSelectionActive = false;
-	CurrentRewardChoices.Empty();
+	// Now create and show the inventory widget for slot selection
+	if (SelectedReward)
+	{
+		AGameCharacterBase* PlayerChar = Cast<AGameCharacterBase>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		if (PlayerChar)
+		{
+			if (USlotManagerComponent* SlotManager = PlayerChar->GetSlotManagerComponent())
+			{
+				// Create the inventory widget
+				InventoryWidget = SNew(SInventoryWidget)
+					.SlotManager(SlotManager)
+					.SelectedReward(SelectedReward)
+					.OnRewardEquipped_Lambda([this]()
+					{
+						// When a reward is equipped, close inventory and complete
+						UE_LOG(LogTemp, Log, TEXT("Reward equipped to slot"));
+						CloseInventoryWidget();
+						
+						// Refresh the compact slot manager display
+						if (SlotManagerWidget.IsValid())
+						{
+							SlotManagerWidget->RefreshSlots();
+						}
+						
+						CompleteRewardSelection();
+					})
+					.OnBackToRewardSelection_Lambda([this]()
+					{
+						// Go back to reward selection
+						UE_LOG(LogTemp, Log, TEXT("Back to reward selection"));
+						CloseInventoryWidget();
+						BackToRewardSelection();
+					})
+					.OnCancelEquip_Lambda([this]()
+					{
+						// Cancel equipment and continue
+						UE_LOG(LogTemp, Log, TEXT("Equipment cancelled"));
+						CloseInventoryWidget();
+						CompleteRewardSelection();
+					});
+				
+				// Add to viewport
+				if (GEngine && GEngine->GameViewport && InventoryWidget.IsValid())
+				{
+					GEngine->GameViewport->AddViewportWidgetContent(InventoryWidget.ToSharedRef(), 100);
+					UE_LOG(LogTemp, Log, TEXT("Opening inventory widget with reward: %s"), *SelectedRewardName);
+				}
+				
+				// Set input mode to UI for slot selection
+				if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+				{
+					FInputModeUIOnly InputMode;
+					PC->SetInputMode(InputMode);
+					PC->bShowMouseCursor = true;
+				}
+			}
+		}
+	}
+	else
+	{
+		// If no reward selected, just complete
+		UE_LOG(LogTemp, Warning, TEXT("No reward selected, completing reward selection"));
+		CompleteRewardSelection();
+	}
 	
 	// Clear timers
 	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
@@ -1882,17 +2024,34 @@ void URunManagerComponent::CancelRewardSelection()
 		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Reward Selection Cancelled"));
 	}
 	
-	// Close the Slate UI
+	// Complete the reward selection process
+	CompleteRewardSelection();
+}
+
+void URunManagerComponent::CompleteRewardSelection()
+{
+	// Close any UI
 	CloseRewardSelectionUI();
+	CloseInventoryWidget();
 	
-	// Clean up
+	// Restore input mode
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		PC->SetInputMode(FInputModeGameOnly());
+		PC->bShowMouseCursor = false;
+	}
+	
+	// Unpause the game
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	
+	// Clean up reward selection state
 	bRewardSelectionActive = false;
 	CurrentRewardChoices.Empty();
 	
 	// Clear timers
 	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 	
-	// Complete the room without reward and transition
+	// Complete the room and transition to next
 	FTimerHandle TransitionTimer;
 	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, [this]()
 	{
@@ -1902,6 +2061,33 @@ void URunManagerComponent::CancelRewardSelection()
 			TransitionToNextRoom();
 		}
 	}, 1.0f, false);
+}
+
+void URunManagerComponent::BackToRewardSelection()
+{
+	// Close inventory widget if open
+	CloseInventoryWidget();
+	
+	// Restore game input
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		PC->SetInputMode(FInputModeGameOnly());
+		PC->bShowMouseCursor = false;
+	}
+	
+	// Unpause temporarily
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	
+	// Re-show reward selection
+	if (CurrentRewardChoices.Num() > 0)
+	{
+		CreateRewardSelectionUI();
+	}
+	else
+	{
+		// If no rewards available, just complete
+		CompleteRewardSelection();
+	}
 }
 
 // ========================================
@@ -2088,9 +2274,14 @@ void URunManagerComponent::CreateRewardSelectionUI()
 	// Close existing widget if any
 	CloseRewardSelectionUI();
 	
+	// Don't transition to inventory mode here - that happens after selecting a reward
+	// Just log that rewards are available
+	UE_LOG(LogTemp, Warning, TEXT("Reward selection UI ready with %d rewards"), CurrentRewardChoices.Num());
+	
 	// For now, let's add a simple fallback that lets you select via console commands
-	UE_LOG(LogTemp, Warning, TEXT("=== CONSOLE REWARD SELECTION ==="));
-	UE_LOG(LogTemp, Warning, TEXT("Type these commands to select rewards:"));
+	UE_LOG(LogTemp, Warning, TEXT("=== REWARD SELECTION ACTIVE ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Drag rewards to equipment slots or use number keys 1-5"));
+	UE_LOG(LogTemp, Warning, TEXT("Console commands also available:"));
 	UE_LOG(LogTemp, Warning, TEXT("  Atlas.SelectReward 0  (for first reward)"));
 	UE_LOG(LogTemp, Warning, TEXT("  Atlas.SelectReward 1  (for second reward)"));
 	UE_LOG(LogTemp, Warning, TEXT("  Atlas.CancelReward   (to skip reward)"));
@@ -2363,6 +2554,23 @@ void URunManagerComponent::CloseRewardSelectionUI()
 	}
 }
 
+void URunManagerComponent::CloseInventoryWidget()
+{
+	if (InventoryWidget.IsValid())
+	{
+		// Remove from viewport
+		if (GEngine && GEngine->GameViewport)
+		{
+			GEngine->GameViewport->RemoveViewportWidgetContent(InventoryWidget.ToSharedRef());
+		}
+		
+		// Reset widget reference
+		InventoryWidget.Reset();
+		
+		UE_LOG(LogTemp, Log, TEXT("Closed inventory widget"));
+	}
+}
+
 void URunManagerComponent::UpdateEnemyHealthDisplay(float CurrentHealth, float MaxHealth, float CurrentPoise, float MaxPoise)
 {
 	if (EnemyHealthWidget.IsValid())
@@ -2400,8 +2608,35 @@ void URunManagerComponent::ShowEnemyHealthWidget(AGameCharacterBase* Enemy)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Creating new enemy health widget"));
 		
-		FText EnemyName = CurrentRoom ? CurrentRoom->EnemyName : FText::FromString("Enemy");
-		UE_LOG(LogTemp, Warning, TEXT("Enemy name: %s"), *EnemyName.ToString());
+		// Determine enemy name with better fallback logic
+		FText EnemyName;
+		if (CurrentRoom)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CurrentRoom exists: %s"), *CurrentRoom->RoomName.ToString());
+			
+			// Check if EnemyName field is populated
+			if (!CurrentRoom->EnemyName.IsEmpty())
+			{
+				EnemyName = CurrentRoom->EnemyName;
+				UE_LOG(LogTemp, Warning, TEXT("Using DataAsset EnemyName: %s"), *EnemyName.ToString());
+			}
+			else
+			{
+				// EnemyName is empty, generate based on room type
+				const UEnum* RoomEnum = StaticEnum<ERoomType>();
+				FString RoomTypeName = RoomEnum ? RoomEnum->GetNameStringByValue((int64)CurrentRoom->RoomType) : TEXT("Unknown");
+				EnemyName = FText::FromString(FString::Printf(TEXT("%s Enemy"), *RoomTypeName));
+				UE_LOG(LogTemp, Warning, TEXT("DataAsset EnemyName is empty, generated: %s"), *EnemyName.ToString());
+			}
+		}
+		else
+		{
+			// No CurrentRoom, use generic fallback
+			EnemyName = FText::FromString("Enemy");
+			UE_LOG(LogTemp, Warning, TEXT("No CurrentRoom, using generic enemy name"));
+		}
+		
+		UE_LOG(LogTemp, Warning, TEXT("Final enemy name: %s"), *EnemyName.ToString());
 		
 		UHealthComponent* EnemyHealthComp = Enemy->GetHealthComponent();
 		if (!EnemyHealthComp)
