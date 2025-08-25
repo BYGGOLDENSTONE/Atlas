@@ -30,6 +30,10 @@ private:
     static void ShowDebugInfo(const TArray<FString>& Args);
     static void ShowRooms(const TArray<FString>& Args);
     
+    // Reward Selection Commands
+    static void SelectReward(const TArray<FString>& Args);
+    static void CancelRewardSelection(const TArray<FString>& Args);
+    
     // Helper functions
     static class AGameCharacterBase* GetPlayerCharacter();
     

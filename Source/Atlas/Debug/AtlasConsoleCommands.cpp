@@ -34,6 +34,20 @@ void FAtlasConsoleCommands::RegisterCommands()
         ECVF_Cheat
     );
     
+    IConsoleManager::Get().RegisterConsoleCommand(
+        TEXT("Atlas.SelectReward"),
+        TEXT("Select reward by index (0 or 1). Usage: Atlas.SelectReward 0"),
+        FConsoleCommandWithArgsDelegate::CreateStatic(&FAtlasConsoleCommands::SelectReward),
+        ECVF_Cheat
+    );
+    
+    IConsoleManager::Get().RegisterConsoleCommand(
+        TEXT("Atlas.CancelRewardSelection"),
+        TEXT("Cancel reward selection (skip reward)"),
+        FConsoleCommandWithArgsDelegate::CreateStatic(&FAtlasConsoleCommands::CancelRewardSelection),
+        ECVF_Cheat
+    );
+    
     // Player State Commands
     IConsoleManager::Get().RegisterConsoleCommand(
         TEXT("Atlas.SetHealth"),
@@ -195,20 +209,31 @@ void FAtlasConsoleCommands::SpawnEnemy(const TArray<FString>& Args)
 
 void FAtlasConsoleCommands::CompleteRoom(const TArray<FString>& Args)
 {
+    UE_LOG(LogTemp, Warning, TEXT("Atlas.CompleteRoom command executed"));
+    
     if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GameViewport, EGetWorldErrorMode::LogAndReturnNull))
     {
         if (AAtlasGameMode* GameMode = Cast<AAtlasGameMode>(World->GetAuthGameMode()))
         {
             if (URunManagerComponent* RunManager = GameMode->GetRunManager())
             {
-                RunManager->CompleteCurrentRoom();
-                if (!RunManager->IsRunComplete())
-                {
-                    RunManager->TransitionToNextRoom();
-                }
-                UE_LOG(LogTemp, Warning, TEXT("Room completed, transitioning to next"));
+                UE_LOG(LogTemp, Warning, TEXT("Found RunManager, calling CompleteRoomTest()"));
+                // Call the test function that properly simulates enemy death and triggers reward selection
+                RunManager->CompleteRoomTest();
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("RunManager not found in GameMode"));
             }
         }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("AtlasGameMode not found"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("World not found"));
     }
 }
 
@@ -413,6 +438,43 @@ void FAtlasConsoleCommands::ShowRooms(const TArray<FString>& Args)
     }
     
     UE_LOG(LogTemp, Warning, TEXT("========================"));
+}
+
+void FAtlasConsoleCommands::SelectReward(const TArray<FString>& Args)
+{
+    if (Args.Num() < 1)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Usage: Atlas.SelectReward <0-1>"));
+        UE_LOG(LogTemp, Error, TEXT("Example: Atlas.SelectReward 0 (first reward) or Atlas.SelectReward 1 (second reward)"));
+        return;
+    }
+    
+    int32 RewardIndex = FCString::Atoi(*Args[0]);
+    
+    if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GameViewport, EGetWorldErrorMode::LogAndReturnNull))
+    {
+        if (AAtlasGameMode* GameMode = Cast<AAtlasGameMode>(World->GetAuthGameMode()))
+        {
+            if (URunManagerComponent* RunManager = GameMode->GetRunManager())
+            {
+                RunManager->SelectReward(RewardIndex);
+            }
+        }
+    }
+}
+
+void FAtlasConsoleCommands::CancelRewardSelection(const TArray<FString>& Args)
+{
+    if (UWorld* World = GEngine->GetWorldFromContextObject(GEngine->GameViewport, EGetWorldErrorMode::LogAndReturnNull))
+    {
+        if (AAtlasGameMode* GameMode = Cast<AAtlasGameMode>(World->GetAuthGameMode()))
+        {
+            if (URunManagerComponent* RunManager = GameMode->GetRunManager())
+            {
+                RunManager->CancelRewardSelection();
+            }
+        }
+    }
 }
 
 AGameCharacterBase* FAtlasConsoleCommands::GetPlayerCharacter()

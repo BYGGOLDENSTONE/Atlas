@@ -260,7 +260,7 @@ public:
 	void GoToRoom(const FString& RoomName);
 	
 	/**
-	 * Complete current room and spawn next (for testing)
+	 * Complete current room and spawn next (for testing) - includes reward selection
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
 	void CompleteRoomTest();
@@ -278,6 +278,12 @@ public:
 	void DebugRooms();
 	
 	/**
+	 * Show the current run map (console command)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
+	void ShowMap();
+	
+	/**
 	 * Test complete room sequence
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Run Manager|Testing", Exec)
@@ -288,6 +294,64 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category = "Run Manager|Testing")
 	ARoomBase* GetRoomActorByType(ERoomType RoomType) const;
+	
+	// ========================================
+	// REWARD SELECTION
+	// ========================================
+	
+	/**
+	 * Start reward selection after enemy defeat
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Rewards")
+	void StartRewardSelection();
+	
+	/**
+	 * Get random rewards from current room pool
+	 * @param Count Number of rewards to get
+	 * @return Array of random rewards
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Rewards")
+	TArray<class URewardDataAsset*> GetRandomRewardsFromRoom(int32 Count = 2);
+	
+	/**
+	 * Handle reward selection by index
+	 * @param RewardIndex Index of selected reward (0 or 1)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Rewards", Exec)
+	void SelectReward(int32 RewardIndex);
+	
+	/**
+	 * Cancel reward selection
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|Rewards", Exec)
+	void CancelRewardSelection();
+	
+	/**
+	 * Create and show the Slate reward selection UI
+	 */
+	void CreateRewardSelectionUI();
+	
+	/**
+	 * Create simple pure Slate UI for testing (no UObject dependencies)
+	 */
+	void CreateSimpleRewardSelectionUI();
+	
+	/**
+	 * Close the Slate reward selection UI
+	 */
+	void CloseRewardSelectionUI();
+	
+	/**
+	 * Display the run map showing all 5 rooms in order
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Run Manager|UI")
+	void DisplayRunMap();
+	
+	/**
+	 * Get room name string for display
+	 */
+	UFUNCTION(BlueprintPure, Category = "Run Manager|UI")
+	FString GetRoomDisplayName(ERoomType RoomType) const;
 	
 	// ========================================
 	// ENEMY SCALING
@@ -456,4 +520,23 @@ protected:
 	
 	/** Whether we're in test arena mode */
 	bool bTestArenaMode = false;
+	
+	// ========================================
+	// REWARD SELECTION PROPERTIES
+	// ========================================
+
+	/** Currently presented reward choices */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rewards")
+	TArray<class URewardDataAsset*> CurrentRewardChoices;
+	
+	/** Whether reward selection is active */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rewards")
+	bool bRewardSelectionActive = false;
+	
+	/** Reference to reward selection component */
+	UPROPERTY()
+	class URewardSelectionComponent* RewardSelectionComponent;
+	
+	/** Slate widget for reward selection */
+	TSharedPtr<SWidget> RewardSelectionWidget;
 };

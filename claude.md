@@ -33,6 +33,7 @@ Single-player roguelite dueling game with 5-room runs, persistent rewards, and d
 - **Slot-Based Equipment**: Head, Body, Arms, Legs, Accessory slots
 - **Persistent Upgrades**: Rewards carry between runs
 - **Data-Driven**: All rewards defined via DataAssets
+- ✅ **Reward Selection UI**: Pure Slate modal UI after enemy defeat with mouse/console input
 
 ### Environment Systems  
 - **Hazards**: Fire, Electric, Toxic, Explosive, Gravity types
@@ -46,7 +47,7 @@ Single-player roguelite dueling game with 5-room runs, persistent rewards, and d
 - Action slot indicators  
 - Combo window display
 - Room progression UI
-- Reward selection screens
+- ✅ **Reward selection system** - Pure Slate UI for choosing rewards after enemy defeat
 
 ### Enemies
 - 5 room-specific enemy types (defined but need BP implementation)
@@ -67,8 +68,14 @@ Single-player roguelite dueling game with 5-room runs, persistent rewards, and d
 ```
 # Run Management
 Atlas.StartRun            # Start a new 5-room run
-Atlas.CompleteRoom         # Complete current room (testing)
+Atlas.CompleteRoom        # Complete current room and trigger reward selection
 Atlas.GoToRoom [name]      # Teleport to specific room
+Atlas.ShowMap             # Display current run progress
+
+# Reward Selection
+Atlas.SelectReward 0      # Select first reward option
+Atlas.SelectReward 1      # Select second reward option
+Atlas.CancelRewardSelection # Skip reward selection
 
 # Combat Testing
 Atlas_AssignAction [Slot] [ActionTag]

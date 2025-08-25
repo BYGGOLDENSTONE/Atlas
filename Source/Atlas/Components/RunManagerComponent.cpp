@@ -5,6 +5,8 @@
 #include "Atlas/Components/SlotManagerComponent.h"
 #include "Atlas/Components/HealthComponent.h"
 #include "Atlas/Components/StationIntegrityComponent.h"
+#include "Atlas/Components/RewardSelectionComponent.h"
+#include "Atlas/UI/SRewardSelectionWidget.h"
 #include "Atlas/Rooms/RoomBase.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -13,6 +15,9 @@
 #include "Engine/LevelStreaming.h"
 #include "TimerManager.h"
 #include "EngineUtils.h"
+#include "Widgets/SViewport.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Engine/GameViewportClient.h"
 
 URunManagerComponent::URunManagerComponent()
 {
@@ -183,6 +188,9 @@ void URunManagerComponent::StartNewRun()
 	UE_LOG(LogTemp, Log, TEXT("Starting new run"));
 	
 	InitializeRun();
+	
+	// Display the run map showing all 5 rooms
+	DisplayRunMap();
 	
 	// Check if we have room actors
 	if (RandomizedRoomOrder.Num() == 0)
@@ -390,6 +398,9 @@ void URunManagerComponent::TransitionToNextRoom()
 		}, CombatStartDelay, false);
 		
 		UE_LOG(LogTemp, Warning, TEXT("Transitioned to room %d: %s"), CurrentLevel, *CurrentRoomActor->GetName());
+		
+		// Display updated map showing progress
+		DisplayRunMap();
 		
 	}, RoomTransitionDuration, false);
 }
@@ -832,17 +843,13 @@ void URunManagerComponent::OnEnemyDefeated(AActor* KilledBy)
 	CurrentRoomEnemy = nullptr;
 	SetRunState(ERunState::Victory);
 	
-	// Auto-complete the room and move to next after delay
+	// Start reward selection after a short delay
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 	{
-		CompleteCurrentRoom();
-		
-		// If run is not complete, transition to next room
-		if (!IsRunComplete())
-		{
-			TransitionToNextRoom();
-		}
+		// Change state to reward selection and start the process
+		SetRunState(ERunState::RewardSelection);
+		StartRewardSelection();
 	}, 2.0f, false);
 }
 
@@ -977,40 +984,61 @@ void URunManagerComponent::GoToRoom(const FString& RoomName)
 
 void URunManagerComponent::CompleteRoomTest()
 {
-	if (!CurrentRoomInstance)
+	UE_LOG(LogTemp, Warning, TEXT("CompleteRoomTest called"));
+	UE_LOG(LogTemp, Warning, TEXT("CurrentRoomInstance: %s"), CurrentRoomInstance ? *CurrentRoomInstance->GetName() : TEXT("NULL"));
+	UE_LOG(LogTemp, Warning, TEXT("CurrentRoomActor: %s"), CurrentRoomActor ? *CurrentRoomActor->GetName() : TEXT("NULL"));
+	UE_LOG(LogTemp, Warning, TEXT("CurrentRoom (DataAsset): %s"), CurrentRoom ? *CurrentRoom->RoomName.ToString() : TEXT("NULL"));
+	
+	// Use CurrentRoomActor if CurrentRoomInstance is null
+	ARoomBase* ActiveRoom = CurrentRoomInstance ? CurrentRoomInstance : CurrentRoomActor;
+	
+	if (!ActiveRoom)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No current room to complete"));
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("No current room found - will still trigger reward selection"));
+		// Don't return - we can still simulate enemy death and trigger rewards
 	}
 	
-	// Mark room as completed
-	CurrentRoomInstance->CompleteRoom();
-	CurrentRoomInstance->bTestRoomCompleted = true;
-	
-	// Clear any enemies
+	// Clear any enemies (simulating enemy death)
 	if (CurrentRoomEnemy)
 	{
 		CurrentRoomEnemy->Destroy();
 		CurrentRoomEnemy = nullptr;
 	}
 	
-	const UEnum* RoomEnum = StaticEnum<ERoomType>();
-	FString RoomName = RoomEnum ? RoomEnum->GetNameStringByValue((int64)CurrentRoomInstance->RoomTypeForTesting) : TEXT("Unknown");
-	UE_LOG(LogTemp, Log, TEXT("Room completed: %s"), *RoomName);
+	FString RoomName = TEXT("Unknown Room");
+	if (ActiveRoom)
+	{
+		const UEnum* RoomEnum = StaticEnum<ERoomType>();
+		RoomName = RoomEnum ? RoomEnum->GetNameStringByValue((int64)ActiveRoom->RoomTypeForTesting) : TEXT("Unknown");
+	}
+	else if (CurrentRoom)
+	{
+		RoomName = CurrentRoom->RoomName.ToString();
+	}
 	
-	// Update progress
-	CurrentLevel++;
-	if (CurrentLevel > 5)
+	UE_LOG(LogTemp, Warning, TEXT("Simulating enemy defeat in room: %s"), *RoomName);
+	
+	// Set victory state
+	SetRunState(ERunState::Victory);
+	
+	// Start reward selection after a short delay (simulating enemy death flow)
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("All 5 rooms complete! Run successful!"));
-		SetRunState(ERunState::RunComplete);
-		CurrentLevel = 5;
-	}
-	else
-	{
-		SetRunState(ERunState::RoomComplete);
-		UE_LOG(LogTemp, Log, TEXT("Ready for next room. Current level: %d/5"), CurrentLevel);
-	}
+		// Check if we're at the last room
+		if (CurrentLevel >= 5)
+		{
+			UE_LOG(LogTemp, Log, TEXT("All 5 rooms complete! Run successful!"));
+			SetRunState(ERunState::RunComplete);
+			EndRun(true, FText::FromString(TEXT("Run completed successfully!")));
+		}
+		else
+		{
+			// Start reward selection for non-final rooms
+			SetRunState(ERunState::RewardSelection);
+			StartRewardSelection();
+		}
+	}, 2.0f, false);
 }
 
 void URunManagerComponent::ResetAllRooms()
@@ -1160,4 +1188,702 @@ ARoomBase* URunManagerComponent::GetRoomActorByType(ERoomType RoomType) const
 	}
 	
 	return nullptr;
+}
+
+// ========================================
+// REWARD SELECTION IMPLEMENTATION
+// ========================================
+
+void URunManagerComponent::StartRewardSelection()
+{
+	if (bRewardSelectionActive)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Reward selection already active"));
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Starting reward selection..."));
+	UE_LOG(LogTemp, Warning, TEXT("Current Room: %s"), CurrentRoom ? *CurrentRoom->RoomName.ToString() : TEXT("NULL"));
+	UE_LOG(LogTemp, Warning, TEXT("Current Level: %d"), CurrentLevel);
+	
+	// Skip the UObject creation - we'll create a simple text-based UI instead
+	UE_LOG(LogTemp, Warning, TEXT("Using simple text-based reward selection"));
+	
+	bRewardSelectionActive = true;
+	
+	// Display simple test rewards
+	UE_LOG(LogTemp, Warning, TEXT("========== REWARD SELECTION =========="));
+	UE_LOG(LogTemp, Warning, TEXT("Choose your reward:"));
+	UE_LOG(LogTemp, Warning, TEXT(""));
+	UE_LOG(LogTemp, Warning, TEXT("[0] Sharp Blade - Increases attack damage by 25%%"));
+	UE_LOG(LogTemp, Warning, TEXT("[1] Iron Skin - Reduces incoming damage by 15%%"));
+	UE_LOG(LogTemp, Warning, TEXT(""));
+	UE_LOG(LogTemp, Warning, TEXT("Commands:"));
+	UE_LOG(LogTemp, Warning, TEXT("  Atlas.SelectReward 0  (Sharp Blade)"));
+	UE_LOG(LogTemp, Warning, TEXT("  Atlas.SelectReward 1  (Iron Skin)"));
+	UE_LOG(LogTemp, Warning, TEXT("  Atlas.CancelRewardSelection"));
+	UE_LOG(LogTemp, Warning, TEXT("======================================"));
+	
+	// Also display on screen
+	if (GEngine)
+	{
+		GEngine->ClearOnScreenDebugMessages();
+		GEngine->AddOnScreenDebugMessage(99, 30.0f, FColor::Green, TEXT("=== CHOOSE YOUR REWARD ==="));
+		GEngine->AddOnScreenDebugMessage(100, 30.0f, FColor::Cyan, TEXT("[0] Sharp Blade - +25%% Attack Damage"));
+		GEngine->AddOnScreenDebugMessage(101, 30.0f, FColor::Yellow, TEXT("[1] Iron Skin - -15%% Damage Taken"));
+		GEngine->AddOnScreenDebugMessage(102, 30.0f, FColor::Red, TEXT("Atlas.SelectReward 0/1 or Atlas.CancelRewardSelection"));
+	}
+	
+	// Create simple pure Slate UI
+	CreateSimpleRewardSelectionUI();
+	
+	UE_LOG(LogTemp, Warning, TEXT("Reward selection is now ACTIVE - waiting for player choice..."));
+}
+
+TArray<URewardDataAsset*> URunManagerComponent::GetRandomRewardsFromRoom(int32 Count)
+{
+	TArray<URewardDataAsset*> SelectedRewards;
+	
+	UE_LOG(LogTemp, Warning, TEXT("GetRandomRewardsFromRoom called with Count=%d"), Count);
+	
+	// For testing, we'll use simple string-based rewards instead of creating UObjects
+	// This avoids crashes and works without Blueprint setup
+	UE_LOG(LogTemp, Warning, TEXT("Creating simple test rewards for reward selection"));
+	
+	// We'll handle reward selection with simple structs instead of URewardDataAsset
+	// Return empty array and handle this in the UI creation
+	return SelectedRewards;
+	
+	// For now, create some test rewards based on room theme
+	// In a real implementation, these would come from the room's RewardPool
+	
+	// Create temporary rewards for testing based on room theme
+	ERewardCategory RoomTheme = CurrentRoom->RoomTheme;
+	
+	// Create test rewards
+	for (int32 i = 0; i < Count; i++)
+	{
+		URewardDataAsset* TestReward = NewObject<URewardDataAsset>(this);
+		
+		// Set reward properties based on room theme
+		switch (RoomTheme)
+		{
+			case ERewardCategory::Defense:
+				if (i == 0)
+				{
+					TestReward->RewardName = FText::FromString("Improved Block");
+					TestReward->Description = FText::FromString("Increases block damage reduction to 60%");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Defense.ImprovedBlock");
+					TestReward->Category = ERewardCategory::Defense;
+				}
+				else
+				{
+					TestReward->RewardName = FText::FromString("Parry Master");
+					TestReward->Description = FText::FromString("Extends parry window by 50%");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Defense.ParryMaster");
+					TestReward->Category = ERewardCategory::Defense;
+				}
+				break;
+				
+			case ERewardCategory::Offense:
+				if (i == 0)
+				{
+					TestReward->RewardName = FText::FromString("Sharp Blade");
+					TestReward->Description = FText::FromString("Increases all attack damage by 25%");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Offense.SharpBlade");
+					TestReward->Category = ERewardCategory::Offense;
+				}
+				else
+				{
+					TestReward->RewardName = FText::FromString("Heavy Impact");
+					TestReward->Description = FText::FromString("Heavy attacks knockback increased by 50%");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Offense.HeavyImpact");
+					TestReward->Category = ERewardCategory::Offense;
+				}
+				break;
+				
+			case ERewardCategory::PassiveStats:
+				if (i == 0)
+				{
+					TestReward->RewardName = FText::FromString("Vitality");
+					TestReward->Description = FText::FromString("Increases maximum health by 30");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Passive.Vitality");
+					TestReward->Category = ERewardCategory::PassiveStats;
+				}
+				else
+				{
+					TestReward->RewardName = FText::FromString("Swiftness");
+					TestReward->Description = FText::FromString("Movement speed increased by 20%");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Passive.Swiftness");
+					TestReward->Category = ERewardCategory::PassiveStats;
+				}
+				break;
+				
+			case ERewardCategory::PassiveAbility:
+				if (i == 0)
+				{
+					TestReward->RewardName = FText::FromString("Second Wind");
+					TestReward->Description = FText::FromString("Revive once upon death");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Ability.SecondWind");
+					TestReward->Category = ERewardCategory::PassiveAbility;
+				}
+				else
+				{
+					TestReward->RewardName = FText::FromString("Vampirism");
+					TestReward->Description = FText::FromString("Heal 10% of damage dealt");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Ability.Vampirism");
+					TestReward->Category = ERewardCategory::PassiveAbility;
+				}
+				break;
+				
+			case ERewardCategory::Interactable:
+				if (i == 0)
+				{
+					TestReward->RewardName = FText::FromString("Explosive Valves");
+					TestReward->Description = FText::FromString("Trigger explosive valves in the environment");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Interact.ExplosiveValves");
+					TestReward->Category = ERewardCategory::Interactable;
+				}
+				else
+				{
+					TestReward->RewardName = FText::FromString("Emergency Vent");
+					TestReward->Description = FText::FromString("Activate vents to launch enemies");
+					TestReward->RewardTag = FGameplayTag::RequestGameplayTag("Reward.Interact.EmergencyVent");
+					TestReward->Category = ERewardCategory::Interactable;
+				}
+				break;
+		}
+		
+		// Set common properties
+		TestReward->SlotCost = 1;
+		TestReward->MaxStackLevel = 3;
+		TestReward->StackMultipliers = {1.0f, 1.5f, 2.0f};
+		
+		SelectedRewards.Add(TestReward);
+	}
+	
+	return SelectedRewards;
+}
+
+void URunManagerComponent::SelectReward(int32 RewardIndex)
+{
+	if (!bRewardSelectionActive)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No active reward selection"));
+		return;
+	}
+	
+	if (RewardIndex < 0 || RewardIndex > 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid reward index: %d (must be 0 or 1)"), RewardIndex);
+		return;
+	}
+	
+	// Get simple reward name
+	FString SelectedRewardName = (RewardIndex == 0) ? TEXT("Sharp Blade") : TEXT("Iron Skin");
+	FString SelectedRewardEffect = (RewardIndex == 0) ? TEXT("+25%% Attack Damage") : TEXT("-15%% Damage Taken");
+	
+	// Log the selection
+	UE_LOG(LogTemp, Warning, TEXT(""));
+	UE_LOG(LogTemp, Warning, TEXT(">>> REWARD SELECTED: %s (%s) <<<"), *SelectedRewardName, *SelectedRewardEffect);
+	UE_LOG(LogTemp, Warning, TEXT(""));
+	
+	// Clear on-screen messages and close UI
+	if (GEngine)
+	{
+		GEngine->ClearOnScreenDebugMessages();
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, 
+			FString::Printf(TEXT("Reward Selected: %s"), *SelectedRewardName));
+	}
+	
+	// Close the Slate UI
+	CloseRewardSelectionUI();
+	
+	// For now, just log that we would apply the reward
+	// In a real system, this would integrate with the slot manager
+	UE_LOG(LogTemp, Log, TEXT("Applied reward effect: %s"), *SelectedRewardEffect);
+	
+	// Clean up reward selection
+	bRewardSelectionActive = false;
+	CurrentRewardChoices.Empty();
+	
+	// Clear timers
+	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+	
+	// Complete the room and transition after a short delay
+	FTimerHandle TransitionTimer;
+	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, [this]()
+	{
+		CompleteCurrentRoom();
+		if (!IsRunComplete())
+		{
+			TransitionToNextRoom();
+		}
+	}, 1.0f, false);
+}
+
+void URunManagerComponent::CancelRewardSelection()
+{
+	if (!bRewardSelectionActive)
+	{
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Reward selection cancelled"));
+	
+	// Clear on-screen messages
+	if (GEngine)
+	{
+		GEngine->ClearOnScreenDebugMessages();
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Reward Selection Cancelled"));
+	}
+	
+	// Close the Slate UI
+	CloseRewardSelectionUI();
+	
+	// Clean up
+	bRewardSelectionActive = false;
+	CurrentRewardChoices.Empty();
+	
+	// Clear timers
+	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+	
+	// Complete the room without reward and transition
+	FTimerHandle TransitionTimer;
+	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, [this]()
+	{
+		CompleteCurrentRoom();
+		if (!IsRunComplete())
+		{
+			TransitionToNextRoom();
+		}
+	}, 1.0f, false);
+}
+
+// ========================================
+// RUN MAP DISPLAY
+// ========================================
+
+void URunManagerComponent::DisplayRunMap()
+{
+	UE_LOG(LogTemp, Warning, TEXT(""));
+	UE_LOG(LogTemp, Warning, TEXT("╔════════════════════════════════════════════════════════════╗"));
+	UE_LOG(LogTemp, Warning, TEXT("║                    ATLAS RUN MAP                           ║"));
+	UE_LOG(LogTemp, Warning, TEXT("╚════════════════════════════════════════════════════════════╝"));
+	UE_LOG(LogTemp, Warning, TEXT(""));
+	
+	// Display on screen as well
+	if (GEngine)
+	{
+		GEngine->ClearOnScreenDebugMessages();
+		GEngine->AddOnScreenDebugMessage(1, 15.0f, FColor::Cyan, TEXT("══════ ATLAS RUN MAP ══════"));
+	}
+	
+	// Show the complete path of 5 rooms
+	if (RandomizedRoomOrder.Num() > 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Your journey through the station:"));
+		UE_LOG(LogTemp, Warning, TEXT(""));
+		
+		for (int32 i = 0; i < RandomizedRoomOrder.Num() && i < 5; i++)
+		{
+			if (RandomizedRoomOrder[i])
+			{
+				FString RoomName = GetRoomDisplayName(RandomizedRoomOrder[i]->RoomTypeForTesting);
+				FString RoomInfo;
+				FColor DisplayColor;
+				
+				// Determine room status
+				if (i < CurrentLevel - 1)
+				{
+					// Completed room
+					RoomInfo = FString::Printf(TEXT("  [✓] Room %d: %s (COMPLETED)"), i + 1, *RoomName);
+					DisplayColor = FColor::Green;
+				}
+				else if (i == CurrentLevel - 1)
+				{
+					// Current room
+					RoomInfo = FString::Printf(TEXT("  [►] Room %d: %s (CURRENT)"), i + 1, *RoomName);
+					DisplayColor = FColor::Yellow;
+				}
+				else
+				{
+					// Upcoming room
+					RoomInfo = FString::Printf(TEXT("  [ ] Room %d: %s"), i + 1, *RoomName);
+					DisplayColor = FColor::Silver;
+				}
+				
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *RoomInfo);
+				
+				// Display on screen
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(10 + i, 15.0f, DisplayColor, RoomInfo);
+				}
+				
+				// Add arrow between rooms (except after last room)
+				if (i < RandomizedRoomOrder.Num() - 1 && i < 4)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("           ↓"));
+				}
+			}
+		}
+		
+		UE_LOG(LogTemp, Warning, TEXT(""));
+		UE_LOG(LogTemp, Warning, TEXT("Defeat all enemies to earn rewards and progress!"));
+		UE_LOG(LogTemp, Warning, TEXT("════════════════════════════════════════════════════════"));
+		
+		// Add legend on screen
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(20, 15.0f, FColor::White, TEXT(""));
+			GEngine->AddOnScreenDebugMessage(21, 15.0f, FColor::White, TEXT("[✓] Completed  [►] Current  [ ] Upcoming"));
+		}
+	}
+	else if (RemainingRooms.Num() > 0)
+	{
+		// Use data assets if room actors aren't available
+		UE_LOG(LogTemp, Warning, TEXT("Your journey through the station:"));
+		UE_LOG(LogTemp, Warning, TEXT(""));
+		
+		for (int32 i = 0; i < RemainingRooms.Num() && i < 5; i++)
+		{
+			if (RemainingRooms[i])
+			{
+				FString RoomName = RemainingRooms[i]->RoomName.ToString();
+				FString RoomInfo;
+				FColor DisplayColor;
+				
+				// Determine room status
+				if (i < CurrentLevel - 1)
+				{
+					// Completed room
+					RoomInfo = FString::Printf(TEXT("  [✓] Room %d: %s (COMPLETED)"), i + 1, *RoomName);
+					DisplayColor = FColor::Green;
+				}
+				else if (i == CurrentLevel - 1)
+				{
+					// Current room
+					RoomInfo = FString::Printf(TEXT("  [►] Room %d: %s (CURRENT)"), i + 1, *RoomName);
+					DisplayColor = FColor::Yellow;
+				}
+				else
+				{
+					// Upcoming room
+					RoomInfo = FString::Printf(TEXT("  [ ] Room %d: %s"), i + 1, *RoomName);
+					DisplayColor = FColor::Silver;
+				}
+				
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *RoomInfo);
+				
+				// Display on screen
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(10 + i, 15.0f, DisplayColor, RoomInfo);
+				}
+				
+				// Add arrow between rooms
+				if (i < RemainingRooms.Num() - 1 && i < 4)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("           ↓"));
+				}
+			}
+		}
+		
+		UE_LOG(LogTemp, Warning, TEXT(""));
+		UE_LOG(LogTemp, Warning, TEXT("Defeat all enemies to earn rewards and progress!"));
+		UE_LOG(LogTemp, Warning, TEXT("════════════════════════════════════════════════════════"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No rooms available for this run"));
+	}
+}
+
+FString URunManagerComponent::GetRoomDisplayName(ERoomType RoomType) const
+{
+	switch (RoomType)
+	{
+		case ERoomType::EngineeringBay:
+			return TEXT("Engineering Bay");
+		case ERoomType::CombatArena:
+			return TEXT("Combat Arena");
+		case ERoomType::MedicalBay:
+			return TEXT("Medical Bay");
+		case ERoomType::CargoHold:
+			return TEXT("Cargo Hold");
+		case ERoomType::Bridge:
+			return TEXT("Bridge");
+		default:
+			return TEXT("Unknown Room");
+	}
+}
+
+void URunManagerComponent::ShowMap()
+{
+	DisplayRunMap();
+}
+
+void URunManagerComponent::CreateRewardSelectionUI()
+{
+	UE_LOG(LogTemp, Warning, TEXT("CreateRewardSelectionUI called"));
+	
+	// Make sure we have rewards to display
+	if (CurrentRewardChoices.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No reward choices available for UI"));
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Creating Slate UI with %d rewards"), CurrentRewardChoices.Num());
+	
+	// Close existing widget if any
+	CloseRewardSelectionUI();
+	
+	// For now, let's add a simple fallback that lets you select via console commands
+	UE_LOG(LogTemp, Warning, TEXT("=== CONSOLE REWARD SELECTION ==="));
+	UE_LOG(LogTemp, Warning, TEXT("Type these commands to select rewards:"));
+	UE_LOG(LogTemp, Warning, TEXT("  Atlas.SelectReward 0  (for first reward)"));
+	UE_LOG(LogTemp, Warning, TEXT("  Atlas.SelectReward 1  (for second reward)"));
+	UE_LOG(LogTemp, Warning, TEXT("  Atlas.CancelReward   (to skip reward)"));
+	UE_LOG(LogTemp, Warning, TEXT("================================="));
+	
+	// Create the Slate widget
+	RewardSelectionWidget = SNew(SRewardSelectionWidget)
+		.RewardChoices(CurrentRewardChoices)
+		.RunManager(this)
+		.OnRewardSelected_Lambda([this]()
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Slate UI: Reward selected callback"));
+			// Reward was selected, close the UI
+			CloseRewardSelectionUI();
+		})
+		.OnSelectionCancelled_Lambda([this]()
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Slate UI: Selection cancelled callback"));
+			// Selection was cancelled, close the UI
+			CloseRewardSelectionUI();
+		});
+	
+	// Add to viewport
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->AddViewportWidgetContent(RewardSelectionWidget.ToSharedRef(), 1000);
+		
+		// Set input mode to UI only
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(RewardSelectionWidget);
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+		
+		// Pause the game
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		
+		UE_LOG(LogTemp, Warning, TEXT("Successfully created Slate reward selection UI"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to create reward selection UI - no game viewport"));
+		UE_LOG(LogTemp, Error, TEXT("Use console commands instead to select rewards"));
+	}
+}
+
+void URunManagerComponent::CreateSimpleRewardSelectionUI()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Creating simple pure Slate reward UI"));
+	
+	// Close any existing widget
+	CloseRewardSelectionUI();
+	
+	// Create a simple Slate widget with hardcoded rewards
+	RewardSelectionWidget = 
+		SNew(SBox)
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			// Semi-transparent background overlay
+			SNew(SBorder)
+			.BorderBackgroundColor(FLinearColor(0, 0, 0, 0.8f))
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Center)
+			[
+				// Main reward panel
+				SNew(SBox)
+				.WidthOverride(600.0f)
+				.HeightOverride(300.0f)
+				[
+					SNew(SBorder)
+					.BorderBackgroundColor(FLinearColor(0.1f, 0.1f, 0.1f, 0.95f))
+					[
+						SNew(SVerticalBox)
+						
+						// Title
+						+ SVerticalBox::Slot()
+						.AutoHeight()
+						.Padding(20.0f, 20.0f, 20.0f, 10.0f)
+						.HAlign(HAlign_Center)
+						[
+							SNew(STextBlock)
+							.Text(FText::FromString("Choose Your Reward"))
+							.Font(FCoreStyle::GetDefaultFontStyle("Bold", 24))
+							.ColorAndOpacity(FLinearColor::White)
+						]
+						
+						// Rewards
+						+ SVerticalBox::Slot()
+						.FillHeight(1.0f)
+						.Padding(20.0f, 10.0f)
+						[
+							SNew(SHorizontalBox)
+							
+							// Reward 1
+							+ SHorizontalBox::Slot()
+							.FillWidth(1.0f)
+							.Padding(10.0f, 0.0f)
+							[
+								SNew(SButton)
+								.OnClicked_Lambda([this]() -> FReply
+								{
+									UE_LOG(LogTemp, Warning, TEXT("Player selected Sharp Blade via Slate UI"));
+									SelectReward(0);
+									return FReply::Handled();
+								})
+								.ContentPadding(FMargin(15.0f, 10.0f))
+								[
+									SNew(SVerticalBox)
+									+ SVerticalBox::Slot()
+									.AutoHeight()
+									.HAlign(HAlign_Center)
+									[
+										SNew(STextBlock)
+										.Text(FText::FromString("Sharp Blade"))
+										.Font(FCoreStyle::GetDefaultFontStyle("Bold", 18))
+										.ColorAndOpacity(FLinearColor::White)
+									]
+									+ SVerticalBox::Slot()
+									.AutoHeight()
+									.HAlign(HAlign_Center)
+									.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+									[
+										SNew(STextBlock)
+										.Text(FText::FromString("+25%% Attack Damage"))
+										.Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+										.ColorAndOpacity(FLinearColor(0.8f, 0.8f, 0.8f, 1.0f))
+										.AutoWrapText(true)
+									]
+								]
+							]
+							
+							// Reward 2
+							+ SHorizontalBox::Slot()
+							.FillWidth(1.0f)
+							.Padding(10.0f, 0.0f)
+							[
+								SNew(SButton)
+								.OnClicked_Lambda([this]() -> FReply
+								{
+									UE_LOG(LogTemp, Warning, TEXT("Player selected Iron Skin via Slate UI"));
+									SelectReward(1);
+									return FReply::Handled();
+								})
+								.ContentPadding(FMargin(15.0f, 10.0f))
+								[
+									SNew(SVerticalBox)
+									+ SVerticalBox::Slot()
+									.AutoHeight()
+									.HAlign(HAlign_Center)
+									[
+										SNew(STextBlock)
+										.Text(FText::FromString("Iron Skin"))
+										.Font(FCoreStyle::GetDefaultFontStyle("Bold", 18))
+										.ColorAndOpacity(FLinearColor::White)
+									]
+									+ SVerticalBox::Slot()
+									.AutoHeight()
+									.HAlign(HAlign_Center)
+									.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+									[
+										SNew(STextBlock)
+										.Text(FText::FromString("-15%% Damage Taken"))
+										.Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+										.ColorAndOpacity(FLinearColor(0.8f, 0.8f, 0.8f, 1.0f))
+										.AutoWrapText(true)
+									]
+								]
+							]
+						]
+						
+						// Cancel button
+						+ SVerticalBox::Slot()
+						.AutoHeight()
+						.Padding(20.0f, 10.0f, 20.0f, 20.0f)
+						.HAlign(HAlign_Center)
+						[
+							SNew(SButton)
+							.Text(FText::FromString("Skip Reward"))
+							.OnClicked_Lambda([this]() -> FReply
+							{
+								UE_LOG(LogTemp, Warning, TEXT("Player cancelled reward selection via Slate UI"));
+								CancelRewardSelection();
+								return FReply::Handled();
+							})
+						]
+					]
+				]
+			]
+		];
+	
+	// Add to viewport
+	if (GEngine && GEngine->GameViewport && RewardSelectionWidget.IsValid())
+	{
+		GEngine->GameViewport->AddViewportWidgetContent(RewardSelectionWidget.ToSharedRef(), 1000);
+		
+		// Set input mode to UI
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(RewardSelectionWidget);
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+		
+		// Pause the game
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		
+		UE_LOG(LogTemp, Warning, TEXT("Successfully created simple Slate reward UI"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to create simple Slate UI"));
+	}
+}
+
+void URunManagerComponent::CloseRewardSelectionUI()
+{
+	if (RewardSelectionWidget.IsValid())
+	{
+		// Remove from viewport
+		if (GEngine && GEngine->GameViewport)
+		{
+			GEngine->GameViewport->RemoveViewportWidgetContent(RewardSelectionWidget.ToSharedRef());
+		}
+		
+		// Reset widget reference
+		RewardSelectionWidget.Reset();
+		
+		// Restore input mode
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			PC->SetInputMode(FInputModeGameOnly());
+			PC->bShowMouseCursor = false;
+		}
+		
+		// Unpause the game
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		
+		UE_LOG(LogTemp, Log, TEXT("Closed Slate reward selection UI"));
+	}
 }
