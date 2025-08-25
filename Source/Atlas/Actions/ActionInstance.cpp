@@ -280,7 +280,7 @@ void UActionInstance::ExecuteAttackAction(AGameCharacterBase* Owner)
 		{
 			for (const FOverlapResult& Result : OverlapResults)
 			{
-				if (AGameCharacterBase* Target = Cast<AGameCharacterBase>(Result.GetActor()))
+				if (AGameCharacterBase* Target = Cast<AGameCharacterBase>(Result.Actor.Get())
 				{
 					if (Target != Owner)
 					{
@@ -349,7 +349,7 @@ bool UActionInstance::IsBlockedByTags(AGameCharacterBase* Owner) const
 	// Check blocked tags through ActionManager
 	if (UActionManagerComponent* ActionManager = GetOwnerActionManagerComponent(Owner))
 	{
-		for (const FGameplayTag& BlockedTag : ActionData->BlockedTags.GetGameplayTagArray())
+		for (const FGameplayTag& BlockedTag : ActionData->BlockedDuringTags.GetGameplayTagArray())
 		{
 			if (ActionManager->HasCombatStateTag(BlockedTag))
 			{

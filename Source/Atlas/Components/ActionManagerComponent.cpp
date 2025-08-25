@@ -99,9 +99,9 @@ bool UActionManagerComponent::AssignActionToSlotByDataAsset(FName SlotName, UAct
 		return false;
 	}
 
-	if (!ActionData || !ActionData->ActionClass)
+	if (!ActionData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ActionManager: Invalid action data or action class"));
+		UE_LOG(LogTemp, Warning, TEXT("ActionManager: Invalid action data"));
 		return false;
 	}
 
@@ -243,10 +243,10 @@ void UActionManagerComponent::OnSlotPressed(FName SlotName)
 	}
 
 	// Try to activate the action
-	if (Action->CanActivate(OwnerCharacter))
+	if (Action->CanExecute(OwnerCharacter))
 	{
 		CurrentAction = Action;
-		Action->OnActivate(OwnerCharacter);
+		Action->Execute(OwnerCharacter);
 		OnActionActivated.Broadcast(SlotName, Action);
 	}
 	else
@@ -266,7 +266,7 @@ void UActionManagerComponent::OnSlotReleased(FName SlotName)
 	// Only process release if this is the current active action
 	if (CurrentAction == Action && Action->IsActive())
 	{
-		Action->OnRelease();
+		Action->Stop();
 		CurrentAction = nullptr;
 	}
 }
@@ -275,7 +275,7 @@ void UActionManagerComponent::InterruptCurrentAction()
 {
 	if (CurrentAction && CurrentAction->IsActive())
 	{
-		CurrentAction->OnInterrupted();
+		CurrentAction->Interrupt();
 		CurrentAction = nullptr;
 	}
 }
