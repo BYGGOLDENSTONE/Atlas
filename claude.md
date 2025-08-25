@@ -1,34 +1,67 @@
-# Atlas - Quick Reference
+# Atlas - Implementation Status
 
-**Engine**: UE 5.5 | **Genre**: 1v1 Roguelite Dueler | **Updated**: 2025-01-26
+**Engine**: UE 5.5 | **Genre**: 1v1 Roguelite Dueler | **Target**: GDD.txt
 
 ## Overview
-Single-player roguelite dueling game. 5 rooms per run, persistent rewards, dual fail-states (health/integrity).
+Single-player roguelite dueling game with 5-room runs, persistent rewards, and dual fail-states (health/integrity).
 
-## Current Status
-✅ **Phase 1-4 Complete**: Core systems, rewards, enemies, environment  
-✅ **GameplayTag Migration Complete**: All tags updated to `Action.Combat.*` structure  
-✅ **Code Cleanup Complete**: Removed ~10,000 lines of obsolete code  
-✅ **Action System Refactored**: Single ActionInstance class replacing complex inheritance  
-✅ **Combat System Fixed**: Animation-driven state management and damage application  
-✅ **Room System Fixed**: Equal randomization, automatic progression, proper teleportation  
-🔧 **Next**: Blueprint implementation in Unreal Editor
+## ✅ Implemented Features
 
-## Key Systems Implemented
-- **Combat**: Animation-driven with parry/vulnerability mechanics
-- **Rewards**: 25 rewards across 5 categories with persistence
-- **Rooms**: 5 unique themed rooms with specialized enemies
-- **Environment**: Hazards, degradation, emergency events
-- **AI**: Adaptive difficulty scaling with player power
+### Core Combat System
+- **Action System**: Unified ActionInstance class with data-driven abilities
+- **Animation-Driven Combat**: States managed by animation notifies
+- **Damage Application**: Timed with animation frames via AttackNotify
+- **Combat Actions**: BasicAttack, HeavyAttack, Block, Dash, Parry
+- **State Management**: Attacking, Blocking, Dashing states with proper transitions
+- **Hit Detection**: Animation-based collision detection at damage frames
 
-## Combat Values
-- Basic Attack: 5 damage
-- Heavy Attack: 15 damage + 500 knockback
-- Soul Attack: 50 unblockable damage
-- Block: 40% reduction
-- Parry: Perfect (100%, 0.2s) / Late (50%, 0.1s)
-- Vulnerability: 2x/4x/8x multipliers
-- Dash: 400 units, 2s cooldown
+### Room & Run System
+- **5-Room Structure**: Bridge, Medical Bay, Engineering Bay, Cargo Hold, Combat Arena
+- **Run Manager**: Handles room progression, enemy spawning, completion tracking
+- **Equal Randomization**: Fair room selection without level-based bias
+- **Auto-Progression**: Automatic advancement on enemy defeat
+
+### Character Components
+- **ActionManagerComponent**: 5 action slots, combo system, state tags
+- **HealthComponent**: Health, poise, damage calculations
+- **VulnerabilityComponent**: Damage multipliers (2x/4x/8x)
+- **StationIntegrityComponent**: Secondary fail state system
+- **SlotManagerComponent**: Reward equipment system
+
+### Reward System
+- **25 Unique Rewards**: Across 5 categories (Offensive, Defensive, Utility, Movement, Special)
+- **Slot-Based Equipment**: Head, Body, Arms, Legs, Accessory slots
+- **Persistent Upgrades**: Rewards carry between runs
+- **Data-Driven**: All rewards defined via DataAssets
+
+### Environment Systems  
+- **Hazards**: Fire, Electric, Toxic, Explosive, Gravity types
+- **Destructible Objects**: Multi-stage destruction with debris
+- **Interactables**: Valves, vents, terminals with gameplay effects
+
+## ⏳ Not Yet Implemented
+
+### UI System
+- Health/Integrity bars
+- Action slot indicators  
+- Combo window display
+- Room progression UI
+- Reward selection screens
+
+### Enemies
+- 5 room-specific enemy types (defined but need BP implementation)
+- AI behavior trees
+- Adaptive difficulty scaling
+
+### Visual Effects
+- Combat VFX (hits, blocks, parries)
+- Environmental effects
+- Ability visuals
+
+### Audio
+- Combat sounds
+- Environmental audio
+- Music system
 
 ## Important Console Commands
 ```
@@ -80,19 +113,14 @@ GameCharacterBase
 - `ATLAS_CONSOLE_COMMANDS.txt` - All 100+ commands
 - `GAMEPLAYTAG_MIGRATION_STATUS.md` - Tag migration (COMPLETE)
 
-## Recent Changes (2025-01-26)
-- **Major Code Cleanup**: Removed ~10,000 lines of obsolete code
-  - Deleted BaseAction/UniversalAction classes (replaced by ActionInstance)
-  - Removed unused Core subsystems (EmergencyEventManager, SaveManager, etc.)
-  - Eliminated duplicate CheatManager system
-- **Action System Refactoring**: Simplified to single ActionInstance class
-  - Fixed all type mismatches and compilation errors
-  - Proper animation montage playback for all action types
-- **Combat System Fixes**:
-  - Fixed stuck attacking state - now properly managed by animation notifies
-  - Moved damage application to AttackNotify (correct animation frame)
-  - Connected action data to ProcessHitFromAnimation for proper damage values
-- **Previous fixes from 2025-01-25**: Room system, auto-assignment, enemy spawning
+## Combat Values (Configured)
+- **Basic Attack**: 5 damage, 0.5s duration
+- **Heavy Attack**: 15 damage, 500 knockback, 1.0s duration  
+- **Soul Attack**: 50 unblockable damage (not yet assigned)
+- **Block**: 40% damage reduction
+- **Parry Windows**: Perfect (100% reduction, 0.2s) / Late (50%, 0.1s)
+- **Vulnerability Multipliers**: 2x/4x/8x based on stacks
+- **Dash**: 400 units distance, 0.3s duration, 2s cooldown
 
 ## Next Steps
 1. Create Blueprint assets in Editor
