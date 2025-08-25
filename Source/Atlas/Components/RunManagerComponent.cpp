@@ -7,6 +7,7 @@
 #include "Atlas/Components/StationIntegrityComponent.h"
 #include "Atlas/Components/RewardSelectionComponent.h"
 #include "Atlas/UI/SRewardSelectionWidget.h"
+#include "Atlas/UI/SRunProgressWidget.h"
 #include "Atlas/Rooms/RoomBase.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -31,6 +32,8 @@ URunManagerComponent::URunManagerComponent()
 void URunManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// Don't create widget in BeginPlay - wait for StartNewRun command
 	
 	// Find all room actors placed in the world
 	AllRoomActors.Empty();
@@ -183,9 +186,79 @@ void URunManagerComponent::InitializeRun()
 	SetRunState(ERunState::PreRun);
 }
 
+void URunManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	// Update health and integrity display periodically
+	if (RunProgressWidget.IsValid())
+	{
+		if (!PlayerCharacter)
+		{
+			PlayerCharacter = Cast<AGameCharacterBase>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		}
+		
+		if (PlayerCharacter)
+		{
+			if (UHealthComponent* HealthComp = PlayerCharacter->FindComponentByClass<UHealthComponent>())
+			{
+				RunProgressWidget->UpdateHealth(HealthComp->GetCurrentHealth(), HealthComp->GetMaxHealth());
+			}
+			
+			if (UStationIntegrityComponent* IntegrityComp = PlayerCharacter->FindComponentByClass<UStationIntegrityComponent>())
+			{
+				RunProgressWidget->UpdateIntegrity(IntegrityComp->GetCurrentIntegrity(), IntegrityComp->GetMaxIntegrity());
+			}
+		}
+	}
+}
+
 void URunManagerComponent::StartNewRun()
 {
 	UE_LOG(LogTemp, Log, TEXT("Starting new run"));
+	
+	// Create and show the run progress widget when run starts
+	if (!RunProgressWidget.IsValid())
+	{
+		// Get player components for the widget
+		AGameCharacterBase* PlayerChar = Cast<AGameCharacterBase>(GetWorld()->GetFirstPlayerController()->GetPawn());
+		UHealthComponent* HealthComp = nullptr;
+		UStationIntegrityComponent* IntegrityComp = nullptr;
+		
+		if (PlayerChar)
+		{
+			HealthComp = PlayerChar->FindComponentByClass<UHealthComponent>();
+			IntegrityComp = PlayerChar->FindComponentByClass<UStationIntegrityComponent>();
+		}
+		
+		// Only create widget if we have a player
+		if (PlayerChar)
+		{
+			// Create the widget
+			RunProgressWidget = SNew(SRunProgressWidget)
+				.RunManager(this)
+				.HealthComponent(HealthComp)
+				.IntegrityComponent(IntegrityComp);
+			
+			// Add to viewport with lower Z-order than reward selection
+			if (GEngine && GEngine->GameViewport && RunProgressWidget.IsValid())
+			{
+				GEngine->GameViewport->AddViewportWidgetContent(RunProgressWidget.ToSharedRef(), 10);
+				UE_LOG(LogTemp, Log, TEXT("RunProgressWidget created and added to viewport"));
+				
+				// Initialize widget with current values if components exist
+				if (HealthComp)
+				{
+					RunProgressWidget->UpdateHealth(HealthComp->GetCurrentHealth(), HealthComp->GetMaxHealth());
+				}
+				
+				if (IntegrityComp)
+				{
+					RunProgressWidget->UpdateIntegrity(IntegrityComp->GetCurrentIntegrity(), IntegrityComp->GetMaxIntegrity());
+				}
+			}
+		}
+	}
 	
 	InitializeRun();
 	
@@ -302,6 +375,12 @@ void URunManagerComponent::CompleteCurrentRoom()
 	// Update statistics
 	UpdateRunStats();
 	
+	// Update run progress widget
+	if (RunProgressWidget.IsValid())
+	{
+		RunProgressWidget->SetRoomCompleted(CurrentLevel - 1);
+	}
+	
 	// Broadcast completion event
 	OnRoomCompleted.Broadcast(CurrentRoom);
 	
@@ -362,6 +441,16 @@ void URunManagerComponent::TransitionToNextRoom()
 			return;
 		}
 		
+		// Update run progress widget with new room
+		if (RunProgressWidget.IsValid())
+		{
+			RunProgressWidget->UpdateRoomProgress(CurrentLevel - 1, CompletedRooms);
+			if (CurrentRoomActor && CurrentRoomActor->GetRoomData())
+			{
+				RunProgressWidget->UpdateCurrentRoomInfo(CurrentRoomActor->GetRoomData());
+			}
+		}
+		
 		// Match with a data asset if available based on room type
 		CurrentRoom = nullptr;
 		if (AllRoomDataAssets.Num() > 0)
@@ -409,6 +498,17 @@ void URunManagerComponent::EndRun(bool bSuccess, const FText& Reason)
 {
 	UE_LOG(LogTemp, Log, TEXT("Ending run - Success: %s, Reason: %s"), 
 		bSuccess ? TEXT("True") : TEXT("False"), *Reason.ToString());
+	
+	// Remove run progress widget when run ends
+	if (RunProgressWidget.IsValid())
+	{
+		if (GEngine && GEngine->GameViewport)
+		{
+			GEngine->GameViewport->RemoveViewportWidgetContent(RunProgressWidget.ToSharedRef());
+		}
+		RunProgressWidget.Reset();
+		UE_LOG(LogTemp, Log, TEXT("RunProgressWidget removed from viewport"));
+	}
 	
 	if (bSuccess)
 	{
@@ -905,9 +1005,27 @@ void URunManagerComponent::UpdateRunStats()
 	// Update damage dealt, parries, etc.
 	// This would be called throughout combat to track statistics
 	
+	if (!PlayerCharacter)
+	{
+		// Try to find player character if not cached
+		PlayerCharacter = Cast<AGameCharacterBase>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	}
+	
 	if (PlayerCharacter)
 	{
-		// TODO: Pull stats from combat components
+		// Update health and integrity in the widget
+		if (RunProgressWidget.IsValid())
+		{
+			if (UHealthComponent* HealthComp = PlayerCharacter->FindComponentByClass<UHealthComponent>())
+			{
+				RunProgressWidget->UpdateHealth(HealthComp->GetCurrentHealth(), HealthComp->GetMaxHealth());
+			}
+			
+			if (UStationIntegrityComponent* IntegrityComp = PlayerCharacter->FindComponentByClass<UStationIntegrityComponent>())
+			{
+				RunProgressWidget->UpdateIntegrity(IntegrityComp->GetCurrentIntegrity(), IntegrityComp->GetMaxIntegrity());
+			}
+		}
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("Run stats updated - Enemies defeated: %d"), RunProgress.TotalEnemiesDefeated);
@@ -1605,12 +1723,7 @@ void URunManagerComponent::DisplayRunMap()
 	UE_LOG(LogTemp, Warning, TEXT("╚════════════════════════════════════════════════════════════╝"));
 	UE_LOG(LogTemp, Warning, TEXT(""));
 	
-	// Display on screen as well
-	if (GEngine)
-	{
-		GEngine->ClearOnScreenDebugMessages();
-		GEngine->AddOnScreenDebugMessage(1, 15.0f, FColor::Cyan, TEXT("══════ ATLAS RUN MAP ══════"));
-	}
+	// Run progression now shown in Slate UI widget
 	
 	// Show the complete path of 5 rooms
 	if (RandomizedRoomOrder.Num() > 0)
@@ -1648,11 +1761,7 @@ void URunManagerComponent::DisplayRunMap()
 				
 				UE_LOG(LogTemp, Warning, TEXT("%s"), *RoomInfo);
 				
-				// Display on screen
-				if (GEngine)
-				{
-					GEngine->AddOnScreenDebugMessage(10 + i, 15.0f, DisplayColor, RoomInfo);
-				}
+				// Room info now shown in Slate UI widget
 				
 				// Add arrow between rooms (except after last room)
 				if (i < RandomizedRoomOrder.Num() - 1 && i < 4)
@@ -1709,11 +1818,7 @@ void URunManagerComponent::DisplayRunMap()
 				
 				UE_LOG(LogTemp, Warning, TEXT("%s"), *RoomInfo);
 				
-				// Display on screen
-				if (GEngine)
-				{
-					GEngine->AddOnScreenDebugMessage(10 + i, 15.0f, DisplayColor, RoomInfo);
-				}
+				// Room info now shown in Slate UI widget
 				
 				// Add arrow between rooms
 				if (i < RemainingRooms.Num() - 1 && i < 4)
